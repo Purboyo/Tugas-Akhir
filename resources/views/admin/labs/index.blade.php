@@ -3,16 +3,15 @@
 @section('content')
 
 {{-- Page Heading --}}
-<section class="is-title-bar">
-    <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
-        <ul>
-            <li>{{ Auth::user()->role === 'admin' ? 'Admin' : 'Teknisi' }}</li>
-            <li>Laboratory Management</li>
-        </ul>
-        <div class="flex items-center space-x-2">
-            <a href="{{ route($role . '.lab.create') }}" class="button blue">
-                <span class="icon"><i class="mdi mdi-plus"></i></span>
-                <span>Add Laboratory</span>
+<section class="is-title-bar py-3 border-bottom bg-white shadow-sm">
+    <div class="d-flex justify-content-between align-items-center px-4">
+        <div>
+            <h1 class="h3 mb-1 text-dark">Laboratory Management</h1>
+            <small class="text-muted">{{ ucfirst(Auth::user()->role) }} · Manage laboratories</small>
+        </div>
+        <div>
+            <a href="{{ route($role . '.lab.create') }}" class="btn btn-primary">
+                <i class="fa fa-plus color-info"></i> Add
             </a>
         </div>
     </div>
@@ -20,36 +19,35 @@
 
 <section class="section main-section">
     @if(session('success'))
-        <div class="notification green">
-            <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0">
-                <div>
-                    <span class="icon"><i class="mdi mdi-check-circle"></i></span>
-                    <span>{{ session('success') }}</span>
-                </div>
-                <button type="button" class="button small textual --jb-notification-dismiss" onclick="this.closest('.notification').style.display='none';">
-                    Dismiss
-                </button>
-            </div>
-        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                toastr.options = {
+                    "closeButton": true,
+                    "progressBar": true,
+                    "positionClass": "toast-top-center",
+                    "timeOut": "3000"
+                };
+                toastr.success("{{ session('success') }}");
+            });
+        </script>
     @endif
 
     <div class="card has-table">
         <header class="card-header">
             <div class="card-header-title">
-                <span class="icon"><i class="mdi mdi-flask"></i></span>
-                <h2>Laboratory List</h2>
+                <span class="icon h2"><i class="mdi mdi-google-classroom"> Laboratory List</i></span>
             </div>
             <div class="card-header-actions">
-                <div class="field has-addons">
-                    <div class="control">
-                        <input type="text" id="searchInput" class="input" placeholder="Search...">
-                    </div>
-                </div>
+                <form method="GET" action="{{ route($role . '.lab.index') }}" class="d-flex">
+                    <input type="text" name="search" class="form-control mr-2 shadow-sm" placeholder="Search..."
+                        value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-primary"><i class="mdi mdi-magnify"></i></button>
+                </form>
             </div>
         </header>
 
         <div class="px-4 py-2">
-            <strong>Total laboratories: <span id="labCount">{{ count($labs) }}</span></strong>
+            <strong>Total laboratories: <span id="labCount">{{ $labs->total() }}</span></strong>
         </div>
 
         <div class="card-content">
@@ -62,59 +60,82 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($labs as $lab)
+                    @forelse($labs as $lab)
                     <tr>
                         <td>{{ $lab->lab_name }}</td>
                         <td>{{ $lab->technician->name ?? 'N/A' }}</td>
-                        <td class="actions-cell">
-                            <div class="buttons right nowrap">
-                                <a href="{{ route($role . '.lab.edit', $lab) }}" class="button small blue --jb-modal" data-target="sample-modal">
-                                    <span class="icon"><i class="mdi mdi-pencil"></i></span>
-                                </a>
-                                <form action="{{ route($role . '.lab.destroy', $lab) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="button small red" onclick="return confirm('Are you sure you want to delete this laboratory?');">
-                                        <span class="icon"><i class="mdi mdi-delete"></i></span>
+                        <td>
+                            <a href="{{ route($role . '.lab.edit', $lab) }}" class="mr-3" data-toggle="tooltip"
+                                title="Edit">
+                                <i class="fa fa-pencil color-muted"> Edit</i>
+                            </a>
+                            <a href="javascript:void(0)" title="Delete"
+                               data-toggle="modal" data-target="#deleteModal-{{ $lab->id }}">
+                                <i class="fa fa-close"></i> Delete
+                            </a>                    
+                            <!-- Modal untuk tiap lab -->
+                            <div class="modal fade" id="deleteModal-{{ $lab->id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ $lab->id }}" aria-hidden="true">
+                              <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                  <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title" id="deleteModalLabel-{{ $lab->id }}">Confirm Delete</h5>
+                                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
                                     </button>
-                                </form>
+                                  </div>
+                                  <div class="modal-body">
+                                    Are you sure you want to delete laboratory <strong>{{ $lab->lab_name }}</strong>?
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <form action="{{ route($role . '.lab.destroy', $lab) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                    </form>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="3" class="text-center">No laboratory data found.</td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
+
+            <div class="card-body">
+                <nav>
+                    <ul class="pagination pagination-sm pagination-gutter">
+                        {{-- Previous Page --}}
+                        <li class="page-item {{ $labs->onFirstPage() ? 'disabled' : '' }}">
+                            <a class="page-link" href="{{ $labs->previousPageUrl() }}">
+                                <i class="icon-arrow-left"></i>
+                            </a>
+                        </li>
+
+                        {{-- Page Numbers --}}
+                        @for ($i = 1; $i <= $labs->lastPage(); $i++)
+                        <li class="page-item {{ $i == $labs->currentPage() ? 'active' : '' }}">
+                            <a class="page-link" href="{{ $labs->url($i) }}">{{ $i }}</a>
+                        </li>
+                        @endfor
+
+                        {{-- Next Page --}}
+                        <li class="page-item {{ !$labs->hasMorePages() ? 'disabled' : '' }}">
+                            <a class="page-link" href="{{ $labs->nextPageUrl() }}">
+                                <i class="icon-arrow-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
         </div>
     </div>
 </section>
 
-<script>
-    const searchInput = document.getElementById('searchInput');
-    const labCount = document.getElementById('labCount');
-    const rows = document.querySelectorAll('#labTable tbody tr');
-
-    function updateLabCount() {
-        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
-        labCount.textContent = visibleRows.length;
-    }
-
-    searchInput.addEventListener('input', function() {
-        const filter = this.value.toLowerCase();
-
-        rows.forEach(row => {
-            const labNameCell = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
-            if (labNameCell.includes(filter)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        updateLabCount();
-    });
-
-    // Initialize lab count on page load
-    updateLabCount();
-</script>
 
 @endsection

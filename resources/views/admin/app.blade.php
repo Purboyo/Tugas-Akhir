@@ -1,152 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard - Admin One Tailwind CSS Admin Dashboard</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>LabSi </title>
+    <!-- Favicon icon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="{{asset('vendor/focus-2/images/favicon.pn')}}g">
+    <link rel="stylesheet" href="{{asset('vendor/focus-2/vendor/owl-carousel/css/owl.carousel.min.css')}}">
+    <link rel="stylesheet" href="{{asset('vendor/focus-2/vendor/owl-carousel/css/owl.theme.default.min.css')}}">
+    <link href="{{asset('vendor/focus-2/vendor/jqvmap/css/jqvmap.min.css')}}" rel="stylesheet">
+    <link href="{{asset('vendor/focus-2/css/style.css')}}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('vendor/mdi/css/materialdesignicons.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('vendor/focus-2/vendor/toastr/css/toastr.min.css')}}">
 
-  <!-- Tailwind CSS -->
-  <link rel="stylesheet" href="{{ asset('vendor/admin-one/dist/css/main.css') }}">
-  <script defer src="{{ asset('vendor/admin-one/dist/js/main.js') }}"></script>
 
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="{{asset('vendor//dist/css/bootstrap.min.css')}}">
-
-  <!-- Font Awesome & Material Design Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link href="https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.materialdesignicons.com/5.4.55/css/materialdesignicons.min.css">
-
-  <!-- Sortable JS -->
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
+
 <body>
 @php
   $role = auth()->user()->role; // 'admin' atau 'teknisi'
 @endphp
-
 <div id="app">
 
-<!-- NAVBAR -->
-<nav id="navbar-main" class="navbar is-fixed-top">
-  <div class="navbar-brand">
-    <a class="navbar-item mobile-aside-button">
-      <span class="icon"><i class="mdi mdi-menu mdi-24px"></i></span>
-    </a>
-  </div>
 
-  <div class="navbar-brand is-right">
-    <a id="navbarToggle" class="navbar-item --jb-navbar-menu-toggle" data-target="navbar-menu">
-      <span class="icon"><i class="mdi mdi-dots-vertical mdi-24px"></i></span>
-    </a>
-  </div>
-
-  <div class="navbar-menu" id="navbar-menu">
-    <div class="navbar-end">
-      <div class="navbar-item dropdown has-divider has-user-avatar">
-        <a class="navbar-link" href="javascript:void(0);">
-          <div class="is-user-name"><span>{{ Auth::user()->name }}</span></div>
-          <span class="icon"><i class="mdi mdi-chevron-down"></i></span>
-        </a>
-        <div class="navbar-dropdown">
-          <a href="profile.html" class="navbar-item">
-            <span class="icon"><i class="mdi mdi-account"></i></span>
-            <span>My Profile</span>
-          </a>
-          <a class="navbar-item">
-            <span class="icon"><i class="mdi mdi-bell"></i></span>
-            <span>Notifications</span>
-          </a>
-          <hr class="navbar-divider">
-          <a class="navbar-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <span class="icon"><i class="mdi mdi-logout"></i></span>
-            <span>Log Out</span>
-          </a>
+    <!--*******************
+        Preloader start
+    ********************-->
+    <div id="preloader">
+        <div class="sk-three-bounce">
+            <div class="sk-child sk-bounce1"></div>
+            <div class="sk-child sk-bounce2"></div>
+            <div class="sk-child sk-bounce3"></div>
         </div>
-      </div>
     </div>
-  </div>
-</nav>
+    <!--*******************
+        Preloader end
+    ********************-->
 
-<!-- SIDEBAR -->
-<aside class="aside is-placed-left is-expanded">
-  <div class="aside-tools">
-    <div>Admin <b class="font-black">One</b></div>
-  </div>
-  <div class="menu is-menu-main">
-    <p class="menu-label">General</p>
-    <ul class="menu-list">
-      <li class="{{ Request::routeIs($role . '.admin.dashboard') ? 'active' : '' }}">
-        <a href="{{ route($role . '.admin.dashboard') }}">
-          <span class="icon"><i class="mdi mdi-desktop-mac"></i></span>
-          <span class="menu-item-label">Dashboard</span>
-        </a>
-      </li>
-    </ul>
-    <p class="menu-label">Examples</p>
-    <ul class="menu-list">
-      <li class="{{ Request::routeIs($role . '.user.index') ? 'active' : '' }}">
-        <a href="{{ route($role . '.user.index') }}">
-          <span class="icon"><i class="mdi mdi-account-multiple"></i></span>
-          <span class="menu-item-label">User</span>
-        </a>
-      </li>
-      <li class="{{ Request::routeIs($role . '.lab.index') ? 'active' : '' }}">
-        <a href="{{ route($role . '.lab.index') }}">
-          <span class="icon"><i class="mdi mdi-google-classroom"></i></span>
-          <span class="menu-item-label">Laboratory</span>
-        </a>
-      </li>
-      <li class="{{ Request::routeIs($role . '.form.index') ? 'active' : '' }}">
-        <a href="{{ route($role . '.form.index') }}">
-          <span class="icon"><i class="mdi mdi-form-select"></i></span>
-          <span class="menu-item-label">Forms</span>
-        </a>
-      </li>
-      <li class="{{ Request::routeIs($role . '.pc.index') ? 'active' : '' }}">
-        <a href="{{ route($role . '.pc.index') }}">
-          <span class="icon"><i class="mdi mdi-laptop"></i></span>
-          <span class="menu-item-label">PC</span>
-        </a>
-      </li>
-      <li class="{{ Request::routeIs($role . '.report.index') ? 'active' : '' }}">
-        <a href="{{ route($role . '.report.index') }}">
-          <span class="icon"><i class="mdi mdi-file-document-outline"></i></span>
-          <span class="menu-item-label">Reports</span>
-        </a>
-      </li>
-      <li class="{{ Request::routeIs($role . '.history.index') ? 'active' : '' }}">
-        <a href="">
-          <span class="icon"><i class="mdi mdi-history"></i></span>
-          <span class="menu-item-label">History</span>
-        </a>
-      </li>
-      <li>
-        <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-          <span class="icon"><i class="mdi mdi-logout"></i></span>
-          <span class="menu-item-label">Logout</span>
-        </a>
-        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-          @csrf
-        </form>
-      </li>
-    </ul>
-  </div>
-</aside>
 
-<!-- KONTEN UTAMA -->
-@yield('content')
+    <!--**********************************
+        Main wrapper start
+    ***********************************-->
+    <div id="main-wrapper">
 
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0">
-    <div class="flex items-center justify-start space-x-3">
-      <div>© 2025, Purboyo Broto Umbaran</div>
+        <!--**********************************
+            Nav header start
+        ***********************************-->
+        <div class="nav-header">
+            <a href="{{route ($role. '.admin.dashboard')}}" class="brand-logo text-white text-lg font-bold" style="text-decoration: none;">
+                LabSI
+            </a>
+
+            <div class="nav-control">
+                <div class="hamburger">
+                    <span class="line"></span><span class="line"></span><span class="line"></span>
+                </div>
+            </div>
+        </div>
+        <!--**********************************
+            Nav header end
+        ***********************************-->
+
+        <!--**********************************
+            Header start
+        ***********************************-->
+        <div class="header">
+            <div class="header-content">
+                <nav class="navbar navbar-expand">
+                    <div class="collapse navbar-collapse justify-content-between">
+                        <div class="header-left">
+                        </div>
+                        <ul class="navbar-nav header-right">
+                            <li class="nav-item dropdown notification_dropdown">
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                    <i class="mdi mdi-bell"></i>
+                                    <div class="pulse-css"></div>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <ul class="list-unstyled">
+                                        <li class="media dropdown-item">
+                                            <span class="success"><i class="ti-user"></i></span>
+                                            <div class="media-body">
+                                                <a href="#">
+                                                    <p><strong>Martin</strong> has added a <strong>customer</strong> Successfully</p>
+                                                </a>
+                                            </div>
+                                            <span class="notify-time">3:20 am</span>
+                                        </li>
+                                        <!-- Item notifikasi lainnya tetap -->
+                                    </ul>
+                                    <a class="all-notification" href="#">See all notifications <i class="ti-arrow-right"></i></a>
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown header-profile">
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                    <i class="mdi mdi-account"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="{{ asset('vendor/focus-2/app-profile.html') }}" class="dropdown-item">
+                                        <i class="icon-user"></i>
+                                        <span class="ml-2">Profile</span>
+                                    </a>
+                                    <a href="{{ asset('vendor/focus-2/email-inbox.html') }}" class="dropdown-item">
+                                        <i class="icon-envelope-open"></i>
+                                        <span class="ml-2">Inbox</span>
+                                    </a>
+                                    <a href="{{route('logout')}}" class="dropdown-item">
+                                        <i class="icon-key"></i>
+                                        <span class="ml-2">Logout</span>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <!--**********************************
+            Header end ti-comment-alt
+        ***********************************-->
+
+        <!--**********************************
+            Sidebar start
+        ***********************************-->
+        <div class="quixnav">
+            <div class="quixnav-scroll">
+                <ul class="metismenu" id="menu">
+                    <li class="nav-label first">Menu</li>
+                    <li><a class="" href="{{route ($role. '.admin.dashboard')}}" aria-expanded="false"><i
+                    class="mdi mdi-view-dashboard"></i><span class="nav-text">Dashboard</span></a>
+                    </li>
+                    <li><a class="" href="{{route ($role. '.user.index')}}" aria-expanded="false"><i
+                    class="mdi mdi-account"></i><span class="nav-text">User</span></a>
+                    </li>
+                    <li><a class="" href="{{route ($role. '.lab.index')}}" aria-expanded="false"><i
+                                class="mdi mdi-google-classroom"></i><span class="nav-text">Laboratory</span></a>
+                    </li>
+                    <li><a class="" href="{{route ($role. '.form.index')}}" aria-expanded="false"><i
+                                class="mdi mdi-form-select"></i><span class="nav-text">Forms</span></a>
+                    </li>
+                    <li><a class="" href="{{route ($role. '.pc.index')}}" aria-expanded="false"><i
+                                class="mdi mdi-laptop"></i><span class="nav-text">PC</span></a>
+                    </li>
+                    <li><a class="" href="{{route ($role. '.report.index')}}" aria-expanded="false"><i
+                                class="mdi mdi-file-document-outline"></i><span class="nav-text">Reports</span></a>
+                    </li>
+                    {{-- <li><a class="" href="" aria-expanded="false"><i
+                                class="mdi mdi-history"></i><span class="nav-text">History !</span></a>
+                    </li> --}}
+                </ul>
+            </div>
+
+
+        </div>
+        <!--**********************************
+            Sidebar end
+        ***********************************-->
+
+        <!--**********************************
+            Content body start
+        ***********************************-->
+        <div class="content-body">
+            <div class="container-fluid">
+
+
+            @yield('content')
+
+            </div>
+        </div>
+        <!--**********************************
+            Content body end
+        ***********************************-->
+
+
+        <!--**********************************
+            Footer start
+        ***********************************-->
+        <div class="footer">
+            <div class="copyright">
+                <p>Copyright © Designed &amp; Developed by <a href="#" target="_blank">Purboyo Broto Umbaran</a> 2025</p>
+            </div>
+        </div>
+        <!--**********************************
+            Footer end
+        ***********************************-->
+
+        <!--**********************************
+           Support ticket button start
+        ***********************************-->
+
+        <!--**********************************
+           Support ticket button end
+        ***********************************-->
+
+
     </div>
-  </div>
-</footer>
+    <!--**********************************
+        Main wrapper end
+    ***********************************-->
 
-</div>
+    <!--**********************************
+        Scripts
+    ***********************************-->
+    <!-- Required vendors -->
+    <script src="{{asset('vendor/focus-2/vendor/global/global.min.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/js/quixnav-init.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/js/custom.min.js')}}"></script>
+
+
+    <!-- Vectormap -->
+    <script src="{{asset('vendor/focus-2/vendor/raphael/raphael.min.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/vendor/morris/morris.min.js')}}"></script>
+
+
+    <script src="{{asset('vendor/focus-2/vendor/circle-progress/circle-progress.min.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/vendor/chart.js/Chart.bundle.min.js')}}"></script>
+
+    <script src="{{asset('vendor/focus-2/vendor/gaugeJS/dist/gauge.min.js')}}"></script>
+
+    <!--  flot-chart js -->
+    <script src="{{asset('vendor/focus-2/vendor/flot/jquery.flot.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/vendor/flot/jquery.flot.resize.js')}}"></script>
+
+    <!-- Owl Carousel -->
+    <script src="{{asset('vendor/focus-2/vendor/owl-carousel/js/owl.carousel.min.js')}}"></script>
+
+    <!-- Counter Up -->
+    <script src="{{asset('vendor/focus-2/vendor/jqvmap/js/jquery.vmap.min.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/vendor/jqvmap/js/jquery.vmap.usa.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/vendor/jquery.counterup/jquery.counterup.min.js')}}"></script>
+
+    <!-- Toastr -->
+    <script src="{{asset('vendor/focus-2/vendor/toastr/js/toastr.min.js')}}"></script>
+
+    <!-- All init script -->
+    <script src="{{asset('vendor/focus-2/js/plugins-init/toastr-init.js')}}"></script>
+
+    <script src="{{asset('vendor/focus-2/js/dashboard/dashboard-1.js')}}"></script>
+
+    <script src="{{asset('vendor/focus-2/vendor/sweetalert2/dist/sweetalert2.min.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/js/plugins-init/sweetalert.init.js')}}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </body>
+
 </html>

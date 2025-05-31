@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Traits\HasUserRole;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class LaboratoryController extends Controller
 {
@@ -17,10 +18,17 @@ class LaboratoryController extends Controller
         $this->setUserRole();
     }
     // Menampilkan semua lab
-    public function index()
+    public function index(Request $request)
     {
-        $labs = Lab::with('technician')->get();
-        return view('admin.labs.index', compact('labs'));
+        $role = auth::user()->role;
+        $search = $request->input('search');
+        $labs = Lab::with('technician')
+            ->when($search, function ($query, $search) {
+                $query->where('lab_name', 'like', '%' . $search . '%');
+            })
+            ->orderBy('lab_name')
+            ->paginate(10);
+        return view($role . '.labs.index', compact('labs', 'role'));
     }
 
     // Menampilkan form untuk membuat lab baru

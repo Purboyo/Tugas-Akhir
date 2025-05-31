@@ -2,131 +2,147 @@
 
 @section('content')
 
-<section class="is-title-bar">
-    <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
-        <ul>
-            <li>Admin</li>
-            <li>PC Management</li>
-        </ul>
-        <a href="{{ route('pc.create') }}" class="button blue">
-            <span class="icon"><i class="mdi mdi-plus"></i></span>
-            <span>Add PC</span>
-        </a>
+{{-- Page Heading --}}
+<section class="is-title-bar py-3 border-bottom bg-white shadow-sm">
+    <div class="d-flex justify-content-between align-items-center px-4">
+        <div>
+            <h1 class="h3 mb-1 text-dark">PC Management</h1>
+            <small class="text-muted">{{ ucfirst(Auth::user()->role) }} · Manage PCs</small>
+        </div>
+        <div>
+            <a href="{{ route($role . '.pc.create') }}" class="btn btn-primary">
+                <i class="fa fa-plus color-info"></i> Add PC
+            </a>
+        </div>
     </div>
 </section>
 
 <section class="section main-section">
-    <form method="GET" action="{{ route('pc.index') }}" class="mb-4">
-        <div class="card has-table">
-            <header class="card-header">
-                <div class="card-header-title">
-                    <span class="icon"><i class="mdi mdi-desktop-classic"></i></span>
-                    <h2>PC List</h2>
-                </div>
-                <div class="card-header-actions flex items-center space-x-2">
-                    <!-- Search input -->
-                    <div class="field has-addons mt-3">
-                        <div class="control">
-                            <input type="text" id="searchInput" class="input" placeholder="Search...">
-                        </div>
-                    </div>
-                    <!-- Laboratory filter dropdown -->
-                    <div class="control select">
-                        <select name="lab_id" onchange="this.form.submit()">
-                            <option value="">All Laboratories</option>
-                            @foreach($labs as $lab)
-                                <option value="{{ $lab->id }}" {{ $selectedLabId == $lab->id ? 'selected' : '' }}>
-                                    {{ $lab->lab_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @if(request()->has('lab_id') && request('lab_id'))
-                        <div class="control">
-                            <a href="{{ route('pc.index') }}" class="button is-light">Reset</a>
-                        </div>
-                    @endif
-                </div>
-            </header>
+    @if(session('success'))
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                toastr.options = {
+                    "closeButton": true,
+                    "progressBar": true,
+                    "positionClass": "toast-top-center",
+                    "timeOut": "3000"
+                };
+                toastr.success("{{ session('success') }}");
+            });
+        </script>
+    @endif
 
-            <div class="px-4 py-2">
-                <strong>Total PCs: <span id="pcCount">{{ $pcs->count() }}</span></strong>
+    <div class="card has-table">
+        <header class="card-header">
+            <div class="card-header-title">
+                <span class="icon h2"><i class="mdi mdi-desktop-classic"> PC List</i></span>
             </div>
+            <div class="card-header-actions">
+                <form method="GET" action="{{ route($role . '.pc.index') }}" class="d-flex">
+                    <input type="text" name="search" class="form-control mr-2 shadow-sm" placeholder="Search..."
+                        value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-primary"><i class="mdi mdi-magnify"></i></button>
+                </form>
+            </div>
+        </header>
 
-            <div class="card-content">
-                <table class="table" id="pcTable">
-                    <thead>
-                        <tr>
-                            <th>PC Name</th>
-                            <th>Laboratory</th>
-                            <th>QR Code</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($pcs as $pc)
-                        <tr>
-                            <td>{{ $pc->pc_name }}</td>
-                            <td>{{ $pc->lab->lab_name ?? 'N/A' }}</td>
-                            <td>
-                            <div class="p-4 border rounded">
-                                {!! QrCode::size(150)->generate(route('form.qr.redirect', $pc->id)) !!}
-                            </div>
-                            </td>
-                            <td class="actions-cell">
-                                <div class="buttons right nowrap">
-                                    <a href="{{ route('pc.edit', $pc->id) }}" class="button small blue">
-                                        <span class="icon"><i class="mdi mdi-pencil"></i></span>
-                                    </a>
-                                    <form action="{{ route('pc.destroy', $pc->id) }}" method="POST" onsubmit="return confirm('Delete this PC?');" style="display:inline;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="button small red">
-                                            <span class="icon"><i class="mdi mdi-delete"></i></span>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="3" class="text-center">No PCs found.</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+        <div class="px-4 py-2">
+            <strong>Total PCs: <span id="pcCount">{{ $pcs->total() }}</span></strong>
         </div>
-    </form>
+
+        <div class="card-content">
+            <table class="table" id="pcTable">
+                <thead>
+                    <tr>
+                        <th>PC Name</th>
+                        <th>Laboratory</th>
+                        <th>QR Code</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($pcs as $pc)
+                    <tr>
+                        <td>{{ $pc->pc_name }}</td>
+                        <td>{{ $pc->lab->lab_name ?? 'N/A' }}</td>
+                        <td>
+                            <div class="p-2 border rounded d-inline-block">
+                                {!! QrCode::size(100)->generate(route('form.qr.redirect', $pc->id)) !!}
+                            </div>
+                        </td>
+                        <td>
+                            <a href="{{ route($role . '.pc.edit', $pc) }}" class="mr-3" data-toggle="tooltip" title="Edit">
+                                <i class="fa fa-pencil color-muted"> Edit</i>
+                            </a>
+                            <a href="javascript:void(0)" title="Delete"
+                               data-toggle="modal" data-target="#deleteModal-{{ $pc->id }}">
+                                <i class="fa fa-close"></i> Delete
+                            </a>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="deleteModal-{{ $pc->id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ $pc->id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-danger text-white">
+                                            <h5 class="modal-title" id="deleteModalLabel-{{ $pc->id }}">Confirm Delete</h5>
+                                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete PC <strong>{{ $pc->pc_name }}</strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <form action="{{ route($role . '.pc.destroy', $pc) }}" method="POST">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="4" class="text-center">No PCs found.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+
+            <div class="card-body">
+                <nav>
+                    <ul class="pagination pagination-sm pagination-gutter">
+                        {{-- Previous Page --}}
+                        <li class="page-item {{ $pcs->onFirstPage() ? 'disabled' : '' }}">
+                            <a class="page-link" href="{{ $pcs->previousPageUrl() }}">
+                                <i class="icon-arrow-left"></i>
+                            </a>
+                        </li>
+
+                        {{-- Page Numbers --}}
+                        @for ($i = 1; $i <= $pcs->lastPage(); $i++)
+                        <li class="page-item {{ $i == $pcs->currentPage() ? 'active' : '' }}">
+                            <a class="page-link" href="{{ $pcs->url($i) }}">{{ $i }}</a>
+                        </li>
+                        @endfor
+
+                        {{-- Next Page --}}
+                        <li class="page-item {{ !$pcs->hasMorePages() ? 'disabled' : '' }}">
+                            <a class="page-link" href="{{ $pcs->nextPageUrl() }}">
+                                <i class="icon-arrow-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+        </div>
+    </div>
 </section>
-
-<script>
-    const searchInput = document.getElementById('searchInput');
-    const pcCount = document.getElementById('pcCount');
-    const rows = document.querySelectorAll('#pcTable tbody tr');
-
-    function updatePcCount() {
-        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
-        pcCount.textContent = visibleRows.length;
-    }
-
-    searchInput.addEventListener('input', function() {
-        const filter = this.value.toLowerCase();
-
-        rows.forEach(row => {
-            const pcNameCell = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
-            if (pcNameCell.includes(filter)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        updatePcCount();
-    });
-
-    // Initialize PC count on page load
-    updatePcCount();
-</script>
 
 @endsection

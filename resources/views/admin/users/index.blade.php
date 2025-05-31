@@ -3,48 +3,48 @@
 @section('content')
 
 {{-- Page Heading --}}
-<section class="is-title-bar">
-    <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
-        <ul>
-            <li>Admin</li>
-            <li>User Management</li>
-        </ul>
-        <div class="flex items-center space-x-2">
-            <a href="{{ route('admin.user.create') }}" class="button blue">
-                <span class="icon"><i class="mdi mdi-plus"></i></span>
-                <span>Add User</span>
+<section class="is-title-bar py-3 border-bottom bg-white shadow-sm">
+    <div class="d-flex justify-content-between align-items-center px-4">
+        <div>
+            <h1 class="h3 mb-1 text-dark">User Management</h1>
+            <small class="text-muted">{{ ucfirst($role) }} · Manage system users</small>
+        </div>
+        <div>
+            <a href="{{ route('admin.user.create') }}" class="btn btn-primary">
+            <i class="fa fa-plus color-info"></i>  Add
             </a>
         </div>
     </div>
 </section>
 
+
+
+
 <section class="section main-section">
     @if(session('success'))
-        <div class="notification green">
-            <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0">
-                <div>
-                    <span class="icon"><i class="mdi mdi-check-circle"></i></span>
-                    <span>{{ session('success') }}</span>
-                </div>
-                <button type="button" class="button small textual --jb-notification-dismiss" onclick="this.closest('.notification').style.display='none';">
-                    Dismiss
-                </button>
-            </div>
-        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                toastr.options = {
+                    "closeButton": true,
+                    "progressBar": true,
+                    "positionClass": "toast-top-center",
+                    "timeOut": "3000"
+                };
+                toastr.success("{{ session('success') }}");
+            });
+        </script>
     @endif
 
     <div class="card has-table">
         <header class="card-header">
             <div class="card-header-title">
-                <span class="icon"><i class="mdi mdi-account-multiple"></i></span>
-                <h2>User List</h2>
-            </div>
-            <div class="card-header-actions">
-                <div class="field has-addons">
-                    <div class="control">
-                        <input type="text" id="searchInput" class="input" placeholder="Search...">
-                    </div>
-                </div>
+                <span class="icon h2"><i class="mdi mdi-account-multiple">  User List</i></span>            </div>
+            <div class="card-header-actions ">
+                <form method="GET" action="{{ route('admin.user.index') }}" class="d-flex">
+                    <input type="text" name="search" class="form-control mr-2 shadow-sm" placeholder="Search..."
+                        value="{{ request('search') }}">
+                    <button type="submit" class="btn btn-primary"><i class="mdi mdi-magnify"></i></button>
+                </form>
             </div>
         </header>
 
@@ -80,50 +80,45 @@
                                 {{ ucfirst($user->role) }}
                             </span>
                         </td>
-                        <td class="actions-cell">
-                            <div class="buttons right nowrap">
-                                <a href="{{ route('admin.user.edit', $user) }}" class="button small blue --jb-modal" data-target="sample-modal">
-                                    <span class="icon"><i class="mdi mdi-pencil"></i></span>
-                                </a>
-
-                            </div>
+                        <td><span>
+                            <a href="{{route ('admin.user.edit', $user)}}" class="mr-4 " data-toggle="tooltip"
+                            data-placement="top" title="Edit"><i
+                            class="fa fa-pencil color-muted">  Edit</i>
                         </td>
                     </tr>
                     @endforeach
                 </tbody>
             </table>
+            <div class="card-body">
+                <nav>
+                    <ul class="pagination pagination-sm pagination-gutter">
+                        {{-- Previous Page --}}
+                        <li class="page-item {{ $users->onFirstPage() ? 'disabled' : '' }}">
+                            <a class="page-link" href="{{ $users->previousPageUrl() }}">
+                                <i class="icon-arrow-left"></i>
+                            </a>
+                        </li>
+            
+                        {{-- Page Numbers --}}
+                        @for ($i = 1; $i <= $users->lastPage(); $i++)
+                            <li class="page-item {{ $i == $users->currentPage() ? 'active' : '' }}">
+                                <a class="page-link" href="{{ $users->url($i) }}">{{ $i }}</a>
+                            </li>
+                        @endfor
+            
+                        {{-- Next Page --}}
+                        <li class="page-item {{ !$users->hasMorePages() ? 'disabled' : '' }}">
+                            <a class="page-link" href="{{ $users->nextPageUrl() }}">
+                                <i class="icon-arrow-right"></i>
+                            </a>
+                        </li>
+                        </ul>
+                </nav>
+            </div>
+                
         </div>
     </div>
 </section>
-
-<script>
-    const searchInput = document.getElementById('searchInput');
-    const userCount = document.getElementById('userCount');
-    const rows = document.querySelectorAll('#userTable tbody tr');
-
-    function updateUserCount() {
-        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
-        userCount.textContent = visibleRows.length;
-    }
-
-    searchInput.addEventListener('input', function() {
-        const filter = this.value.toLowerCase();
-
-        rows.forEach(row => {
-            const nameCell = row.querySelector('td:nth-child(1) span').textContent.toLowerCase();
-            if (nameCell.includes(filter)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        updateUserCount();
-    });
-
-    // Initialize user count on page load
-    updateUserCount();
-</script>
 
 @endsection
 

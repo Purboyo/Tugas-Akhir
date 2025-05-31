@@ -10,27 +10,37 @@ use App\Models\Report_answer;
 use App\Models\Reporter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use App\Traits\HasUserRole;
+
 
 class FormController extends Controller
 {
+    use HasUserRole;
+
+    public function __construct()
+    {
+        $this->setUserRole();
+    }
     public function index()
     {
+        $role = auth::user()->role;
         $forms = Form::with('lab')->get();
         $labs = Lab::all();
-        return view('admin.forms.index', compact('forms', 'labs'));
+        return view($role. '.forms.index', compact('forms', 'labs'));
     }
 
     public function create()
     {
         $labs = Lab::all();
-        return view('admin.forms.create', compact('labs'));
+        return view($this->role. '.forms.create', compact('labs'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'lab_id' => 'null|exists:laboratories,id',
+            'lab_id' => 'nullable|exists:laboratories,id',
             'questions' => 'required|array|min:1',
             'questions.*.question_text' => 'required|string',
             'questions.*.type' => 'required|in:text,number,checkbox,radio,textarea',
@@ -56,7 +66,7 @@ class FormController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('form.index')->with('success', 'Form berhasil dibuat.');
+            return redirect()->route($this->role. '.form.index')->with('success', 'Form berhasil dibuat.');
         } catch (\Exception $e) {
             DB::rollback();
             return back()->with('error', 'Gagal menyimpan form.')->withInput();
@@ -67,7 +77,7 @@ class FormController extends Controller
     {
         $form = Form::with('questions')->findOrFail($id);
         $labs = Lab::all();
-        return view('admin.forms.edit', compact('form', 'labs'));
+        return view($this->role. '.forms.edit', compact('form', 'labs'));
     }
 
     public function update(Request $request, $id)
@@ -106,7 +116,7 @@ class FormController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('form.index')->with('success', 'Form berhasil diperbarui.');
+            return redirect()->route($this->role. '.form.index')->with('success', 'Form berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollback();
             return back()->with('error', 'Gagal memperbarui form.')->withInput();
@@ -119,12 +129,12 @@ class FormController extends Controller
         $form->questions()->delete();
         $form->delete();
 
-        return redirect()->route('form.index')->with('success', 'Form berhasil dihapus.');
+        return redirect()->route($this->role. '.form.index')->with('success', 'Form berhasil dihapus.');
     }
     public function fill(Form $form, Request $request)
     {
         $form->load('questions');
-        return view('admin.forms.fill', compact('form'));
+        return view($this->role. '.forms.fill', compact('form'));
     }
 
     public function submit(Request $request, Form $form)

@@ -8,11 +8,20 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::all();
+        $query = User::query();
+    
+        if ($request->has('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+        }
+    
+        $users = $query->paginate(5)->withQueryString(); // ubah jumlah sesuai kebutuhan
+    
         return view('admin.users.index', compact('users'));
     }
+
 
     public function create()
     {

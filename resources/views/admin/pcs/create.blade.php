@@ -21,7 +21,7 @@
             </div>
         </header>
         <div class="card-content">
-            <form action="{{ route('pc.store') }}" method="POST">
+            <form action="{{ route($role . '.pc.store') }}" method="POST">
                 @csrf
                 
                 <div class="field">
@@ -57,7 +57,7 @@
                         <span class="icon"><i class="mdi mdi-content-save"></i></span>
                         <span>Create PC</span>
                     </button>
-                    <a href="{{ route('pc.index') }}" class="button red">
+                    <a href="{{ route($role . '.pc.index') }}" class="button red">
                         <span class="icon"><i class="mdi mdi-close"></i></span>
                         <span>Cancel</span>
                     </a>
