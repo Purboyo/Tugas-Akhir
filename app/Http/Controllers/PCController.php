@@ -62,7 +62,7 @@ class PCController extends Controller
 
         PC::create($request->only(['pc_name', 'lab_id']));
 
-        return redirect()->route($this->role . '.pc.index')->with('success', 'PC berhasil ditambahkan.');
+        return redirect()->route($this->role . '.pc.index')->with('success', 'PC add successfully.');
     }
 
     // Menampilkan form untuk mengedit PC
@@ -88,13 +88,13 @@ class PCController extends Controller
 
         $pc->update($request->only(['pc_name', 'lab_id']));
 
-        return redirect()->route($this->role . '.pc.index')->with('success', 'PC berhasil diupdate.');
+        return redirect()->route($this->role . '.pc.index')->with('success', 'PC update successfully.');
     }
 
     // Menghapus PC
     public function destroy(PC $pc)
     {
         $pc->delete();
-        return redirect()->route($this->role . '.pc.index')->with('success', 'PC berhasil dihapus.');
+        return redirect()->route($this->role . '.pc.index')->with('success', 'PC delete successfully.');
     }
 }

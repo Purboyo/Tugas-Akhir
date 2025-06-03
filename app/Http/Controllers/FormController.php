@@ -22,13 +22,22 @@ class FormController extends Controller
     {
         $this->setUserRole();
     }
-    public function index()
+    public function index(Request $request)
     {
         $role = auth::user()->role;
-        $forms = Form::with('lab')->get();
-        $labs = Lab::all();
-        return view($role. '.forms.index', compact('forms', 'labs'));
+
+        $query = Form::with('lab', 'questions');
+
+        if ($request->has('search') && $request->search !== null) {
+            $search = $request->search;
+            $query->where('title', 'like', '%' . $search . '%');
+        }
+
+        $forms = $query->get();
+
+        return view($role . '.forms.index', compact('forms', 'role'));
     }
+
 
     public function create()
     {
@@ -66,10 +75,10 @@ class FormController extends Controller
             }
 
             DB::commit();
-            return redirect()->route($this->role. '.form.index')->with('success', 'Form berhasil dibuat.');
+            return redirect()->route($this->role. '.form.index')->with('success', 'Form add successfully.');
         } catch (\Exception $e) {
             DB::rollback();
-            return back()->with('error', 'Gagal menyimpan form.')->withInput();
+            return back()->with('error', 'Failed to add form.')->withInput();
         }
     }
 
@@ -116,10 +125,10 @@ class FormController extends Controller
             }
 
             DB::commit();
-            return redirect()->route($this->role. '.form.index')->with('success', 'Form berhasil diperbarui.');
+            return redirect()->route($this->role. '.form.index')->with('success', 'Form updated successfully.');
         } catch (\Exception $e) {
             DB::rollback();
-            return back()->with('error', 'Gagal memperbarui form.')->withInput();
+            return back()->with('error', 'Failed to update form.')->withInput();
         }
     }
 
@@ -129,6 +138,6 @@ class FormController extends Controller
         $form->questions()->delete();
         $form->delete();
 
-        return redirect()->route($this->role. '.form.index')->with('success', 'Form berhasil dihapus.');
+        return redirect()->route($this->role. '.form.index')->with('success', 'Form deleted successfully.');
     }
 }

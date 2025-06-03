@@ -15,7 +15,6 @@
     <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
         <header class="bg-gray-200 p-4">
             <div class="flex items-center">
-                <span class="text-gray-600 text-xl mdi mdi-file-plus-outline"></span>
                 <h2 class="text-gray-800 text-l font-semibold ml-2">Tambah Form</h2>
             </div>
         </header>

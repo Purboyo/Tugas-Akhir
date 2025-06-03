@@ -17,7 +17,7 @@ class UserController extends Controller
                   ->orWhere('email', 'like', '%' . $request->search . '%');
         }
     
-        $users = $query->paginate(5)->withQueryString(); // ubah jumlah sesuai kebutuhan
+        $users = $query->paginate(5)->withQueryString();
     
         return view('admin.users.index', compact('users'));
     }
@@ -43,7 +43,7 @@ class UserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('admin.user.index')->with('success', 'User berhasil ditambahkan.');
+        return redirect()->route('admin.user.index')->with('success', 'User add Successfully.');
     }
 
     public function edit(User $user)
@@ -66,12 +66,12 @@ class UserController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('admin.user.index')->with('success', 'User berhasil diupdate.');
+        return redirect()->route('admin.user.index')->with('success', 'User update Successfully.');
     }
 
     public function destroy(User $user)
     {
         $user->delete();
-        return redirect()->route('admin.user.index')->with('success', 'User berhasil dihapus.');
+        return redirect()->route('admin.user.index')->with('success', 'User delete Successfully.');
     }
 }

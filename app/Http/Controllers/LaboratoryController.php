@@ -48,7 +48,7 @@ class LaboratoryController extends Controller
 
         Lab::create($request->only(['lab_name', 'technician_id']));
 
-        return redirect()->route($this->role.'.lab.index')->with('success', 'Lab berhasil ditambahkan.');
+        return redirect()->route($this->role.'.lab.index')->with('success', 'Laboratory add successfully.');
     }
 
     // Menampilkan form untuk mengedit lab
@@ -68,13 +68,13 @@ class LaboratoryController extends Controller
 
         $lab->update($request->only(['lab_name', 'technician_id']));
 
-        return redirect()->route($this->role. '.lab.index')->with('success', 'Lab berhasil diupdate.');
+        return redirect()->route($this->role. '.lab.index')->with('success', 'Laboratory update successfully.');
     }
 
     // Menghapus lab
     public function destroy(Lab $lab)
     {
         $lab->delete();
-        return redirect()->route($this->role.'.lab.index')->with('success', 'Lab berhasil dihapus.');
+        return redirect()->route($this->role.'.lab.index')->with('success', 'Laboratory delete successfully.');
     }
 }
