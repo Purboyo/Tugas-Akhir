@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\PC;
 use App\Models\Form;
+use App\Models\User;
+use App\Models\Laboratory;
 use Illuminate\Http\Request;
 use App\Models\Reporter;
 use App\Models\Report;
@@ -11,59 +13,81 @@ use App\Models\Report_answer;
 
 class PublicFormController extends Controller
 {
+    public function welcome($id)
+    {
+        // Ambil PC dan relasi lab+technician-nya
+        $pc = PC::with('lab.technician')->findOrFail($id);
+
+        // Ambil form berdasarkan lab_id PC
+        $form = Form::where('lab_id', $pc->lab_id)->first();
+
+        if (!$form) {
+            abort(404, 'Form untuk lab ini tidak ditemukan.');
+        }
+
+        // Generate URL untuk route public.form.redirect dengan parameter pcId
+        $formUrl = route('public.form.redirect', ['pcId' => $pc->id]);
+
+        // Kirim data ke view
+        return view('public.forms.welcome', compact('pc', 'form', 'formUrl'));
+    }
+
     public function redirectToForm($pcId)
     {
+        // Cari PC dan relasi lab
         $pc = PC::with('lab')->findOrFail($pcId);
 
         // Cari form berdasarkan lab_id
         $form = Form::where('lab_id', $pc->lab_id)->first();
 
         if (!$form) {
-            return abort(404, 'Form untuk lab ini tidak ditemukan.');
+            abort(404, 'Form untuk lab ini tidak ditemukan.');
         }
 
-        // Redirect ke form isian (bisa sesuaikan path)
+        // Redirect ke halaman pengisian form
         return redirect()->route('form.fill', ['form' => $form->id, 'pc' => $pc->id]);
     }
 
-    public function fill(Form $form, Request $request)
+    public function fill(Form $form, $pcId)
     {
-        // Munculkan halaman isi form dengan data questions
-        $form->load('questions'); // pastikan relasi questions ada di model Form
-
-        return view('forms.fill', compact('form'));
+        $pc = PC::findOrFail($pcId);
+        $form->load('questions');
+        return view('public.forms.fill', compact('form', 'pc'));
     }
-
-    public function submit(Form $form, Request $request)
+    
+    public function submit(Request $request, Form $form)
     {
-        $request->validate([
+        $validated = $request->validate([
             'reporter.name' => 'required|string|max:255',
             'reporter.npm' => 'required|string|max:255',
+            'pc_id' => 'required|exists:pcs,id',
             'answers' => 'required|array',
         ]);
-
-        // Buat atau ambil reporter berdasarkan npm
-        $reporter = Reporter::firstOrCreate(
-            ['npm' => $request->input('reporter.npm')],
-            ['name' => $request->input('reporter.name')]
-        );
-
+    
+        // Simpan data reporter
+        $reporter = Reporter::create([
+            'name' => $validated['reporter']['name'],
+            'npm' => $validated['reporter']['npm'],
+        ]);
+    
         // Simpan report
         $report = Report::create([
             'reporter_id' => $reporter->id,
-            'computer_id' => $request->input('computer_id'), // Bisa kamu kirim hidden input di form
             'form_id' => $form->id,
+            'pc_id' => $validated['pc_id'],
         ]);
-
+    
         // Simpan jawaban
-        foreach ($request->input('answers') as $questionId => $answerText) {
+        foreach ($validated['answers'] as $questionId => $answer) {
             Report_answer::create([
                 'report_id' => $report->id,
                 'question_id' => $questionId,
-                'answer_text' => is_array($answerText) ? json_encode($answerText) : $answerText,
+                'answer_text' => is_array($answer) ? json_encode($answer) : $answer,
             ]);
         }
-
-        return redirect()->route('form.fill', $form)->with('success', 'Form submitted successfully!');
+    
+        // Redirect ke halaman sukses
+        return redirect()->route('form.success');
     }
+
 }

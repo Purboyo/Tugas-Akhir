@@ -66,10 +66,10 @@
                         <td>{{ $pc->pc_name }}</td>
                         <td>{{ $pc->lab->lab_name ?? 'N/A' }}</td>
                         <td>
-                            <div class="p-2 border rounded d-inline-block">
-                                {!! QrCode::size(100)->generate(route('form.qr.redirect', $pc->id)) !!}
-                            </div>
-                        </td>
+                        <a href="{{ route('welcome', $pc->id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                            Lihat Halaman QR
+                        </a>
+                    </td>
                         <td>
                             <a href="{{ route($role . '.pc.edit', $pc) }}" class="mr-3" data-toggle="tooltip" title="Edit">
                                 <i class="fa fa-pencil color-muted"> Edit</i>

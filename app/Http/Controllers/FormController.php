@@ -131,44 +131,4 @@ class FormController extends Controller
 
         return redirect()->route($this->role. '.form.index')->with('success', 'Form berhasil dihapus.');
     }
-    public function fill(Form $form, Request $request)
-    {
-        $form->load('questions');
-        return view($this->role. '.forms.fill', compact('form'));
-    }
-
-    public function submit(Request $request, Form $form)
-    {
-        $validated = $request->validate([
-            'reporter.name' => 'required|string|max:255',
-            'reporter.npm' => 'required|string|max:255',
-            'pc_id' => 'required|exists:pcs,id', // validasi id pc
-            'answers' => 'required|array',
-        ]);
-
-        // Simpan data reporter
-        $reporter = Reporter::create([
-            'name' => $validated['reporter']['name'],
-            'npm' => $validated['reporter']['npm'],
-        ]);
-
-        // Simpan report
-        $report = Report::create([
-            'reporter_id' => $reporter->id,
-            'form_id' => $form->id,
-            'pc_id' => $validated['pc_id'], // ← langsung dari URL param
-        ]);
-
-        // Simpan jawaban
-        foreach ($validated['answers'] as $questionId => $answer) {
-            Report_answer::create([
-                'report_id' => $report->id,
-                'question_id' => $questionId,
-                'answer_text' => is_array($answer) ? json_encode($answer) : $answer,
-            ]);
-        }
-
-
-        return redirect()->back()->with('success', 'Laporan berhasil dikirim.');
-    }
 }

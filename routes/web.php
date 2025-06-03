@@ -14,9 +14,15 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Route publik tanpa auth untuk form via QR dll
-Route::get('/form/fill/{pc}', [PublicFormController::class, 'redirectToForm'])->name('form.qr.redirect');
-Route::get('/form/{form}/fill', [FormController::class, 'fill'])->name('form.fill');
-Route::post('/form/{form}/submit', [FormController::class, 'submit'])->name('form.submit');
+Route::get('/welcome/{id}', [PublicFormController::class, 'welcome'])->name('welcome');
+Route::get('/redirect-form/{pcId}', [PublicFormController::class, 'redirectToForm'])->name('public.form.redirect');
+Route::get('/form/{form}/fill/{pc}', [PublicFormController::class, 'fill'])->name('form.fill');
+Route::post('/form/{form}/submit', [PublicFormController::class, 'submit'])->name('form.submit');
+Route::get('/form/success', function () {
+    return view('public.forms.success');
+})->name('form.success');
+
+
 
 // Route group dengan middleware auth
 Route::middleware(['auth'])->group(function () {

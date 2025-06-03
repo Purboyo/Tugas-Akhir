@@ -71,7 +71,7 @@
                                 </button>
                             </td>
                             <td>
-                                <form action="{{ route($role . '.reportsdestroy', $report->id) }}" method="POST"
+                                <form action="{{ route($role . '.report.destroy', $report->id) }}" method="POST"
                                     onsubmit="return confirm('Yakin ingin menghapus laporan ini?')" class="d-inline">
                                     @csrf
                                     @method('DELETE')
