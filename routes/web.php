@@ -18,9 +18,8 @@ Route::get('/welcome/{id}', [PublicFormController::class, 'welcome'])->name('wel
 Route::get('/redirect-form/{pcId}', [PublicFormController::class, 'redirectToForm'])->name('public.form.redirect');
 Route::get('/form/{form}/fill/{pc}', [PublicFormController::class, 'fill'])->name('form.fill');
 Route::post('/form/{form}/submit', [PublicFormController::class, 'submit'])->name('form.submit');
-Route::get('/form/success', function () {
-    return view('public.forms.success');
-})->name('form.success');
+Route::get('/form/success/{pc}', [PublicFormController::class, 'success'])->name('form.success');
+
 
 
 

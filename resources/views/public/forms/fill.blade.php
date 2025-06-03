@@ -24,7 +24,7 @@
             @csrf
 
             {{-- Optional: Hidden PC ID --}}
-            <input type="hidden" name="pc_id" value="{{ request()->query('pc') }}">
+            <input type="hidden" name="pc_id" value="{{ $pc->id }}">
 
             <div>
                 <label class="block font-semibold mb-1 text-gray-700">Nama</label>
@@ -48,6 +48,19 @@
                     </div>
                 </div>
                 @error('reporter.npm')
+                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+            
+            <div>
+                <label class="block font-semibold mb-1 text-gray-700">Telephone/Wa</label>
+                <div class="relative">
+                    <input type="text" name="reporter[telephone]" value="{{ old('reporter.telephone') }}" class="input w-full pl-10 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                        <i class="mdi mdi-phone text-xl"></i>
+                    </div>
+                </div>
+                @error('reporter.telephone')
                     <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                 @enderror
             </div>

@@ -96,7 +96,7 @@
                             </li>
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <i class="mdi mdi-account"></i>
+                                    {{ ucfirst(Auth::user()->name) }} <i class="mdi mdi-account"></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right">
                                     <a href="{{ asset('vendor/focus-2/app-profile.html') }}" class="dropdown-item">

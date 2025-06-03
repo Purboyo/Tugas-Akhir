@@ -11,10 +11,17 @@ use App\Models\Laboratory;
 use App\Models\Report_answer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Traits\HasUserRole;
 
 
 class ReportController extends Controller
 {
+    use HasUserRole;
+
+    public function __construct()
+    {
+        $this->setUserRole();
+    }
     /**
      * Display a listing of the resource.
      */
@@ -103,13 +110,13 @@ class ReportController extends Controller
             $report->answers()->delete();
 
             // Hapus reporter jika ingin (opsional, tergantung logika sistem)
-            // $report->reporter()->delete();
+            $report->reporter()->delete();
 
             // Hapus report
             $report->delete();
         });
 
-        return redirect()->route('report.index')->with('success', 'Laporan berhasil dihapus.');
+        return redirect()->route($this->role. '.report.index')->with('success', 'Laporan berhasil dihapus.');
     }
     public function getAnswers($id)
     {

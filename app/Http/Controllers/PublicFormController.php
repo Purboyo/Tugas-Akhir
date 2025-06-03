@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use App\Models\Reporter;
 use App\Models\Report;
 use App\Models\Report_answer;
+use Illuminate\Validation\ValidationException;
 
 class PublicFormController extends Controller
 {
@@ -57,17 +58,23 @@ class PublicFormController extends Controller
     
     public function submit(Request $request, Form $form)
     {
+    try {
         $validated = $request->validate([
             'reporter.name' => 'required|string|max:255',
             'reporter.npm' => 'required|string|max:255',
+            'reporter.telephone' => 'required|string|max:255',
             'pc_id' => 'required|exists:pcs,id',
             'answers' => 'required|array',
         ]);
-    
+    } catch (ValidationException $e) {
+        // Dump error validasi dalam array
+        dd($e->errors());
+    }
         // Simpan data reporter
         $reporter = Reporter::create([
             'name' => $validated['reporter']['name'],
             'npm' => $validated['reporter']['npm'],
+            'telephone' => $validated['reporter']['telephone'],
         ]);
     
         // Simpan report
@@ -87,7 +94,13 @@ class PublicFormController extends Controller
         }
     
         // Redirect ke halaman sukses
-        return redirect()->route('form.success');
+        return redirect()->route('form.success', ['pc' => $validated['pc_id']]);
     }
+    public function success($pcId)
+    {
+        $pc = PC::findOrFail($pcId);
+        return view('public.forms.succes', compact('pc'));
+    }
+
 
 }

@@ -36,7 +36,7 @@ class PCController extends Controller
         // Lakukan pagination
         $pcs = $pcsQuery->paginate(10);
 
-        return view($role . '.pcs.index', compact('pcs', 'labs', 'selectedLabId'));
+        return view('admin.pcs.index', compact('pcs', 'labs', 'selectedLabId'));
     }
 
     // Menampilkan form untuk membuat PC baru
@@ -44,7 +44,7 @@ class PCController extends Controller
     {
         $role = auth::user()->role;
         $labs = Lab::all(); // Ambil semua lab
-        return view($role .'.pcs.create', compact('labs'));
+        return view('admin.pcs.create', compact('labs'));
     }
 
     // Menyimpan PC baru
@@ -70,7 +70,7 @@ class PCController extends Controller
     {
         $role = auth::user()->role;
         $labs = Lab::all();
-        return view($role . '.pcs.edit', compact('pc', 'labs'));
+        return view('admin.pcs.edit', compact('pc', 'labs'));
     }
 
     // Mengupdate data PC

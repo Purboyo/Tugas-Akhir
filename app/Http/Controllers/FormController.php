@@ -35,50 +35,75 @@ class FormController extends Controller
 
         $forms = $query->get();
 
-        return view($role . '.forms.index', compact('forms', 'role'));
+        return view('admin.forms.index', compact('forms', 'role'));
     }
 
 
     public function create()
     {
         $labs = Lab::all();
-        return view($this->role. '.forms.create', compact('labs'));
+        return view('admin.forms.create', compact('labs'));
     }
-
+    
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
             'lab_id' => 'nullable|exists:laboratories,id',
-            'questions' => 'required|array|min:1',
+            'questions' => 'array',
             'questions.*.question_text' => 'required|string',
             'questions.*.type' => 'required|in:text,number,checkbox,radio,textarea',
         ]);
-
+    
         DB::beginTransaction();
-
+    
         try {
+            $isAdmin = auth::user()->role === 'admin';
+    
             $form = Form::create([
                 'title' => $request->title,
                 'lab_id' => $request->lab_id,
+                'is_default' => $isAdmin,
             ]);
-
-            foreach ($request->questions as $question) {
-                Form_question::create([
-                    'form_id' => $form->id,
-                    'question_text' => $question['question_text'],
-                    'type' => $question['type'],
-                    'options' => in_array($question['type'], ['radio', 'checkbox']) 
-                        ? json_encode($question['options'] ?? [])
-                        : null,
-                ]);
+    
+            if (!$isAdmin) {
+                // Cari form default
+                $defaultForm = Form::where('is_default', true)->first();
+    
+                if ($defaultForm) {
+                    // Salin semua pertanyaan dari form default (tidak bisa diubah)
+                    foreach ($defaultForm->questions as $q) {
+                        Form_question::create([
+                            'form_id' => $form->id,
+                            'question_text' => $q->question_text,
+                            'type' => $q->type,
+                            'options' => $q->options,
+                            'is_editable' => false, // Buat kolom baru jika perlu
+                        ]);
+                    }
+                }
             }
-
+    
+            // Tambah pertanyaan tambahan dari user (admin atau teknisi)
+            if ($request->has('questions')) {
+                foreach ($request->questions as $question) {
+                    Form_question::create([
+                        'form_id' => $form->id,
+                        'question_text' => $question['question_text'],
+                        'type' => $question['type'],
+                        'options' => in_array($question['type'], ['radio', 'checkbox']) 
+                            ? json_encode($question['options'] ?? [])
+                            : null,
+                        'is_editable' => true,
+                    ]);
+                }
+            }
+    
             DB::commit();
-            return redirect()->route($this->role. '.form.index')->with('success', 'Form add successfully.');
+            return redirect()->route($this->role. '.form.index')->with('success', 'Form saved successfully.');
         } catch (\Exception $e) {
             DB::rollback();
-            return back()->with('error', 'Failed to add form.')->withInput();
+            return back()->with('error', 'Failed to save form.')->withInput();
         }
     }
 
@@ -86,7 +111,7 @@ class FormController extends Controller
     {
         $form = Form::with('questions')->findOrFail($id);
         $labs = Lab::all();
-        return view($this->role. '.forms.edit', compact('form', 'labs'));
+        return view('admin.forms.edit', compact('form', 'labs'));
     }
 
     public function update(Request $request, $id)

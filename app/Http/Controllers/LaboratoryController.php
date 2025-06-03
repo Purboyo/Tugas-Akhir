@@ -28,7 +28,7 @@ class LaboratoryController extends Controller
             })
             ->orderBy('lab_name')
             ->paginate(10);
-        return view($role . '.labs.index', compact('labs', 'role'));
+        return view('admin.labs.index', compact('labs', 'role'));
     }
 
     // Menampilkan form untuk membuat lab baru
