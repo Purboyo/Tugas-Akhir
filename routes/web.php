@@ -45,6 +45,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('pc', PCController::class);
         Route::resource('form', FormController::class);
         Route::resource('report', ReportController::class);
+        Route::post('/teknisi/report/check/{id}', [ReportController::class, 'check']);
+        Route::post('/teknisi/report/done', [ReportController::class, 'done']);
     });
 
     // Routes yang bisa diakses oleh admin & teknisi sekaligus

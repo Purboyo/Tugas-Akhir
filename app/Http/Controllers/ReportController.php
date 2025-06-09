@@ -25,12 +25,26 @@ class ReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $reports = Report::with(['reporter', 'pc.lab', 'form', 'answers.question'])->latest()->get();
+        $search = $request->input('search');
+    
+        $reports = Report::with(['reporter', 'pc.lab', 'form', 'answers.question'])
+            ->when($search, function ($query, $search) {
+                $query->whereHas('reporter', function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                      ->orWhere('npm', 'like', '%' . $search . '%');
+                })
+                ->orWhereHas('pc', function ($q) use ($search) {
+                    $q->where('pc_name', 'like', '%' . $search . '%');
+                });
+            })
+            ->latest()
+            ->get();
+    
         return view('admin.report.index', compact('reports'));
     }
-
+    
 
     /**
      * Show the form for creating a new resource.
@@ -77,11 +91,13 @@ class ReportController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(report $report)
+    public function show(Report $report)
     {
-        //
+        $report->load(['reporter', 'pc.lab', 'form', 'answers.question']);
+    
+        return view('admin.report.show', compact('report'));
     }
-
+    
     /**
      * Show the form for editing the specified resource.
      */
@@ -128,5 +144,38 @@ class ReportController extends Controller
             ];
         });
     }
-
+    // ReportController.php
+    public function check(Request $request, $id)
+    {
+        $report = Report::findOrFail($id);
+        $report->checked = $request->checked;
+        
+        // Update status berdasarkan jawabannya
+        $hasDamage = $report->answers->contains(function ($ans) {
+            return strtolower($ans->answer_text) === 'rusak';
+        });
+        $report->status = $hasDamage ? 'rusak' : 'baik';
+        $report->save();
+    
+        return response()->json(['success' => true]);
+    }
+    
+    public function done()
+    {
+        $reports = Report::where('checked', true)->get();
+    
+        foreach ($reports as $report) {
+            // Simpan ke history (sesuai struktur tabel Anda)
+            History::create([
+                'report_id' => $report->id,
+                'status' => $report->status,
+                'completed_at' => now()
+            ]);
+    
+            $report->delete(); // atau ubah status menjadi "selesai"
+        }
+    
+        return response()->json(['done' => true]);
+    }
+    
 }

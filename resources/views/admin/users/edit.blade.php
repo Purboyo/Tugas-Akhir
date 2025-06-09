@@ -19,9 +19,6 @@
             </div>
         </header>
         <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title">Horizontal Form</h4>
-                </div>
                 <div class="card-body">
                     <div class="basic-form">
                         <form action="{{ route('admin.user.update', $user) }}" method="POST">
