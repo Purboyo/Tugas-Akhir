@@ -8,6 +8,7 @@ use App\Http\Controllers\PCController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PublicFormController;
+use App\Http\Controllers\ReminderController;
 
 Route::get('/', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -20,20 +21,19 @@ Route::get('/form/{form}/fill/{pc}', [PublicFormController::class, 'fill'])->nam
 Route::post('/form/{form}/submit', [PublicFormController::class, 'submit'])->name('form.submit');
 Route::get('/form/success/{pc}', [PublicFormController::class, 'success'])->name('form.success');
 
-
-
-
 // Route group dengan middleware auth
 Route::middleware(['auth'])->group(function () {
 
     // Routes khusus admin
     Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', fn() => view('admin.dashboard'))->name('admin.dashboard');
-
+        Route::resource('reminder', ReminderController::class);
+        Route::resource('reminders', ReminderController::class);
         Route::resource('user', UserController::class);
         Route::resource('lab', LaboratoryController::class);
         Route::resource('pc', PCController::class);
         Route::resource('form', FormController::class);
+        Route::post('/admin/report/check/{id}', [ReportController::class, 'check']);
         Route::resource('report', ReportController::class);
     });
 

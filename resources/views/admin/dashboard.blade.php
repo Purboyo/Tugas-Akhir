@@ -29,7 +29,29 @@
         </div>
       </div>
       <!-- More cards here -->
+      <div class="card">
+        <div class="card-header">
+          <h4 class="card-title">Reminder Hari Ini</h4>
+        </div>
+        <div class="card-body">
+          <ul class="list-group">
+          @forelse($reminders as $reminder)
+          <li class="list-group-item d-flex justify-content-between align-items-center bg-info text-white">
+            <strong>{{$reminder->user->name}} : {{ $reminder->title }}</strong> {{ $reminder->reminder_date->format('d M Y') }}
+            @if(Auth::user()->role === 'admin')
+            <form action="{{ route('admin.reminders.destroy', $reminder->id) }}" method="POST">
+              @csrf @method('DELETE')
+              <button class="btn btn-sm btn-light">Hapus</button>
+            </form>
+            @endif
+          </li>
+          @empty
+          <li class="list-group-item">Tidak ada reminder</li>
+          @endforelse
+        </ul>
+      </div>
     </div>
-  </section>
+  </div>
+</section>
 
 @endsection

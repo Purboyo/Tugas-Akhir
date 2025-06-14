@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Reminder;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,7 +25,17 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('*', function ($view) {
             if (Auth::check()) {
-                $view->with('role', Auth::user()->role);
+                $user = Auth::user();
+                $view->with('role', $user->role);
+    
+                // Ambil reminder sesuai role
+                $reminders = $user->role === 'admin'
+                    ? Reminder::whereDate('reminder_date', now())->get()
+                    : Reminder::where('user_id', $user->id)
+                              ->whereDate('reminder_date', now())
+                              ->get();
+    
+                $view->with('reminders', $reminders);
             }
         });
     }

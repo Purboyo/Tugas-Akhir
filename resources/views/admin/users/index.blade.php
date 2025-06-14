@@ -48,14 +48,14 @@
             </div>
         </header>
 
-        <div class="px-4 py-2">
+        <div class="px-4 py-2 text-dark">
             <strong>Total users: <span id="userCount">{{ count($users) }}</span></strong>
         </div>
 
-        <div class="card-content">
+        <div class="card-content ">
             <table class="table" id="userTable">
                 <thead>
-                    <tr>
+                    <tr class="text-dark">
                         <th>Name</th>
                         <th>Email</th>
                         <th>Role</th>
@@ -64,7 +64,7 @@
                 </thead>
                 <tbody>
                     @foreach($users as $user)
-                    <tr>
+                    <tr class="text-dark">
                         <td class="flex items-center">
                         <div class="image-cell">
                             <div class="flex items-center space-x-3">
@@ -83,7 +83,7 @@
                         <td><span>
                             <a href="{{route ('admin.user.edit', $user)}}" class="mr-4 " data-toggle="tooltip"
                             data-placement="top" title="Edit"><i
-                            class="fa fa-pencil color-muted">  Edit</i>
+                            class="fa fa-pencil text-muted">  Edit</i>
                         </td>
                     </tr>
                     @endforeach

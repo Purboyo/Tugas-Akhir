@@ -12,6 +12,7 @@ use App\Models\Report_answer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Traits\HasUserRole;
+use Illuminate\Support\Facades\Auth;
 
 
 class ReportController extends Controller
@@ -25,36 +26,64 @@ class ReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
-    {
-        $search = $request->input('search');
-    
-        $reports = Report::with(['reporter', 'pc.lab', 'form', 'answers.question'])
-            ->when($search, function ($query, $search) {
-                $query->whereHas('reporter', function ($q) use ($search) {
-                    $q->where('name', 'like', '%' . $search . '%')
-                      ->orWhere('npm', 'like', '%' . $search . '%');
-                })
-                ->orWhereHas('pc', function ($q) use ($search) {
-                    $q->where('pc_name', 'like', '%' . $search . '%');
+public function index(Request $request)
+{
+    $user = auth::user();
+    $role = $user->role;
+    $search = $request->input('search');
+
+    $reports = Report::with(['reporter', 'pc.lab', 'form', 'answers.question'])
+        ->when($role === 'teknisi', function ($query) use ($user) {
+            // Filter report berdasarkan PC yang lab-nya dimiliki teknisi
+            $query->whereHas('pc.lab', function ($q) use ($user) {
+                $q->where('technician_id', $user->id);
+            });
+        })
+        ->when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('reporter', function ($q2) use ($search) {
+                    $q2->where('name', 'like', '%' . $search . '%')
+                       ->orWhere('npm', 'like', '%' . $search . '%');
+                })->orWhereHas('pc', function ($q2) use ($search) {
+                    $q2->where('pc_name', 'like', '%' . $search . '%');
                 });
-            })
-            ->latest()
-            ->get();
-    
-        return view('admin.report.index', compact('reports'));
-    }
+            });
+        })
+        ->latest()
+        ->get();
+
+    return view('admin.report.index', compact('reports', 'role'));
+}
+
     
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
+public function create()
+{
+    $user = auth::user();
+    $role = $user->role;
+
+    if ($role === 'teknisi') {
+        // Form hanya yang lab-nya milik teknisi
+        $forms = Form::whereHas('lab', function ($q) use ($user) {
+            $q->where('technician_id', $user->id);
+        })->with('questions')->get();
+
+        // Komputer hanya dari lab milik teknisi
+        $computers = PC::whereHas('lab', function ($q) use ($user) {
+            $q->where('technician_id', $user->id);
+        })->with('lab')->get();
+    } else {
+        // Admin dan lainnya melihat semua data
         $forms = Form::with('questions')->get();
         $computers = PC::with('lab')->get();
-        return view('admin.report.create', compact('forms', 'computers'));
     }
+
+    return view('admin.report.create', compact('forms', 'computers', 'role'));
+}
+
 
     public function store(Request $request)
     {

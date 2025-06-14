@@ -19,33 +19,51 @@ class PCController extends Controller
         $this->setUserRole();
     }
     // Menampilkan semua PC
-    public function index(Request $request)
-    {
-        $role = auth::user()->role;
-        $labs = Lab::all(); // untuk dropdown
-        $selectedLabId = $request->input('lab_id');
+public function index(Request $request)
+{
+    $user = auth::user();
+    $role = $user->role;
 
-        // Mulai query
-        $pcsQuery = PC::with('lab');
+    // Dropdown lab hanya sesuai role
+    $labs = $role === 'teknisi'
+        ? Lab::where('technician_id', $user->id)->get()
+        : Lab::all();
 
-        // Jika ada lab_id yang dipilih, tambahkan kondisi where
-        if ($selectedLabId) {
-            $pcsQuery->where('lab_id', $selectedLabId);
-        }
+    $selectedLabId = $request->input('lab_id');
 
-        // Lakukan pagination
-        $pcs = $pcsQuery->paginate(10);
+    $pcsQuery = PC::with('lab');
 
-        return view('admin.pcs.index', compact('pcs', 'labs', 'selectedLabId'));
+    // Filter lab milik teknisi jika role teknisi
+    if ($role === 'teknisi') {
+        $pcsQuery->whereHas('lab', function ($query) use ($user) {
+            $query->where('technician_id', $user->id);
+        });
     }
+
+    // Jika ada lab_id dipilih via dropdown
+    if ($selectedLabId) {
+        $pcsQuery->where('lab_id', $selectedLabId);
+    }
+
+    $pcs = $pcsQuery->paginate(10);
+
+    return view('admin.pcs.index', compact('pcs', 'labs', 'selectedLabId', 'role'));
+}
+
 
     // Menampilkan form untuk membuat PC baru
-    public function create()
-    {
-        $role = auth::user()->role;
-        $labs = Lab::all(); // Ambil semua lab
-        return view('admin.pcs.create', compact('labs'));
-    }
+public function create()
+{
+    $user = auth::user();
+    $role = $user->role;
+
+    $labs = $role === 'teknisi'
+        ? Lab::where('technician_id', $user->id)->get()
+        : Lab::all();
+
+    return view('admin.pcs.create', compact('labs', 'role'));
+}
+
 
     // Menyimpan PC baru
     public function store(Request $request)
@@ -66,12 +84,19 @@ class PCController extends Controller
     }
 
     // Menampilkan form untuk mengedit PC
-    public function edit(PC $pc)
-    {
-        $role = auth::user()->role;
-        $labs = Lab::all();
-        return view('admin.pcs.edit', compact('pc', 'labs'));
-    }
+public function edit($id)
+{
+    $pc = PC::findOrFail($id);
+    $user = auth::user();
+    $role = $user->role;
+
+    $labs = $role === 'teknisi'
+        ? Lab::where('technician_id', $user->id)->get()
+        : Lab::all();
+
+    return view('admin.pcs.edit', compact('pc', 'labs', 'role'));
+}
+
 
     // Mengupdate data PC
     public function update(Request $request, PC $pc)

@@ -65,13 +65,13 @@
                             </td>
                             <td>{{ $report->form->title }}</td>
                             <td>{{ $report->created_at->format('d M Y H:i') }}</td>                            
-<td>
-    <select class="form-select status-dropdown" data-id="{{ $report->id }}">
-        <option value="baik" {{ $report->status == 'baik' ? 'selected' : '' }}>Baik</option>
-        <option value="rusak" {{ $report->status == 'rusak' ? 'selected' : '' }}>Rusak</option>
-        <option value="perbaikan" {{ $report->status == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
-    </select>
-</td>
+                            <td>
+                                <select class="form-select status-dropdown" data-id="{{ $report->id }}">
+                                    <option value="baik" {{ $report->status == 'baik' ? 'selected' : '' }}>Baik</option>
+                                    <option value="rusak" {{ $report->status == 'rusak' ? 'selected' : '' }}>Rusak</option>
+                                    <option value="perbaikan" {{ $report->status == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
+                                </select>
+                            </td>
                             <td>
                                 <input type="checkbox" class="report-checkbox" data-id="{{ $report->id }}"
                                     {{ $report->checked ? 'checked' : '' }}>

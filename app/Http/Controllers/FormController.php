@@ -22,28 +22,45 @@ class FormController extends Controller
     {
         $this->setUserRole();
     }
-    public function index(Request $request)
-    {
-        $role = auth::user()->role;
+public function index(Request $request)
+{
+    $user = Auth::user();
+    $role = $user->role;
 
-        $query = Form::with('lab', 'questions');
+    $query = Form::with('lab', 'questions');
 
-        if ($request->has('search') && $request->search !== null) {
-            $search = $request->search;
-            $query->where('title', 'like', '%' . $search . '%');
-        }
-
-        $forms = $query->get();
-
-        return view('admin.forms.index', compact('forms', 'role'));
+    // Jika role teknisi, filter berdasarkan lab yang dimiliki teknisi
+    if ($role === 'teknisi') {
+        $query->whereHas('lab', function ($q) use ($user) {
+            $q->where('technician_id', $user->id);
+        });
     }
 
+    // Jika ada pencarian berdasarkan judul
+    if ($request->has('search') && $request->search !== null) {
+        $search = $request->search;
+        $query->where('title', 'like', '%' . $search . '%');
+    }
 
-    public function create()
-    {
+    $forms = $query->get();
+
+    return view('admin.forms.index', compact('forms', 'role'));
+}
+
+public function create()
+{
+    $user = auth::user();
+
+    if ($user->role === 'teknisi') {
+        // Ambil lab yang dimiliki oleh teknisi
+        $labs = Lab::where('technician_id', $user->id)->get();
+    } else {
+        // Admin bisa melihat semua lab
         $labs = Lab::all();
-        return view('admin.forms.create', compact('labs'));
     }
+
+    return view('admin.forms.create', compact('labs'));
+}
     
     public function store(Request $request)
     {
@@ -107,12 +124,19 @@ class FormController extends Controller
         }
     }
 
-    public function edit($id)
-    {
-        $form = Form::with('questions')->findOrFail($id);
+public function edit($id)
+{
+    $form = Form::with('questions')->findOrFail($id);
+    $user = auth::user();
+
+    if ($user->role === 'teknisi') {
+        $labs = Lab::where('technician_id', $user->id)->get();
+    } else {
         $labs = Lab::all();
-        return view('admin.forms.edit', compact('form', 'labs'));
     }
+
+    return view('admin.forms.edit', compact('form', 'labs'));
+}
 
     public function update(Request $request, $id)
     {

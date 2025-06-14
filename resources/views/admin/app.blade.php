@@ -14,7 +14,9 @@
     <link href="{{asset('vendor/focus-2/css/style.css')}}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('vendor/mdi/css/materialdesignicons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('vendor/focus-2/vendor/toastr/css/toastr.min.css')}}">
+    <link  rel="stylesheet" href="{{asset('vendor/focus-2/vendor/fullcalendar/css/fullcalendar.min.css')}}">
 
+    @stack('styles')
 
 </head>
 
@@ -152,9 +154,9 @@
                     <li><a class="" href="{{route ($role. '.report.index')}}" aria-expanded="false"><i
                                 class="mdi mdi-file-document-outline"></i><span class="nav-text">Reports</span></a>
                     </li>
-                    {{-- <li><a class="" href="" aria-expanded="false"><i
-                                class="mdi mdi-history"></i><span class="nav-text">History !</span></a>
-                    </li> --}}
+                    <li><a class="" href="{{route ($role. '.reminder.index')}}" aria-expanded="false"><i
+                                class="mdi mdi-calendar-clock"></i><span class="nav-text">Reminders</span></a>
+                    </li>
                 </ul>
             </div>
 
@@ -249,6 +251,9 @@
     <script src="{{asset('vendor/focus-2/js/plugins-init/sweetalert.init.js')}}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script src="{{asset('vendor/focus-2/vendor/fullcalendar/js/fullcalendar.min.js')}}"></script>
+    <script src="{{asset('vendor/focus-3/js/plugins-init/fullcalendar-init.js')}}"></script>
+    @stack('scripts')
 </body>
 
 </html>
