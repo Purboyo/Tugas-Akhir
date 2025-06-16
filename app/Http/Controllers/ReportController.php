@@ -26,34 +26,34 @@ class ReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-public function index(Request $request)
-{
-    $user = auth::user();
-    $role = $user->role;
-    $search = $request->input('search');
+    public function index(Request $request)
+    {
+        $user = auth::user();
+        $role = $user->role;
+        $search = $request->input('search');
 
-    $reports = Report::with(['reporter', 'pc.lab', 'form', 'answers.question'])
-        ->when($role === 'teknisi', function ($query) use ($user) {
-            // Filter report berdasarkan PC yang lab-nya dimiliki teknisi
-            $query->whereHas('pc.lab', function ($q) use ($user) {
-                $q->where('technician_id', $user->id);
-            });
-        })
-        ->when($search, function ($query, $search) {
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('reporter', function ($q2) use ($search) {
-                    $q2->where('name', 'like', '%' . $search . '%')
-                       ->orWhere('npm', 'like', '%' . $search . '%');
-                })->orWhereHas('pc', function ($q2) use ($search) {
-                    $q2->where('pc_name', 'like', '%' . $search . '%');
+        $reports = Report::with(['reporter', 'pc.lab', 'form', 'answers.question'])
+            ->when($role === 'teknisi', function ($query) use ($user) {
+                // Filter report berdasarkan PC yang lab-nya dimiliki teknisi
+                $query->whereHas('pc.lab', function ($q) use ($user) {
+                    $q->where('technician_id', $user->id);
                 });
-            });
-        })
-        ->latest()
-        ->get();
+            })
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->whereHas('reporter', function ($q2) use ($search) {
+                        $q2->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('npm', 'like', '%' . $search . '%');
+                    })->orWhereHas('pc', function ($q2) use ($search) {
+                        $q2->where('pc_name', 'like', '%' . $search . '%');
+                    });
+                });
+            })
+            ->latest()
+            ->get();
 
-    return view('admin.report.index', compact('reports', 'role'));
-}
+        return view('admin.report.index', compact('reports', 'role'));
+    }
 
     
 
@@ -62,59 +62,12 @@ public function index(Request $request)
      */
 public function create()
 {
-    $user = auth::user();
-    $role = $user->role;
 
-    if ($role === 'teknisi') {
-        // Form hanya yang lab-nya milik teknisi
-        $forms = Form::whereHas('lab', function ($q) use ($user) {
-            $q->where('technician_id', $user->id);
-        })->with('questions')->get();
-
-        // Komputer hanya dari lab milik teknisi
-        $computers = PC::whereHas('lab', function ($q) use ($user) {
-            $q->where('technician_id', $user->id);
-        })->with('lab')->get();
-    } else {
-        // Admin dan lainnya melihat semua data
-        $forms = Form::with('questions')->get();
-        $computers = PC::with('lab')->get();
-    }
-
-    return view('admin.report.create', compact('forms', 'computers', 'role'));
 }
 
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'npm' => 'required|string|max:100',
-            'computer_id' => 'required|exists:computers,id',
-            'form_id' => 'required|exists:forms,id',
-            'answers' => 'required|array',
-        ]);
-
-        $reporter = Reporter::create([
-            'name' => $request->name,
-            'npm' => $request->npm,
-        ]);
-
-        $report = Report::create([
-            'reporter_id' => $reporter->id,
-            'computer_id' => $request->computer_id,
-            'form_id' => $request->form_id,
-        ]);
-
-        foreach ($request->answers as $questionId => $answer) {
-            Report_answer::create([
-                'report_id' => $report->id,
-                'question_id' => $questionId,
-                'answer_text' => is_array($answer) ? implode(', ', $answer) : $answer,
-            ]);
-        }
-
-        return redirect()->route('reports.create')->with('success', 'Laporan berhasil disimpan.');
     }
 
     /**
@@ -206,5 +159,18 @@ public function create()
     
         return response()->json(['done' => true]);
     }
-    
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:baik,rusak,perbaikan'
+        ]);
+
+        $report = Report::findOrFail($id);
+        $report->status = $request->status;
+        $report->save();
+
+        return response()->json(['success' => true]);
+}
+
+
 }

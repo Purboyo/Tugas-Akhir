@@ -150,9 +150,12 @@
                     <li><a class="" href="{{route ($role. '.report.index')}}" aria-expanded="false"><i
                                 class="mdi mdi-file-document-outline"></i><span class="nav-text">Reports</span></a>
                     </li>
-                    {{-- <li><a class="" href="" aria-expanded="false"><i
-                                class="mdi mdi-history"></i><span class="nav-text">History !</span></a>
-                    </li> --}}
+                    <li><a class="" href="{{route ($role. '.maintenance.index')}}" aria-expanded="false"><i
+                                class="mdi mdi-wrench"></i><span class="nav-text">Maintenance</span></a>
+                    </li>
+                    <li><a class="" href="" aria-expanded="false"><i
+                                class="mdi mdi-history"></i><span class="nav-text">History</span></a>
+                    </li>
                 </ul>
             </div>
 

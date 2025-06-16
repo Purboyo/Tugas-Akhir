@@ -56,8 +56,8 @@ class PublicFormController extends Controller
         return view('public.forms.fill', compact('form', 'pc'));
     }
     
-    public function submit(Request $request, Form $form)
-    {
+public function submit(Request $request, Form $form)
+{
     try {
         $validated = $request->validate([
             'reporter.name' => 'required|string|max:255',
@@ -67,35 +67,54 @@ class PublicFormController extends Controller
             'answers' => 'required|array',
         ]);
     } catch (ValidationException $e) {
-        // Dump error validasi dalam array
         dd($e->errors());
     }
-        // Simpan data reporter
-        $reporter = Reporter::create([
-            'name' => $validated['reporter']['name'],
-            'npm' => $validated['reporter']['npm'],
-            'telephone' => $validated['reporter']['telephone'],
-        ]);
-    
-        // Simpan report
-        $report = Report::create([
-            'reporter_id' => $reporter->id,
-            'form_id' => $form->id,
-            'pc_id' => $validated['pc_id'],
-        ]);
-    
-        // Simpan jawaban
-        foreach ($validated['answers'] as $questionId => $answer) {
-            Report_answer::create([
-                'report_id' => $report->id,
-                'question_id' => $questionId,
-                'answer_text' => is_array($answer) ? json_encode($answer) : $answer,
-            ]);
+
+    // Simpan data reporter
+    $reporter = Reporter::create([
+        'name' => $validated['reporter']['name'],
+        'npm' => $validated['reporter']['npm'],
+        'telephone' => $validated['reporter']['telephone'],
+    ]);
+
+    // Cek apakah ada jawaban buruk
+    $burukKeywords = ['rusak', 'tidak berfungsi', 'tidak menyala']; // sesuaikan jika perlu
+    $isBad = false;
+
+    foreach ($validated['answers'] as $answer) {
+        $jawaban = is_array($answer) ? implode(' ', $answer) : $answer;
+        foreach ($burukKeywords as $keyword) {
+            if (stripos($jawaban, $keyword) !== false) {
+                $isBad = true;
+                break 2;
+            }
         }
-    
-        // Redirect ke halaman sukses
-        return redirect()->route('form.success', ['pc' => $validated['pc_id']]);
     }
+
+    // Status disesuaikan dengan enum: 'Good', 'Bad', 'Repairing', 'Pending'
+    $status = $isBad ? 'Bad' : 'Good';
+
+    // Simpan report
+    $report = Report::create([
+        'reporter_id' => $reporter->id,
+        'form_id' => $form->id,
+        'pc_id' => $validated['pc_id'],
+        'status' => $status,
+    ]);
+
+    // Simpan jawaban
+    foreach ($validated['answers'] as $questionId => $answer) {
+        Report_answer::create([
+            'report_id' => $report->id,
+            'question_id' => $questionId,
+            'answer_text' => is_array($answer) ? json_encode($answer) : $answer,
+        ]);
+    }
+
+    return redirect()->route('form.success', ['pc' => $validated['pc_id']]);
+}
+
+
     public function success($pcId)
     {
         $pc = PC::findOrFail($pcId);

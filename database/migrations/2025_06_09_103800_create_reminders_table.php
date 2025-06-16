@@ -16,7 +16,9 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->date('reminder_date');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // untuk teknisi
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // teknisi
+            $table->unsignedBigInteger('laboratory_id')->nullable();
+            $table->foreign('laboratory_id')->references('id')->on('laboratories')->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -25,6 +25,7 @@ class ReminderController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
+            'laboratory_id' => 'required|exists:laboratories,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'reminder_date' => 'required|date',
@@ -48,5 +49,13 @@ class ReminderController extends Controller
         $reminders = Reminder::where('user_id', $user->id)->latest()->get();
         return view('teknisi.reminder.index', compact('reminders'));
     }
+
+    public function getLaboratories($userId)
+    {
+        $labs = \App\Models\Laboratory::where('technician_id', $userId)->get();
+        return response()->json($labs);
+    }
+
+    
 }
 

@@ -6,9 +6,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\PCController;
 use App\Http\Controllers\FormController;
+use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\ReminderController;
+use App\Models\Maintenance;
 
 Route::get('/', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -28,7 +30,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', fn() => view('admin.dashboard'))->name('admin.dashboard');
         Route::resource('reminder', ReminderController::class);
-        Route::resource('reminders', ReminderController::class);
+        Route::get('/get-laboratories/{userId}', [ReminderController::class, 'getLaboratories']);
         Route::resource('user', UserController::class);
         Route::resource('lab', LaboratoryController::class);
         Route::resource('pc', PCController::class);
@@ -45,8 +47,11 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('pc', PCController::class);
         Route::resource('form', FormController::class);
         Route::resource('report', ReportController::class);
+        Route::resource('maintenance', MaintenanceController::class);
         Route::post('/teknisi/report/check/{id}', [ReportController::class, 'check']);
         Route::post('/teknisi/report/done', [ReportController::class, 'done']);
+        Route::post('/report/status/{id}', [ReportController::class, 'updateStatus'])->name('report.updateStatus');
+
     });
 
     // Routes yang bisa diakses oleh admin & teknisi sekaligus

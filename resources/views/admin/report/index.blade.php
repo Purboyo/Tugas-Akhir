@@ -167,12 +167,11 @@
                 }).then(res => location.reload());
             }
         });
-        document.querySelectorAll('.change-status').forEach(btn => {
-            btn.addEventListener('click', function (e) {
-                e.preventDefault();
+        document.querySelectorAll('.status-dropdown').forEach(select => {
+            select.addEventListener('change', function () {
                 const reportId = this.dataset.id;
-                const newStatus = this.dataset.status;
-                
+                const newStatus = this.value;
+
                 fetch(`/teknisi/report/status/${reportId}`, {
                     method: 'POST',
                     headers: {
@@ -180,10 +179,15 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ status: newStatus })
-                }).then(() => location.reload());
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log('Status updated');
+                    }
+                });
             });
         });
-    });
+
 </script>
 @endpush
 

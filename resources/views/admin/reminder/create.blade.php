@@ -24,21 +24,29 @@
                     <form action="{{ route('admin.reminder.store') }}" method="POST">
                         @csrf
                         <div class="form-row">
-                            <div class="form-group col-md-12">
-                                <label>Technician</label>
-                                <select name="user_id" class="form-control" required>
-                                    <option value="" disabled selected>-- Choose Technician --</option>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                                            {{ $user->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
+<!-- Technician select -->
+<div class="form-group col-md-12">
+    <label>Technician</label>
+    <select name="user_id" id="technicianSelect" class="form-control" required>
+        <option value="" disabled selected>-- Choose Technician --</option>
+        @foreach($users as $user)
+            <option value="{{ $user->id }}">{{ $user->name }}</option>
+        @endforeach
+    </select>
+</div>
+
+<!-- Laboratory select -->
+<div class="form-group col-md-12">
+    <label>Laboratory</label>
+    <select name="laboratory_id" id="laboratorySelect" class="form-control" required>
+        <option value="" disabled selected>-- Choose Laboratory --</option>
+    </select>
+</div>
+
 
                             <div class="form-group col-md-12">
                                 <label>Title</label>
-                                <input type="text" name="title" class="form-control" value="Title" required>
+                                <input type="text" name="title" class="form-control" placeholder="Title" required>
                             </div>
 
                             <div class="form-group col-md-12">
@@ -81,5 +89,31 @@
             allowInput: true
         });
     </script>
+<script>
+document.getElementById('technicianSelect').addEventListener('change', function () {
+    const techId = this.value;
+    const labSelect = document.getElementById('laboratorySelect');
+
+    labSelect.innerHTML = '<option disabled selected>Loading...</option>';
+
+    fetch(`/admin/get-laboratories/${techId}`)
+        .then(res => res.json())
+        .then(data => {
+            labSelect.innerHTML = '<option disabled selected>-- Choose Laboratory --</option>';
+            data.forEach(lab => {
+                const opt = document.createElement('option');
+                opt.value = lab.id;
+                opt.textContent = lab.lab_name;
+                labSelect.appendChild(opt);
+            });
+        })
+        .catch(err => {
+            labSelect.innerHTML = '<option disabled selected>Error loading laboratories</option>';
+            console.error(err);
+        });
+});
+</script>
+
+
     @endpush
 @endsection
