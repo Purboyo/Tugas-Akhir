@@ -16,8 +16,9 @@
     <link rel="stylesheet" href="{{ asset('vendor/focus-2/vendor/toastr/css/toastr.min.css')}}">
     <link  rel="stylesheet" href="{{asset('vendor/focus-2/vendor/fullcalendar/css/fullcalendar.min.css')}}">
 
-    @stack('styles')
-
+    <link rel="stylesheet" href="{{asset('vendor/focus-2/vendor/pickadate/themes/default.css')}}">
+    <link rel="stylesheet" href="{{asset('vendor/focus-2/vendor/pickadate/themes/default.date.css')}}">
+    @yield('styles')
 </head>
 
 <body>
@@ -252,7 +253,13 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="{{asset('vendor/focus-2/vendor/fullcalendar/js/fullcalendar.min.js')}}"></script>
-    <script src="{{asset('vendor/focus-3/js/plugins-init/fullcalendar-init.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/js/plugins-init/fullcalendar-init.js')}}"></script>
+
+    <!-- Pickdate -->{{asset ('vendor/focus-2')}}
+    <script src="{{asset ('vendor/focus-2/vendor/pickadate/picker.js')}}"></script>
+    <script src="{{asset ('vendor/focus-2/vendor/pickadate/picker.time.js')}}"></script>
+    <script src="{{asset ('vendor/focus-2/vendor/pickadate/picker.date.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/js/plugins-init/pickadate-init.js')}}"></script>
     @stack('scripts')
 </body>
 

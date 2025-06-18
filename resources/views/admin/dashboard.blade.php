@@ -35,11 +35,11 @@
         </div>
         <div class="card-body">
           <ul class="list-group">
-          @forelse($reminders as $reminder)
+          @forelse($todayReminders as $reminder)
           <li class="list-group-item d-flex justify-content-between align-items-center bg-info text-white">
             <strong>{{$reminder->user->name}} : {{ $reminder->title }}</strong> {{ $reminder->reminder_date->format('d M Y') }}
             @if(Auth::user()->role === 'admin')
-            <form action="{{ route('admin.reminders.destroy', $reminder->id) }}" method="POST">
+            <form action="{{ route('admin.reminder.destroy', $reminder->id) }}" method="POST">
               @csrf @method('DELETE')
               <button class="btn btn-sm btn-light">Hapus</button>
             </form>

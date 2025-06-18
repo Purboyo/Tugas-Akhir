@@ -57,26 +57,45 @@
                             </div>
                         </div>
                         <!-- /# card -->
+                        
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="card-title">Reminder Hari Ini</h4>
+                                <h4 class="card-title">
+                                    @if(Auth::user()->role === 'admin')
+                                        Reminder Hari Ini
+                                    @else
+                                        Reminder Kamu
+                                    @endif
+                                </h4>
                             </div>
                             <div class="card-body">
                                 <ul class="list-group">
-                                @forelse($reminders as $reminder)
-                                <li class="list-group-item d-flex justify-content-between align-items-center bg-info text-white">
-                                    <strong>{{$reminder->user->name}} : {{ $reminder->title }}</strong> {{ $reminder->reminder_date->format('d M Y') }}
-                                    @if(Auth::user()->role === 'admin')
-                                    <form action="{{ route('admin.reminders.destroy', $reminder->id) }}" method="POST">
-                                        @csrf @method('DELETE')
-                                        <button class="btn btn-sm btn-light">Hapus</button>
-                                    </form>
-                                    @endif
-                                </li>
-                                @empty
-                                <li class="list-group-item">Tidak ada reminder</li>
-                                @endforelse
-                            </ul>
+                                    @forelse($todayReminders as $reminder)
+                                        <li class="list-group-item d-flex justify-content-between align-items-center 
+                                            {{ Auth::user()->role === 'admin' ? 'bg-info text-white' : '' }}">
+                                            <div>
+                                                <strong>
+                                                    @if(Auth::user()->role === 'admin')
+                                                        {{ $reminder->user->name }}:
+                                                    @endif
+                                                    {{ $reminder->title }}
+                                                </strong>
+                                                <br>
+                                                <small>{{ $reminder->reminder_date->format('d M Y') }}</small>
+                                            </div>
+
+                                            @if(Auth::user()->role === 'admin')
+                                                <form action="{{ route('admin.reminder.destroy', $reminder->id) }}" method="POST" onsubmit="return confirm('Hapus reminder ini?')">
+                                                    @csrf @method('DELETE')
+                                                    <button class="btn btn-sm btn-light">Hapus</button>
+                                                </form>
+                                            @endif
+                                        </li>
+                                    @empty
+                                        <li class="list-group-item text-muted">Tidak ada reminder.</li>
+                                    @endforelse
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     <!-- /# column -->

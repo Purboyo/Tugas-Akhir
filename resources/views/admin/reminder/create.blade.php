@@ -24,40 +24,44 @@
                     <form action="{{ route('admin.reminder.store') }}" method="POST">
                         @csrf
                         <div class="form-row">
-<!-- Technician select -->
-<div class="form-group col-md-12">
-    <label>Technician</label>
-    <select name="user_id" id="technicianSelect" class="form-control" required>
-        <option value="" disabled selected>-- Choose Technician --</option>
-        @foreach($users as $user)
-            <option value="{{ $user->id }}">{{ $user->name }}</option>
-        @endforeach
-    </select>
-</div>
+                            <!-- Technician select -->
+                            <div class="form-group col-md-12">
+                                <label>Technician</label>
+                                <select name="user_id" id="technicianSelect" class="form-control" required>
+                                    <option value="" disabled selected>-- Choose Technician --</option>
+                                    @foreach($users as $user)
+                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-<!-- Laboratory select -->
-<div class="form-group col-md-12">
-    <label>Laboratory</label>
-    <select name="laboratory_id" id="laboratorySelect" class="form-control" required>
-        <option value="" disabled selected>-- Choose Laboratory --</option>
-    </select>
-</div>
+                            <!-- Laboratory select -->
+                            <div class="form-group col-md-12">
+                                <label>Laboratory</label>
+                                <select name="laboratory_id" id="laboratorySelect" class="form-control" required>
+                                    <option value="" disabled selected>-- Choose Laboratory --</option>
+                                </select>
+                            </div>
 
-
+                            <!-- Title -->
                             <div class="form-group col-md-12">
                                 <label>Title</label>
                                 <input type="text" name="title" class="form-control" placeholder="Title" required>
                             </div>
 
+                            <!-- Description -->
                             <div class="form-group col-md-12">
                                 <label>Description</label>
                                 <textarea name="description" class="form-control" rows="4" placeholder="Description"></textarea>
                             </div>
 
+                            <!-- Reminder Date -->
                             <div class="form-group col-md-12">
-                                <label>Reminder Date</label>
-                                <input type="text" id="reminder_date" name="reminder_date" class="form-control" value="{{ old('reminder_date') }}" placeholder="Select date" required>
+                                <p class="mb-1">Reminder Date</p>
+                                <input name="reminder_date" class="datepicker-default form-control" id="datepicker" placeholder="Select date" required>
                             </div>
+                        </div>
+
                         </div>
                         <button type="submit" class="btn btn-primary">
                             <i class="mdi mdi-calendar-plus"></i> Save Reminder
@@ -71,49 +75,46 @@
         </div>
     </div>
 </section>
-                            
-                            
-@endsection
-    @section('script')
-    @push('styles')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    @endpush
 
-    @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script>
-        flatpickr("#reminder_date", {
-            dateFormat: "Y-m-d",
-            altInput: true,
-            altFormat: "F j, Y",
-            allowInput: true
-        });
-    </script>
+@endsection
+
+@section('script')
 <script>
-document.getElementById('technicianSelect').addEventListener('change', function () {
-    const techId = this.value;
+document.addEventListener("DOMContentLoaded", function () {
+    const technicianSelect = document.getElementById('technicianSelect');
     const labSelect = document.getElementById('laboratorySelect');
 
-    labSelect.innerHTML = '<option disabled selected>Loading...</option>';
+    if (technicianSelect) {
+        technicianSelect.addEventListener('change', function () {
+            const techId = this.value;
+            
+            if (!techId) return;
 
-    fetch(`/admin/get-laboratories/${techId}`)
-        .then(res => res.json())
-        .then(data => {
-            labSelect.innerHTML = '<option disabled selected>-- Choose Laboratory --</option>';
-            data.forEach(lab => {
-                const opt = document.createElement('option');
-                opt.value = lab.id;
-                opt.textContent = lab.lab_name;
-                labSelect.appendChild(opt);
-            });
-        })
-        .catch(err => {
-            labSelect.innerHTML = '<option disabled selected>Error loading laboratories</option>';
-            console.error(err);
+            labSelect.innerHTML = '<option disabled selected>Loading...</option>';
+
+            fetch(`/admin/get-laboratories/${techId}`)
+                .then(response => response.json())
+                .then(data => {
+                    labSelect.innerHTML = '<option disabled selected>-- Choose Laboratory --</option>';
+
+                    if (data.length === 0) {
+                        labSelect.innerHTML += '<option disabled>No laboratories found</option>';
+                        return;
+                    }
+
+                    data.forEach(lab => {
+                        const option = document.createElement('option');
+                        option.value = lab.id;
+                        option.textContent = lab.lab_name;
+                        labSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching laboratories:', error);
+                    labSelect.innerHTML = '<option disabled selected>Error loading laboratories</option>';
+                });
         });
+    }
 });
 </script>
-
-
-    @endpush
 @endsection

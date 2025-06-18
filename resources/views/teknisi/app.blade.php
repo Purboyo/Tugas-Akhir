@@ -8,13 +8,13 @@
     <title>LabSi </title>
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{asset('vendor/focus-2/images/favicon.pn')}}g">
+    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
     <link rel="stylesheet" href="{{asset('vendor/focus-2/vendor/owl-carousel/css/owl.carousel.min.css')}}">
     <link rel="stylesheet" href="{{asset('vendor/focus-2/vendor/owl-carousel/css/owl.theme.default.min.css')}}">
     <link href="{{asset('vendor/focus-2/vendor/jqvmap/css/jqvmap.min.css')}}" rel="stylesheet">
     <link href="{{asset('vendor/focus-2/css/style.css')}}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('vendor/mdi/css/materialdesignicons.min.css') }}">
-
-
+    <link rel="stylesheet" href="{{ asset('vendor/focus-2/vendor/select2/css/select2.min.css')}}">
 
 </head>
 
@@ -136,7 +136,7 @@
                 <ul class="metismenu" id="menu">
                     <li class="nav-label first">Menu</li>
                     <li><a class="" href="{{route ($role. '.teknisi.dashboard')}}" aria-expanded="false"><i
-                    class="mdi mdi-view-dashboard"></i><span class="nav-text">Dashboard</span></a>
+                                class="mdi mdi-view-dashboard"></i><span class="nav-text">Dashboard</span></a>
                     </li>
                     <li><a class="" href="{{route ($role. '.lab.index')}}" aria-expanded="false"><i
                                 class="mdi mdi-google-classroom"></i><span class="nav-text">Laboratory</span></a>
@@ -150,11 +150,11 @@
                     <li><a class="" href="{{route ($role. '.report.index')}}" aria-expanded="false"><i
                                 class="mdi mdi-file-document-outline"></i><span class="nav-text">Reports</span></a>
                     </li>
-                    <li><a class="" href="{{route ($role. '.maintenance.index')}}" aria-expanded="false"><i
+                    <li><a class="" href="{{ route($role. '.maintenance.index') }}" aria-expanded="false"><i
                                 class="mdi mdi-wrench"></i><span class="nav-text">Maintenance</span></a>
                     </li>
-                    <li><a class="" href="" aria-expanded="false"><i
-                                class="mdi mdi-history"></i><span class="nav-text">History</span></a>
+                    <li><a href="{{ route($role .'.maintenance.history') }}"><i 
+                                class="mdi mdi-history"></i><span class="nav-text">History Maintenance</span></a>
                     </li>
                 </ul>
             </div>
@@ -240,6 +240,15 @@
 
 
     <script src="{{asset('vendor/focus-2/js/dashboard/dashboard-1.js')}}"></script>
+
+    <!-- Chart Morris plugin files -->
+    <script src="{{asset('vendor/focus-2/vendor/raphael/raphael.min.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/vendor/morris/morris.min.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/js/plugins-init/morris-init.js')}}"></script>
+
+{{-- 
+    <script src="{{asset('vendor/focus-2/vendor/select2/js/select2.full.min.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/js/plugins-init/select2-init.js')}}"></script> --}}
 
 </body>
 

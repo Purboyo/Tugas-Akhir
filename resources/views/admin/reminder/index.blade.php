@@ -54,26 +54,41 @@
         <div class="card-content">
             <table class="table" id="reminderTable">
                 <thead>
-                    <tr>
+                    <tr class="text-dark">
                         <th>Judul</th>
                         <th>Deskripsi</th>
                         <th>Tanggal Reminder</th>
                         <th>Teknisi</th>
+                        <th>Status</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($reminders as $reminder)
-                    <tr>
+                    <tr class="text-dark">
                         <td>{{ $reminder->title }}</td>
                         <td>{{ $reminder->description ?? '-' }}</td>
                         <td>{{ \Carbon\Carbon::parse($reminder->reminder_date)->format('d M Y') }}</td>
-                        <td>{{ $reminder->user->name ?? '-' }}</td>
+                        <td>{{ optional($reminder->user)->name ?? '-' }}</td>
                         <td>
+                            @php
+                                $status = $reminder->computed_status; // dari accessor
+                            @endphp
+                            <span class="badge 
+                                {{ $status === 'completed' ? 'bg-success' : 
+                                ($status === 'missed' ? 'bg-danger' : 'bg-warning') }}">
+                                {{ ucfirst($status) }}
+                            </span>
+                        </td>
+                        <td class="d-flex gap-2">
+                            <a href="{{ route('admin.reminder.edit', $reminder->id) }}" class="btn btn-sm btn-warning" data-toggle="tooltip" title="Edit">
+                                <i class="fa fa-pencil"></i> Edit
+                            </a>
+
                             <form action="{{ route('admin.reminder.destroy', $reminder->id) }}" method="POST" onsubmit="return confirm('Hapus reminder ini?')">
                                 @csrf
                                 @method('DELETE')
-                                <button class="btn btn-sm btn-danger">
+                                <button class="btn btn-sm btn-danger" data-toggle="tooltip" title="Hapus">
                                     <i class="fa fa-trash"></i> Hapus
                                 </button>
                             </form>
@@ -81,11 +96,12 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="text-center text-muted">Belum ada data reminder.</td>
+                        <td colspan="6" class="text-center text-muted">Belum ada data reminder.</td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
+
         </div>
     </div>
 </section>

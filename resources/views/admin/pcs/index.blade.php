@@ -10,7 +10,7 @@
             <small class="text-muted">{{ ucfirst(Auth::user()->role) }} · Manage PCs</small>
         </div>
         <div>
-            <a href="{{ route($role . '.pc.create') }}" class="btn btn-primary">
+            <a href="{{ route($role . '.pc.create') }}" class="btn btn-outline-primary">
                 <i class="fa fa-plus color-info"></i> Add PC
             </a>
         </div>
@@ -41,7 +41,7 @@
                 <form method="GET" action="{{ route($role . '.pc.index') }}" class="d-flex">
                     <input type="text" name="search" class="form-control mr-2 shadow-sm" placeholder="Search..."
                         value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-primary"><i class="mdi mdi-magnify"></i></button>
+                    <button type="submit" class="btn btn-outline-primary"><i class="mdi mdi-magnify"></i></button>
                 </form>
             </div>
         </header>
@@ -51,7 +51,7 @@
         </div>
 
         <div class="card-content">
-            <table class="table" id="pcTable">
+            <table class="table text-dark" id="pcTable">
                 <thead>
                     <tr>
                         <th>PC Name</th>
@@ -71,10 +71,10 @@
                         </a>
                     </td>
                         <td>
-                            <a href="{{ route($role . '.pc.edit', $pc) }}" class="mr-3" data-toggle="tooltip" title="Edit">
-                                <i class="fa fa-pencil color-muted"> Edit</i>
+                            <a href="{{ route($role . '.pc.edit', $pc) }}" class="btn btn-outline-warning mr-3" data-toggle="tooltip" title="Edit">
+                                <i class="fa fa-pencil"> Edit</i>
                             </a>
-                            <a href="javascript:void(0)" title="Delete"
+                            <a href="javascript:void(0)" title="Delete" class="btn btn-outline-danger"
                                data-toggle="modal" data-target="#deleteModal-{{ $pc->id }}">
                                 <i class="fa fa-close"></i> Delete
                             </a>

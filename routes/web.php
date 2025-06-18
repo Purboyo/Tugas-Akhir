@@ -7,6 +7,7 @@ use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\PCController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\HistoryMaintenanceController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\ReminderController;
@@ -47,10 +48,16 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('pc', PCController::class);
         Route::resource('form', FormController::class);
         Route::resource('report', ReportController::class);
-        Route::resource('maintenance', MaintenanceController::class);
+        // Route::resource('maintenance', MaintenanceController::class);
         Route::post('/teknisi/report/check/{id}', [ReportController::class, 'check']);
         Route::post('/teknisi/report/done', [ReportController::class, 'done']);
         Route::post('/report/status/{id}', [ReportController::class, 'updateStatus'])->name('report.updateStatus');
+        Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
+        Route::post('/maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
+        Route::get('/maintenance/history', [MaintenanceController::class, 'history'])->name('maintenance.history');
+        Route::get('/history-maintenance', [HistoryMaintenanceController::class, 'index'])->name('history.index');
+        Route::get('/maintenance/create/{reminder}', [MaintenanceController::class, 'create'])->name('maintenance.create');
+
 
     });
 

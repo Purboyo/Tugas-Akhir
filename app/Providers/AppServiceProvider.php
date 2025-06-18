@@ -23,20 +23,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        View::composer('*', function ($view) {
-            if (Auth::check()) {
-                $user = Auth::user();
-                $view->with('role', $user->role);
-    
-                // Ambil reminder sesuai role
-                $reminders = $user->role === 'admin'
-                    ? Reminder::whereDate('reminder_date', now())->get()
-                    : Reminder::where('user_id', $user->id)
-                              ->whereDate('reminder_date', now())
-                              ->get();
-    
-                $view->with('reminders', $reminders);
+    View::composer('*', function ($view) {
+        if (Auth::check()) {
+            $user = Auth::user();
+            $view->with('role', $user->role);
+
+            // Default kosong
+            $todayReminders = collect();
+
+            if ($user->role === 'admin') {
+                // Admin hanya melihat reminder hari ini
+                $todayReminders = Reminder::whereDate('reminder_date', now())->get();
+            } elseif ($user->role === 'teknisi') {
+                // Teknisi melihat semua reminder miliknya, tidak peduli tanggal
+                $todayReminders = Reminder::where('user_id', $user->id)->get();
             }
-        });
+
+            $view->with('todayReminders', $todayReminders);
+        }
+    });
     }
 }
