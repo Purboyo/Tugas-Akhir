@@ -13,31 +13,27 @@
 
 <section class="section main-section py-8">
     <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-        <header class="bg-gray-200 p-4">
-            <div class="flex items-center">
-                <h2 class="text-gray-800 text-l font-semibold ml-2">Edit Form</h2>
-            </div>
-        </header>
         <div class="card">
             <div class="card-header">
-                <h4 class="card-title">Form Builder</h4>
+                <h4 class="card-title">Edit Form</h4>
             </div>
             <div class="card-body">
-                <form action="{{ route($role.'.form.update', $form->id) }}" method="POST" id="form-builder">
+                <form action="{{ route($role.'.form.update', $form->id) }}" method="POST">
                     @csrf
                     @method('PUT')
 
                     <div class="form-group">
-                        <label>Judul Form</label>
-                        <input type="text" name="title" class="form-control" required placeholder="Masukkan judul form" value="{{ old('title', $form->title) }}">
+                        <label>Form Title</label>
+                        <input type="text" name="title" class="form-control" required value="{{ $form->title }}">
                     </div>
 
                     <div class="form-group">
                         <label>Pilih Laboratorium</label>
-                        <select name="lab_id" class="form-control" required>
-                            <option value="">-- Pilih Laboratorium --</option>
+                        <select class="form-control multi-select" name="lab_id[]" multiple="multiple" required>
                             @foreach ($labs as $lab)
-                                <option value="{{ $lab->id }}" {{ old('lab_id', $form->lab_id) == $lab->id ? 'selected' : '' }}>{{ $lab->lab_name }}</option>
+                                <option value="{{ $lab->id }}" {{ in_array($lab->id, $form->laboratories->pluck('id')->toArray()) ? 'selected' : '' }}>
+                                    {{ $lab->lab_name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -45,25 +41,21 @@
                     <hr class="my-4">
 
                     <div class="form-group">
-                        <label>Pertanyaan</label>
-                        <div id="questions-container" class="space-y-4"></div>
+                        <label>Questions</label>
+                        <div id="questions-container" class="space-y-4">
+                        </div>
                         <button type="button" class="btn btn-success btn-sm mt-2" onclick="addQuestion()">
-                            <i class="mdi mdi-plus"></i> Tambah Pertanyaan
+                            <i class="mdi mdi-plus"></i> Add Question
                         </button>
                     </div>
 
                     <div class="mt-4 d-flex justify-content-between">
-                        <button type="button" class="btn btn-info" onclick="previewForm()">
-                            <i class="mdi mdi-eye"></i> Preview
+                        <a href="{{ route($role.'.form.index') }}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="mdi mdi-content-save"></i> Update Form
                         </button>
-                        <div>
-                            <a href="{{ route($role.'.form.index') }}" class="btn btn-secondary">
-                                <i class="mdi mdi-arrow-left"></i> Batal
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="mdi mdi-content-save"></i> Update Form
-                            </button>
-                        </div>
                     </div>
                 </form>
             </div>
@@ -85,13 +77,12 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
 
 <script>
     let questionCount = 0;
-        const existingQuestions = @json($existingQuestions);
+    const existingQuestions = @json($existingQuestions);
 
-    
     function addQuestion(question = {}) {
         const container = document.getElementById('questions-container');
         const qIndex = questionCount++;
-    
+
         const optionsHtml = (question.options || []).map(opt => `
             <div class="input-group mb-2 option-item">
                 <input type="text" name="questions[${qIndex}][options][]" class="form-control" value="${opt}">
@@ -100,9 +91,9 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
                 </button>
             </div>
         `).join('');
-    
+
         const selectedType = question.type || 'text';
-    
+
         const questionEl = document.createElement('div');
         questionEl.className = 'p-3 border rounded bg-light position-relative question-item';
         questionEl.innerHTML = `
@@ -139,21 +130,21 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
                 </button>
             </div>
         `;
-    
+
         container.appendChild(questionEl);
-    
+
         new Sortable(container, {
             animation: 150,
             handle: '.drag-handle',
         });
     }
-    
+
     function toggleOptions(select, qIndex) {
         const type = select.value;
         const container = document.getElementById(`options-${qIndex}`);
         container.style.display = (type === 'checkbox' || type === 'radio') ? 'block' : 'none';
     }
-    
+
     function addOption(qIndex) {
         const list = document.getElementById(`options-list-${qIndex}`);
         list.insertAdjacentHTML('beforeend', `
@@ -165,40 +156,35 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
             </div>
         `);
     }
-    
+
     function duplicateQuestion(button) {
         const original = button.closest('.question-item');
         const clone = original.cloneNode(true);
-    
-        // Update question index on clone so name attribute tidak bentrok
+
         const container = document.getElementById('questions-container');
         const newIndex = questionCount++;
-        
-        // Perbarui semua input dan select name attribute di clone
+
         clone.querySelectorAll('input, select').forEach(el => {
             if(el.name) {
-                el.name = el.name.replace(/questions\[\d+\]/, `questions[${newIndex}]`);
+                el.name = el.name.replace(/questions\$\d+\$/, `questions[${newIndex}]`);
                 if(el.tagName === 'INPUT' && el.type === 'text') el.value = el.value || '';
             }
         });
-    
-        // Perbarui id div options agar unik juga
+
         const oldId = clone.querySelector('[id^="options-"]').id;
         const newOptionsId = `options-${newIndex}`;
         clone.querySelector('[id^="options-"]').id = newOptionsId;
-    
+
         const oldOptionsListId = clone.querySelector('[id^="options-list-"]').id;
         const newOptionsListId = `options-list-${newIndex}`;
         clone.querySelector('[id^="options-list-"]').id = newOptionsListId;
-    
-        // Perbarui tombol tambah opsi onclick
+
         const btnAddOption = clone.querySelector('button.btn-success');
         btnAddOption.setAttribute('onclick', `addOption(${newIndex})`);
-    
+
         container.appendChild(clone);
     }
-    
-    // Inisialisasi pertanyaan saat halaman load
+
     window.onload = function() {
         if(existingQuestions.length > 0) {
             existingQuestions.forEach(q => addQuestion(q));
@@ -215,10 +201,10 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
         const title = document.querySelector('input[name="title"]').value;
         const labSelect = document.querySelector('select[name="lab_id"]');
         const labName = labSelect.options[labSelect.selectedIndex].text;
-    
+
         const questionItems = document.querySelectorAll('.question-item');
         let questionsHtml = '';
-    
+
         if (questionItems.length === 0) {
             questionsHtml = '<p class="text-muted">Belum ada pertanyaan ditambahkan.</p>';
         } else {
@@ -226,7 +212,7 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
                 const qText = item.querySelector('input[name*="[question_text]"]').value;
                 const qType = item.querySelector('select[name*="[type]"]').value;
                 const optionList = item.querySelectorAll('.option-item input');
-    
+
                 let optionsHtml = '';
                 if (optionList.length > 0) {
                     optionsHtml = '<ul class="mb-0 ps-4">';
@@ -235,7 +221,7 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
                     });
                     optionsHtml += '</ul>';
                 }
-    
+
                 questionsHtml += `
                     <div class="border rounded p-3 mb-3 bg-white shadow-sm">
                         <p class="mb-1"><strong>Pertanyaan ${index + 1}:</strong> ${qText}</p>
@@ -245,7 +231,7 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
                 `;
             });
         }
-    
+
         Swal.fire({
             title: 'Preview Form',
             html: `
@@ -276,7 +262,6 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
             }
         });
     }
-
 </script>
 
 @endsection

@@ -6,16 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Form extends Model
 {
-    protected $fillable = ['title', 'lab_id'];
+    protected $fillable = ['title', 'is_default'];
 
     public function questions()
     {
         return $this->hasMany(Form_question::class);
     }
 
-    public function lab()
+    public function laboratories()
     {
-        return $this->belongsTo(Laboratory::class, 'lab_id');
+        return $this->belongsToMany(Laboratory::class, 'form_laboratory');
     }
+
 }
 

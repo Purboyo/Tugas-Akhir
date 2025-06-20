@@ -52,6 +52,7 @@
                         <th>Form Title</th>
                         <th>Laboratory</th>
                         <th>Number of Questions</th>
+                        <th>Form Type</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -59,16 +60,27 @@
                     @forelse($forms as $form)
                     <tr>
                         <td>{{ $form->title }}</td>
-                        <td>{{ $form->lab->lab_name ?? 'N/A' }}</td>
+                        <td>{{ $form->laboratories->pluck('lab_name')->join(', ') }}</td>
                         <td>{{ $form->questions->count() }}</td>
                         <td>
+                            @if($form->is_default)
+                                <span class="badge badge-info">Default (Admin)</span>
+                            @else
+                                <span class="badge badge-secondary">Custom</span>
+                            @endif
+                        </td>
+                        <td>
                             <div class="btn-group btn-group-sm">
+                                @if(!$form->is_default || auth()->user()->role === 'admin')
                                 <a href="{{ route($role . '.form.edit', $form) }}" class="mr-3" data-toggle="tooltip" title="Edit">
                                     <i class="fa fa-pencil color-muted"> Edit</i>
                                 </a>
                                 <a href="javascript:void(0)" title="Delete" data-toggle="modal" data-target="#deleteModal-{{ $form->id }}">
                                     <i class="fa fa-close"></i> Delete
-                                </a>   
+                                </a>
+                                @else
+                                <span class="text-muted">No Action</span>
+                                @endif
                             </div>
                             <!-- Delete Modal -->
                             <div class="modal fade" id="deleteModal-{{ $form->id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -98,7 +110,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="text-center text-muted">No form data found.</td>
+                        <td colspan="5" class="text-center text-muted">No form data found.</td>
                     </tr>
                     @endforelse
                 </tbody>

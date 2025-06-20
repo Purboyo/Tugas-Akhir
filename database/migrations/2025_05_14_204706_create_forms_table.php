@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('forms', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->unsignedBigInteger('lab_id')->nullable();
+            $table->boolean('is_default')->default(false); // tambahan jika belum ada
             $table->timestamps();
-            $table->foreign('lab_id')->references('id')->on('laboratories')->onDelete('cascade');
         });
     }
 

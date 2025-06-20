@@ -6,7 +6,7 @@
     <div class="d-flex justify-content-between align-items-center px-4">
         <div>
             <h1 class="h3 mb-1 text-dark">Form Builder</h1>
-            <small class="text-muted">{{ ucfirst(Auth::user()->role) }} · Tambah Form</small>
+            <small class="text-muted">{{ ucfirst(Auth::user()->role) }} · Add Form</small>
         </div>
     </div>
 </section>
@@ -15,7 +15,7 @@
     <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
         <header class="bg-gray-200 p-4">
             <div class="flex items-center">
-                <h2 class="text-gray-800 text-l font-semibold ml-2">Tambah Form</h2>
+                <h2 class="text-gray-800 text-l font-semibold ml-2">Add Form</h2>
             </div>
         </header>
         <div class="card">
@@ -27,14 +27,13 @@
                     @csrf
 
                     <div class="form-group">
-                        <label>Judul Form</label>
-                        <input type="text" name="title" class="form-control" required placeholder="Masukkan judul form">
+                        <label>Form Title</label>
+                        <input type="text" name="title" class="form-control" required placeholder="Enter form title">
                     </div>
 
                     <div class="form-group">
-                        <label>Pilih Laboratorium</label>
-                        <select name="lab_id" class="form-control" required>
-                            <option value="">-- Pilih Laboratorium --</option>
+                        <label for="lab_id">Pilih Laboratorium</label>
+                        <select class="form-control multi-select" name="lab_id[]" multiple="multiple" required>
                             @foreach ($labs as $lab)
                                 <option value="{{ $lab->id }}">{{ $lab->lab_name }}</option>
                             @endforeach
@@ -44,10 +43,10 @@
                     <hr class="my-4">
 
                     <div class="form-group">
-                        <label>Pertanyaan</label>
+                        <label>Questions</label>
                         <div id="questions-container" class="space-y-4"></div>
                         <button type="button" class="btn btn-success btn-sm mt-2" onclick="addQuestion()">
-                            <i class="mdi mdi-plus"></i> Tambah Pertanyaan
+                            <i class="mdi mdi-plus"></i> Add Question
                         </button>
                     </div>
 
@@ -57,10 +56,10 @@
                         </button>
                         <div>
                             <a href="{{ route($role.'.form.index') }}" class="btn btn-secondary">
-                                <i class="mdi mdi-arrow-left"></i> Batal
+                                <i class="mdi mdi-arrow-left"></i> Cancel
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="mdi mdi-content-save"></i> Simpan Form
+                                <i class="mdi mdi-content-save"></i> Save Form
                             </button>
                         </div>
                     </div>
@@ -93,11 +92,11 @@ function addQuestion(question = {}) {
     questionEl.innerHTML = `
         <div class="position-absolute end-0 top-0 m-2 drag-handle cursor-move"><i class="mdi mdi-drag"></i></div>
         <div class="form-group">
-            <label>Pertanyaan</label>
+            <label>Question</label>
             <input type="text" name="questions[${qIndex}][question_text]" class="form-control" required value="${question.question_text || ''}">
         </div>
         <div class="form-group">
-            <label>Jenis Jawaban</label>
+            <label>Type of Question</label>
             <select name="questions[${qIndex}][type]" class="form-control type-select" onchange="toggleOptions(this, ${qIndex})" required>
                 <option value="text">Text</option>
                 <option value="number">Number</option>
@@ -107,20 +106,20 @@ function addQuestion(question = {}) {
             </select>
         </div>
         <div class="form-group" id="options-${qIndex}" style="display: none;">
-            <label>Opsi Jawaban</label>
+            <label>Answer Options</label>
             <div id="options-list-${qIndex}">
                 ${optionsHtml}
             </div>
             <button type="button" class="btn btn-success btn-sm mt-2" onclick="addOption(${qIndex})">
-                <i class="mdi mdi-plus"></i> Tambah Opsi
+                <i class="mdi mdi-plus"></i> Add Option
             </button>
         </div>
         <div class="mt-3 d-flex gap-2">
             <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.question-item').remove()">
-                <i class="mdi mdi-delete"></i> Hapus
+                <i class="mdi mdi-delete"></i> Delete
             </button>
             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="duplicateQuestion(this)">
-                Duplikat
+                Duplicate
             </button>
         </div>
     `;
@@ -169,7 +168,7 @@ function previewForm() {
     let questionsHtml = '';
 
     if (questionItems.length === 0) {
-        questionsHtml = '<p class="text-muted">Belum ada pertanyaan ditambahkan.</p>';
+        questionsHtml = '<p class="text-muted">no questions yet.</p>';
     } else {
         questionsHtml += '<ol class="text-start">';
         questionItems.forEach((item, index) => {
@@ -186,7 +185,7 @@ function previewForm() {
                 optionsHtml += '</ul>';
             }
 
-            questionsHtml += `<li><strong>${qText}</strong><br><em>Jenis: ${qType}</em>${optionsHtml}</li>`;
+            questionsHtml += `<li><strong>${qText}</strong><br><em>Type: ${qType}</em>${optionsHtml}</li>`;
         });
         questionsHtml += '</ol>';
     }
@@ -195,15 +194,15 @@ function previewForm() {
         title: 'Preview Form',
         html: `
             <div class="text-start">
-                <p><strong>Judul:</strong> ${title || '-'}<br>
-                <strong>Laboratorium:</strong> ${labName || '-'}</p>
+                <p><strong>title:</strong> ${title || '-'}<br>
+                <strong>Laboratory:</strong> ${labName || '-'}</p>
                 <hr>
-                <h5>Pertanyaan:</h5>
+                <h5>Questions:</h5>
                 ${questionsHtml}
             </div>
         `,
         width: '700px',
-        confirmButtonText: 'Tutup',
+        confirmButtonText: 'Close',
         customClass: {
             htmlContainer: 'text-start'
         }

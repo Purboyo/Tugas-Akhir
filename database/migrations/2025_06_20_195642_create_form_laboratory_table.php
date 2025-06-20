@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('forms', function (Blueprint $table) {
-            $table->boolean('is_default')->default(false);
+        Schema::create('form_laboratory', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('form_id')->constrained()->onDelete('cascade');
+            $table->foreignId('laboratory_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
         });
+
     }
 
     /**
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('forms', function (Blueprint $table) {
-            $table->dropColumn('is_default');
-        });
+        Schema::dropIfExists('form_laboratory');
     }
 };

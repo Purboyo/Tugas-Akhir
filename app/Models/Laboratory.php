@@ -26,4 +26,9 @@ class Laboratory extends Model
         return $this->hasMany(Reminder::class);
     }
 
+    public function forms()
+    {
+        return $this->belongsToMany(Form::class, 'form_laboratory');
+    }
+
 }

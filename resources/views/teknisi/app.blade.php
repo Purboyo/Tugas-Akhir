@@ -8,13 +8,20 @@
     <title>LabSi </title>
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{asset('vendor/focus-2/images/favicon.pn')}}g">
-    <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
     <link rel="stylesheet" href="{{asset('vendor/focus-2/vendor/owl-carousel/css/owl.carousel.min.css')}}">
     <link rel="stylesheet" href="{{asset('vendor/focus-2/vendor/owl-carousel/css/owl.theme.default.min.css')}}">
     <link href="{{asset('vendor/focus-2/vendor/jqvmap/css/jqvmap.min.css')}}" rel="stylesheet">
     <link href="{{asset('vendor/focus-2/css/style.css')}}" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('vendor/mdi/css/materialdesignicons.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('vendor/focus-2/vendor/select2/css/select2.min.css')}}">
+    <link rel="stylesheet" href="{{ asset('vendor/focus-2/vendor/toastr/css/toastr.min.css')}}">
+    <link  rel="stylesheet" href="{{asset('vendor/focus-2/vendor/fullcalendar/css/fullcalendar.min.css')}}">
+
+    <link rel="stylesheet" href="{{asset('vendor/focus-2/vendor/pickadate/themes/default.css')}}">
+    <link rel="stylesheet" href="{{asset('vendor/focus-2/vendor/pickadate/themes/default.date.css')}}">
+
+     <link rel="stylesheet" href="{{asset ('vendor/focus-2//vendor/select2/css/select2.min.css')}}">
+
+    @yield('styles')
 
 </head>
 
@@ -238,17 +245,31 @@
     <script src="{{asset('vendor/focus-2/vendor/jqvmap/js/jquery.vmap.usa.js')}}"></script>
     <script src="{{asset('vendor/focus-2/vendor/jquery.counterup/jquery.counterup.min.js')}}"></script>
 
+    <!-- Toastr -->
+    <script src="{{asset('vendor/focus-2/vendor/toastr/js/toastr.min.js')}}"></script>
+
+    <!-- All init script -->
+    <script src="{{asset('vendor/focus-2/js/plugins-init/toastr-init.js')}}"></script>
 
     <script src="{{asset('vendor/focus-2/js/dashboard/dashboard-1.js')}}"></script>
 
-    <!-- Chart Morris plugin files -->
-    <script src="{{asset('vendor/focus-2/vendor/raphael/raphael.min.js')}}"></script>
-    <script src="{{asset('vendor/focus-2/vendor/morris/morris.min.js')}}"></script>
-    <script src="{{asset('vendor/focus-2/js/plugins-init/morris-init.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/vendor/sweetalert2/dist/sweetalert2.min.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/js/plugins-init/sweetalert.init.js')}}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-{{-- 
-    <script src="{{asset('vendor/focus-2/vendor/select2/js/select2.full.min.js')}}"></script>
-    <script src="{{asset('vendor/focus-2/js/plugins-init/select2-init.js')}}"></script> --}}
+    <script src="{{asset('vendor/focus-2/vendor/fullcalendar/js/fullcalendar.min.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/js/plugins-init/fullcalendar-init.js')}}"></script>
+
+    <!-- Pickdate -->{{asset ('vendor/focus-2')}}
+    <script src="{{asset ('vendor/focus-2/vendor/pickadate/picker.js')}}"></script>
+    <script src="{{asset ('vendor/focus-2/vendor/pickadate/picker.time.js')}}"></script>
+    <script src="{{asset ('vendor/focus-2/vendor/pickadate/picker.date.js')}}"></script>
+    <script src="{{asset('vendor/focus-2/js/plugins-init/pickadate-init.js')}}"></script>
+    
+    {{-- Select2 --}}
+    <script src="{{asset ('vendor/focus-2/vendor/select2/js/select2.full.min.js')}}"></script>
+    <script src="{{asset ('vendor/focus-2/js/plugins-init/select2-init.js')}}"></script>
+    @stack('scripts')
 
 </body>
 

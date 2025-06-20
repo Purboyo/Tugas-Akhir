@@ -18,6 +18,9 @@
 
     <link rel="stylesheet" href="{{asset('vendor/focus-2/vendor/pickadate/themes/default.css')}}">
     <link rel="stylesheet" href="{{asset('vendor/focus-2/vendor/pickadate/themes/default.date.css')}}">
+
+     <link rel="stylesheet" href="{{asset ('vendor/focus-2//vendor/select2/css/select2.min.css')}}">
+
     @yield('styles')
 </head>
 
@@ -260,6 +263,10 @@
     <script src="{{asset ('vendor/focus-2/vendor/pickadate/picker.time.js')}}"></script>
     <script src="{{asset ('vendor/focus-2/vendor/pickadate/picker.date.js')}}"></script>
     <script src="{{asset('vendor/focus-2/js/plugins-init/pickadate-init.js')}}"></script>
+    
+    {{-- Select2 --}}
+    <script src="{{asset ('vendor/focus-2/vendor/select2/js/select2.full.min.js')}}"></script>
+    <script src="{{asset ('vendor/focus-2/js/plugins-init/select2-init.js')}}"></script>
     @stack('scripts')
 </body>
 

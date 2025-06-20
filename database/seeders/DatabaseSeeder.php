@@ -18,8 +18,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             LaboratorySeeder::class,
             PCSeeder::class,
-            FormSeeder::class,
-            FormQuestionSeeder::class,
+            // FormQuestionSeeder::class,
 
         ]);
     }
