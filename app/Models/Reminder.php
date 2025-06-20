@@ -51,13 +51,17 @@ class Reminder extends Model
      * Get the computed status of the reminder.
      * Possible values: 'completed', 'missed', 'pending'
      */
+
     public function getComputedStatusAttribute()
     {
         if ($this->historyMaintenance) {
             return 'completed';
         }
 
-        if (Carbon::parse($this->reminder_date)->isPast()) {
+        $reminderDate = Carbon::parse($this->reminder_date)->startOfDay();
+        $today = now()->startOfDay();
+
+        if ($reminderDate->lt($today)) {
             return 'missed';
         }
 

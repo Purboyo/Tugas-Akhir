@@ -27,7 +27,7 @@
                             <!-- Technician select -->
                             <div class="form-group col-md-12">
                                 <label>Technician</label>
-                                <select name="user_id" id="technicianSelect" class="form-control" required>
+                                    <select name="user_id" id="technicianSelect" class="form-control" required>
                                     <option value="" disabled selected>-- Choose Technician --</option>
                                     @foreach($users as $user)
                                         <option value="{{ $user->id }}">{{ $user->name }}</option>
@@ -77,44 +77,74 @@
 </section>
 
 @endsection
-
-@section('script')
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const technicianSelect = document.getElementById('technicianSelect');
     const labSelect = document.getElementById('laboratorySelect');
 
-    if (technicianSelect) {
-        technicianSelect.addEventListener('change', function () {
-            const techId = this.value;
-            
-            if (!techId) return;
+    if (!technicianSelect || !labSelect) {
+        console.log("❌ Select element not found!");
+        return;
+    }
 
-            labSelect.innerHTML = '<option disabled selected>Loading...</option>';
+    console.log("✅ Elements ditemukan");
 
-            fetch(`/admin/get-laboratories/${techId}`)
-                .then(response => response.json())
-                .then(data => {
-                    labSelect.innerHTML = '<option disabled selected>-- Choose Laboratory --</option>';
+    technicianSelect.addEventListener('change', function () {
+        const techId = this.value;
+        console.log("👤 Technician ID selected:", techId);
 
-                    if (data.length === 0) {
-                        labSelect.innerHTML += '<option disabled>No laboratories found</option>';
-                        return;
+        if (!techId) return;
+
+        labSelect.innerHTML = '<option disabled selected>Loading...</option>';
+
+        fetch(`/admin/get-laboratories/${techId}`)
+            .then(response => {
+                if (!response.ok) throw new Error("Fetch failed");
+                return response.json();
+            })
+            .then(data => {
+                console.log("📦 Data labs:", data);
+
+                labSelect.innerHTML = '';
+
+                let allDisabled = true;
+
+                data.forEach(lab => {
+                    const option = document.createElement('option');
+                    option.value = lab.id;
+                    option.textContent = lab.lab_name;
+
+                    if (lab.has_reminder) {
+                        option.disabled = true;
+                        option.textContent += " (Already assigned)";
+                    } else {
+                        allDisabled = false;
                     }
 
-                    data.forEach(lab => {
-                        const option = document.createElement('option');
-                        option.value = lab.id;
-                        option.textContent = lab.lab_name;
-                        labSelect.appendChild(option);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching laboratories:', error);
-                    labSelect.innerHTML = '<option disabled selected>Error loading laboratories</option>';
+                    labSelect.appendChild(option);
                 });
-        });
-    }
+
+                if (allDisabled) {
+                    const infoOption = document.createElement('option');
+                    infoOption.disabled = true;
+                    infoOption.selected = true;
+                    infoOption.textContent = "All laboratories already assigned to reminders.";
+                    labSelect.appendChild(infoOption);
+                } else {
+                    const chooseOption = document.createElement('option');
+                    chooseOption.disabled = true;
+                    chooseOption.selected = true;
+                    chooseOption.textContent = "-- Choose Laboratory --";
+                    labSelect.prepend(chooseOption);
+                }
+            })
+            .catch(error => {
+                console.error('🚨 Error fetching laboratories:', error);
+                labSelect.innerHTML = '<option disabled selected>Error loading laboratories</option>';
+            });
+    });
 });
 </script>
-@endsection
+
+
+

@@ -1,20 +1,20 @@
 @extends('teknisi.app')
-@section('title', 'History Maintenance')
+@section('title', 'Maintenance History')
 
 @section('content')
 <div class="container-fluid py-4">
-    <h2 class="mb-4">History Maintenance</h2>
+    <h2 class="mb-4">Maintenance History</h2>
 
     <div class="col-xl-14 mb-0"> 
         <div class="card mb-0"> 
             <div class="card-body pb-2 pt-3">
                 <div class="mb-2">
-                    <h4 class="card-title">Pilih Maintenance</h4>
+                    <h4 class="card-title">Select Maintenance</h4>
                 </div>
 
                 <form method="GET" action="{{ route('teknisi.maintenance.history') }}">
                     <select class="form-control js-select2" name="maintenance_id" id="maintenance_id">
-                        <option value="">-- Semua Maintenance --</option>
+                        <option value="">-- All Maintenance --</option>
                         @foreach ($maintenances as $m)
                             <option value="{{ $m->id }}" {{ $selectedId == $m->id ? 'selected' : '' }}>
                                 {{ $m->laboratory->lab_name }} - {{ $m->created_at->format('d M Y') }}
@@ -30,8 +30,6 @@
         </div>
     </div>
 
-
-
     {{-- Chart --}}
     <div class="card">
         <div class="card-header">
@@ -42,11 +40,10 @@
         </div>
     </div>
 
-
     {{-- Table --}}
     <div class="card">
         <div class="card-header">
-            <h4 class="card-title">Riwayat Maintenance</h4>
+            <h4 class="card-title">Maintenance History Records</h4>
         </div>
         <div class="card-body table-responsive">
             <table class="table table-bordered table-hover">
@@ -55,9 +52,9 @@
                         <th>#</th>
                         <th>PC</th>
                         <th>Status</th>
-                        <th>Lab</th>
-                        <th>Teknisi</th>
-                        <th>Tanggal</th>
+                        <th>Laboratory</th>
+                        <th>Technician</th>
+                        <th>Date</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -77,47 +74,49 @@
                     @endforeach
                 </tbody>
             </table>
+
+            {{-- Pagination --}}
             <div class="card-body">
-    <nav>
-        <ul class="pagination pagination-sm pagination-gutter">
-            {{-- Previous Page --}}
-            <li class="page-item {{ $history->onFirstPage() ? 'disabled' : '' }}">
-                <a class="page-link" href="{{ $history->previousPageUrl() }}">
-                    <i class="icon-arrow-left"></i>
-                </a>
-            </li>
+                <nav>
+                    <ul class="pagination pagination-sm pagination-gutter">
+                        {{-- Previous Page --}}
+                        <li class="page-item {{ $history->onFirstPage() ? 'disabled' : '' }}">
+                            <a class="page-link" href="{{ $history->previousPageUrl() }}">
+                                <i class="icon-arrow-left"></i>
+                            </a>
+                        </li>
 
-            {{-- Page Numbers --}}
-            @for ($i = 1; $i <= $history->lastPage(); $i++)
-            <li class="page-item {{ $i == $history->currentPage() ? 'active' : '' }}">
-                <a class="page-link" href="{{ $history->url($i) }}">{{ $i }}</a>
-            </li>
-            @endfor
+                        {{-- Page Numbers --}}
+                        @for ($i = 1; $i <= $history->lastPage(); $i++)
+                        <li class="page-item {{ $i == $history->currentPage() ? 'active' : '' }}">
+                            <a class="page-link" href="{{ $history->url($i) }}">{{ $i }}</a>
+                        </li>
+                        @endfor
 
-            {{-- Next Page --}}
-            <li class="page-item {{ !$history->hasMorePages() ? 'disabled' : '' }}">
-                <a class="page-link" href="{{ $history->nextPageUrl() }}">
-                    <i class="icon-arrow-right"></i>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</div>
+                        {{-- Next Page --}}
+                        <li class="page-item {{ !$history->hasMorePages() ? 'disabled' : '' }}">
+                            <a class="page-link" href="{{ $history->nextPageUrl() }}">
+                                <i class="icon-arrow-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
 
         </div>
     </div>
 </div>
 
+{{-- Chart.js --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const labels = {!! json_encode(array_keys($chartData)) !!};
     const dataValues = {!! json_encode(array_values($chartData)) !!};
 
-    // Map warna berdasarkan label
     const backgroundColors = labels.map(label => {
-        if (label === 'Good') return '#28a745'; // hijau
-        if (label === 'Bad') return '#dc3545';  // merah
-        return '#6c757d'; // abu-abu untuk selain itu
+        if (label === 'Good') return '#28a745';
+        if (label === 'Bad') return '#dc3545';
+        return '#6c757d';
     });
 
     const ctx = document.getElementById('statusChart').getContext('2d');
@@ -138,15 +137,14 @@
     });
 </script>
 
-
+{{-- Select2 --}}
 <script>
     $(document).ready(function() {
         $('.js-select2').select2({
             width: '100%',
-            placeholder: "Pilih Maintenance"
+            placeholder: "Select Maintenance"
         });
     });
 </script>
 
 @endsection
-

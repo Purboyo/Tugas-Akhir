@@ -35,7 +35,7 @@
 
                         <a href="{{ route('teknisi.maintenance.create', $reminder->id) }}" 
                            class="btn btn-primary d-inline-flex align-items-center">
-                            <span class="material-icons md-18 me-2">build</span> Perform Maintenance
+                            <span class="material-icons md-18 me-2">build </span> Perform Maintenance
                         </a>
                     </div>
                 </div>

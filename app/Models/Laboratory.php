@@ -21,4 +21,9 @@ class Laboratory extends Model
     {
         return $this->hasMany(Pc::class, 'lab_id');
     }
+    public function reminders()
+    {
+        return $this->hasMany(Reminder::class);
+    }
+
 }
