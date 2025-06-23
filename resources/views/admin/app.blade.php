@@ -152,12 +152,12 @@
                     <li><a class="" href="{{route ($role. '.form.index')}}" aria-expanded="false"><i
                                 class="mdi mdi-form-select"></i><span class="nav-text">Forms</span></a>
                     </li>
-                    <li><a class="" href="{{route ($role. '.pc.index')}}" aria-expanded="false"><i
+                    {{-- <li><a class="" href="{{route ($role. '.pc.index')}}" aria-expanded="false"><i
                                 class="mdi mdi-laptop"></i><span class="nav-text">PC</span></a>
                     </li>
                     <li><a class="" href="{{route ($role. '.report.index')}}" aria-expanded="false"><i
                                 class="mdi mdi-file-document-outline"></i><span class="nav-text">Reports</span></a>
-                    </li>
+                    </li> --}}
                     <li><a class="" href="{{route ($role. '.reminder.index')}}" aria-expanded="false"><i
                                 class="mdi mdi-calendar-clock"></i><span class="nav-text">Reminders</span></a>
                     </li>

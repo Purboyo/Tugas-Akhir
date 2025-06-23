@@ -10,6 +10,8 @@ use App\Models\PC;
 use App\Models\Laboratory;
 use App\Models\Report_answer;
 use Illuminate\Http\Request;
+use App\Models\LabReport;
+use App\Models\HistoryReportPC;
 use Illuminate\Support\Facades\DB;
 use App\Traits\HasUserRole;
 use Illuminate\Support\Facades\Auth;
@@ -126,51 +128,106 @@ public function create()
             ];
         });
     }
-    // ReportController.php
-    public function check(Request $request, $id)
-    {
-        $report = Report::findOrFail($id);
-        $report->checked = $request->checked;
-        
-        // Update status berdasarkan jawabannya
-        $hasDamage = $report->answers->contains(function ($ans) {
-            return strtolower($ans->answer_text) === 'rusak';
-        });
-        $report->status = $hasDamage ? 'rusak' : 'baik';
+public function check(Request $request, $id)
+{
+    try {
+        $report = Report::findOrFail($id); // cari report yang sudah ada
+        $report->checked = $request->input('checked') ? true : false;
         $report->save();
-    
-        return response()->json(['success' => true]);
+
+        return;
+        // return response()->json(['message' => 'Checklist status updated.']);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Failed to update status',
+            'error' => $e->getMessage()
+        ], 500);
     }
-    
-    public function done()
-    {
-        $reports = Report::where('checked', true)->get();
-    
-        foreach ($reports as $report) {
-            // Simpan ke history (sesuai struktur tabel Anda)
-            History::create([
-                'report_id' => $report->id,
-                'status' => $report->status,
-                'completed_at' => now()
-            ]);
-    
-            $report->delete(); // atau ubah status menjadi "selesai"
-        }
-    
-        return response()->json(['done' => true]);
+}
+
+
+public function checkAll()
+{
+    // Ambil semua laporan yang belum dicek
+    $reports = Report::where('checked', true)->get();
+
+    foreach ($reports as $report) {
+        // Simpan ke history_reports
+        HistoryReportPC::create([
+            'pc_id' => $report->pc_id,
+            'technician_id' => $report->technician_id,
+            'description' => $report->description,
+            'status' => $report->status,
+        ]);
     }
-    public function updateStatus(Request $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|in:baik,rusak,perbaikan'
+
+    // Hapus laporan yang sudah dipindahkan
+    Report::where('checked', true)->delete();
+
+    return response()->json(['message' => 'Semua laporan telah dicentang dan dipindahkan ke riwayat.']);
+}
+
+public function updateStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:Good,Bad,Repairing,Pending',
+    ]);
+
+    $report = Report::findOrFail($id);
+    $report->status = $request->status;
+    $report->save();
+
+    return redirect()->back()->with('success', 'Status berhasil diperbarui.');
+}
+public function reportBadForm()
+{
+    
+$pcs = Report::where('status', 'Bad')
+    ->where('checked', 1)
+    ->with('pc')
+    ->get()
+    ->groupBy('pc_id');
+
+    return view('teknisi.report.report_bad_form', compact('pcs'));
+}
+
+public function submitBadReport(Request $request)
+{
+    $request->validate([
+        'descriptions' => 'required|array',
+        'descriptions.*' => 'required|string|max:1000',
+    ]);
+
+    foreach ($request->descriptions as $pc_id => $description) {
+        // Kirim ke lab_reports
+        LabReport::create([
+            'pc_id' => $pc_id,
+            'technician_id' => auth::id(),
+            'description' => $description,
         ]);
 
-        $report = Report::findOrFail($id);
-        $report->status = $request->status;
-        $report->save();
+        // Simpan ke history_reports
+        HistoryReportPC::create([
+            'pc_id' => $pc_id,
+            'technician_id' => auth::id(),
+            'description' => $description,
+            'status' => 'Reported',
+        ]);
 
-        return response()->json(['success' => true]);
+        // Hapus data dari tabel report
+        Report::where('pc_id', $pc_id)
+            ->where('status', 'Bad')
+            ->where('checked', 1)
+            ->delete();
+    }
+
+    return redirect()->route('teknisi.report.index')->with('success', 'Laporan berhasil dikirim ke Kepala Lab.');
 }
+
+
+
+
+
 
 
 }

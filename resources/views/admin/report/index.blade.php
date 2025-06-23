@@ -50,8 +50,10 @@
                         <th>Form</th>
                         <th>Date</th>
                         <th>Status</th>
+                        @if(auth()->user()->role === 'teknisi')
                         <th>Checklist</th>
                         <th>Action</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody>
@@ -65,26 +67,32 @@
                             </td>
                             <td>{{ $report->form->title }}</td>
                             <td>{{ $report->created_at->format('d M Y H:i') }}</td>                            
-                            <td>
-                                <select class="form-select status-dropdown" data-id="{{ $report->id }}">
-                                    <option value="baik" {{ $report->status == 'baik' ? 'selected' : '' }}>Baik</option>
-                                    <option value="rusak" {{ $report->status == 'rusak' ? 'selected' : '' }}>Rusak</option>
-                                    <option value="perbaikan" {{ $report->status == 'perbaikan' ? 'selected' : '' }}>Perbaikan</option>
-                                </select>
-                            </td>
-                            <td>
-                                <input type="checkbox" class="report-checkbox" data-id="{{ $report->id }}"
-                                    {{ $report->checked ? 'checked' : '' }}>
-                            </td>                 
+<td>
+    {{ $report->status }} 
+    @if(auth()->user()->role === 'teknisi')
+    <a href="javascript:void(0)" title="Ubah Status"
+        data-toggle="modal" data-target="#statusModal-{{ $report->id }}">   
+        <i class="fa fa-pencil"></i>
+    </a>
+    @endif
+</td>
+<td>
+    @if(auth()->user()->role === 'teknisi')
+        <input type="checkbox" class="report-checkbox" data-id="{{ $report->id }}"
+            {{ $report->checked ? 'checked' : '' }}>
+    @endif
+</td>
+ 
+@if(auth()->user()->role === 'teknisi')
                             <td>
                                 <a href="{{ route('teknisi.report.show', $report->id) }}" class="mr-4" data-toggle="tooltip"
                                    data-placement="top" title="Show">
                                     <i class="fa fa-eye"></i> Show
                                 </a>
-                                <a href="javascript:void(0)" title="Delete"
-                                   data-toggle="modal" data-target="#deleteModal-{{ $report->id }}">
-                                    <i class="fa fa-close"></i> Delete
-                                </a>
+    <a href="javascript:void(0)" title="Delete"
+       data-toggle="modal" data-target="#deleteModal-{{ $report->id }}">
+        <i class="fa fa-close"></i> Delete
+    </a>
                             
                                 <!-- Modal -->
                                 <div class="modal fade" id="deleteModal-{{ $report->id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ $report->id }}" aria-hidden="true">
@@ -110,6 +118,39 @@
                                         </div>
                                     </div>
                                 </div>
+                                @endif
+                                <!-- Modal Ubah Status -->
+@if(auth()->user()->role === 'teknisi')
+<!-- Modal Ubah Status -->
+<div class="modal fade" id="statusModal-{{ $report->id }}" tabindex="-1" role="dialog" aria-labelledby="statusModalLabel-{{ $report->id }}" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <form action="{{ route('teknisi.report.updateStatus', $report->id) }}" method="POST">
+        @csrf
+        @method('PATCH')
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title">Ubah Status</h5>
+          <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <label for="status-{{ $report->id }}">Status:</label>
+          <select name="status" class="form-control" id="status-{{ $report->id }}" required>
+            <option value="Good" {{ $report->status == 'Good' ? 'selected' : '' }}>Good</option>
+            <option value="Bad" {{ $report->status == 'Bad' ? 'selected' : '' }}>Bad</option>
+            <option value="Repairing" {{ $report->status == 'Repairing' ? 'selected' : '' }}>Repairing</option>
+            <option value="Pending" {{ $report->status == 'Pending' ? 'selected' : '' }}>Pending</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-info">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+@endif
+
                             </td>
                         </tr>
                     @empty
@@ -119,77 +160,82 @@
                     @endforelse
                 </tbody>
             </table>
-            <div class="mt-3 text-end">
-                <button id="done-button" class="btn btn-success" disabled>Done</button>
-            </div>
+@if(auth()->user()->role === 'teknisi')
+<div class="mt-3 text-end">
+    <button id="done-button" class="btn btn-success" disabled>Done</button>
+</div>
+@endif
+@if(auth()->user()->role === 'teknisi' && $reports->where('status', 'Bad')->count() > 0)
+<div class="mt-3 text-end">
+    <a href="{{ route('teknisi.report.reportBadForm') }}" class="btn btn-warning">
+        <i class="fa fa-paper-plane"></i> Laporkan ke Kepala Lab
+    </a>
+</div>
+@endif
+
+
         </div>
     </div>
 </section>
 
-@push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const checkboxes = document.querySelectorAll('.report-checkbox');
-        const doneBtn = document.getElementById('done-button');
+    document.addEventListener("DOMContentLoaded", function () {
+        // Checklist individual
+        document.querySelectorAll('.report-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const reportId = this.getAttribute('data-id');
+                const checked = this.checked;
 
-        function updateDoneButtonState() {
-            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-            doneBtn.disabled = !allChecked;
-        }
-
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', () => {
-                const reportId = cb.dataset.id;
-
-                // Simpan status checked ke backend
-                fetch(`/teknisi/report/check/${reportId}`, {
-                    method: 'POST',
+                fetch(`/teknisi/report/${reportId}/check`, {
+                    method: 'PATCH',
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({ checked: cb.checked })
-                });
-
-                updateDoneButtonState();
-            });
-        });
-
-        updateDoneButtonState();
-
-        doneBtn.addEventListener('click', () => {
-            if (confirm('Selesaikan verifikasi semua report dan masukkan ke histori?')) {
-                fetch('/teknisi/report/done', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    }
-                }).then(res => location.reload());
-            }
-        });
-        document.querySelectorAll('.status-dropdown').forEach(select => {
-            select.addEventListener('change', function () {
-                const reportId = this.dataset.id;
-                const newStatus = this.value;
-
-                fetch(`/teknisi/report/status/${reportId}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ status: newStatus })
-                }).then(response => response.json())
+                    body: JSON.stringify({ checked: checked })
+                })
+                .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        console.log('Status updated');
-                    }
+                    toastr.success(data.message);
+                    checkAllDone();
                 });
             });
         });
 
-</script>
-@endpush
+        // Cek apakah semua checkbox dicentang
+function checkAllDone() {
+    const all = document.querySelectorAll('.report-checkbox');
+    const allChecked = [...all].length > 0 && [...all].every(c => c.checked);
+    const doneButton = document.getElementById('done-button');
+    if (doneButton) {
+        doneButton.disabled = !allChecked;
+    }
+}
 
+
+        checkAllDone();
+
+        // Tombol Done
+const doneButton = document.getElementById('done-button');
+if (doneButton) {
+    doneButton.addEventListener('click', function () {
+        fetch(`/teknisi/report/check-all`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            toastr.success(data.message);
+            checkAllDone();
+        });
+    });
+}
+
+    });
+</script>
 @endsection
 

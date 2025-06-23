@@ -6,7 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class report extends Model
 {
-    protected $fillable = ['reporter_id', 'pc_id', 'form_id', 'status'];
+    protected $fillable = [
+        'reporter_id',
+        'form_id',
+        'pc_id',
+        'technician_id',
+        'status',
+        'description',
+        'report_to_head_at',
+        'remark_to_head',
+    ];
 
     public function reporter() {
         return $this->belongsTo(Reporter::class);

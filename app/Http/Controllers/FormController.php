@@ -78,6 +78,8 @@ public function create()
         $form = Form::create([
             'title' => $request->title,
             'is_default' => $isAdmin,
+            'created_by' => auth::id(),
+
         ]);
         $form->laboratories()->sync($request->lab_id);
 

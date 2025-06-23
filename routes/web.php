@@ -8,6 +8,7 @@ use App\Http\Controllers\PCController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\HistoryMaintenanceController;
+use App\Http\Controllers\LaboratoryReportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\ReminderController;
@@ -34,10 +35,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/get-laboratories/{userId}', [ReminderController::class, 'getLaboratories']);
         Route::resource('user', UserController::class);
         Route::resource('lab', LaboratoryController::class);
-        Route::resource('pc', PCController::class);
+        // Route::resource('pc', PCController::class);
         Route::resource('form', FormController::class);
-        Route::post('/admin/report/check/{id}', [ReportController::class, 'check']);
-        Route::resource('report', ReportController::class);
+        // Route::post('/admin/report/check/{id}', [ReportController::class, 'check']);
+        // Route::resource('report', ReportController::class);
     });
 
     // Routes khusus teknisi
@@ -48,10 +49,13 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('pc', PCController::class);
         Route::resource('form', FormController::class);
         Route::resource('report', ReportController::class);
-        // Route::resource('maintenance', MaintenanceController::class);
-        Route::post('/teknisi/report/check/{id}', [ReportController::class, 'check']);
-        Route::post('/teknisi/report/done', [ReportController::class, 'done']);
-        Route::post('/report/status/{id}', [ReportController::class, 'updateStatus'])->name('report.updateStatus');
+        Route::patch('/report/{id}/check', [ReportController::class, 'check'])->name('report.check');
+        Route::post('/report/check-all', [ReportController::class, 'checkAll'])->name('report.checkAll');
+        Route::get('report-bad', [ReportController::class, 'reportBadForm'])->name('report.reportBadForm');
+        Route::post('report-bad/submit', [ReportController::class, 'submitBadReport'])->name('report.submitBadReport');
+        Route::get('/history-reports', [ReportController::class, 'historyReports'])->name('historyReports');
+        Route::get('/lab-reports', [ReportController::class, 'labReports'])->name('labReports'); //tambahkan di kepala_lab nanti
+        Route::patch('/report/{report}/status', [ReportController::class, 'updateStatus'])->name('report.updateStatus'); 
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
         Route::get('/maintenance/history', [MaintenanceController::class, 'history'])->name('maintenance.history');
@@ -75,6 +79,8 @@ Route::middleware(['auth'])->group(function () {
     // Routes khusus kepala_lab
     Route::middleware(['auth','role:kepala_lab'])->prefix('kepala_lab')->name('kepala_lab.')->group(function () {
         Route::get('/dashboard', fn() => view('kepala_lab.dashboard'))->name('kepala_lab.dashboard');
+        Route::get('/lab-reports', [LaboratoryReportController::class, 'labReports'])->name('labReports'); //tambahkan di kepala_lab nanti
+
     });
 
 });

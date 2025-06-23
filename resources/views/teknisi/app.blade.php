@@ -163,6 +163,7 @@
                     <li><a href="{{ route($role .'.maintenance.history') }}"><i 
                                 class="mdi mdi-history"></i><span class="nav-text">History Maintenance</span></a>
                     </li>
+
                 </ul>
             </div>
 
@@ -270,6 +271,7 @@
     <script src="{{asset ('vendor/focus-2/vendor/select2/js/select2.full.min.js')}}"></script>
     <script src="{{asset ('vendor/focus-2/js/plugins-init/select2-init.js')}}"></script>
     @stack('scripts')
+
 
 </body>
 

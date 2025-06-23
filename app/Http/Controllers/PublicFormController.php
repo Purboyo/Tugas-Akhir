@@ -19,8 +19,12 @@ class PublicFormController extends Controller
         // Ambil PC dan relasi lab+technician-nya
         $pc = PC::with('lab.technician')->findOrFail($id);
 
-        // Ambil form berdasarkan lab_id PC
-        $form = Form::where('lab_id', $pc->lab_id)->first();
+        // Ambil form berdasarkan laboratory_id PC
+$form = Form::whereHas('laboratories', function ($query) use ($pc) {
+    $query->where('laboratories.id', $pc->lab_id);
+})->where('created_by', $pc->lab->technician->id)->first();
+
+
 
         if (!$form) {
             abort(404, 'Form untuk lab ini tidak ditemukan.');
@@ -38,8 +42,11 @@ class PublicFormController extends Controller
         // Cari PC dan relasi lab
         $pc = PC::with('lab')->findOrFail($pcId);
 
-        // Cari form berdasarkan lab_id
-        $form = Form::where('lab_id', $pc->lab_id)->first();
+        // Cari form berdasarkan laboratory_id PC
+$form = Form::whereHas('laboratories', function ($query) use ($pc) {
+    $query->where('laboratories.id', $pc->lab_id);
+})->where('created_by', $pc->lab->technician->id)->first();
+
 
         if (!$form) {
             abort(404, 'Form untuk lab ini tidak ditemukan.');
@@ -56,6 +63,8 @@ class PublicFormController extends Controller
         return view('public.forms.fill', compact('form', 'pc'));
     }
     
+
+// Submit form
 public function submit(Request $request, Form $form)
 {
     try {
@@ -78,7 +87,7 @@ public function submit(Request $request, Form $form)
     ]);
 
     // Cek apakah ada jawaban buruk
-    $burukKeywords = ['rusak', 'tidak berfungsi', 'tidak menyala']; // sesuaikan jika perlu
+    $burukKeywords = ['Buruk','rusak', 'tidak berfungsi', 'tidak menyala', 'Tidak']; // sesuaikan jika perlu
     $isBad = false;
 
     foreach ($validated['answers'] as $answer) {
