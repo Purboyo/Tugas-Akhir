@@ -18,7 +18,7 @@
                 <h2 class="text-gray-800 text-l font-semibold ml-2">Edit PC</h2>
             </div>
         </header>
-        <div class="card">
+        <div class="card text-dark">
             <div class="card-header">
                 <h4 class="card-title">Form Edit PC</h4>
             </div>
@@ -52,10 +52,10 @@
                             @enderror
                         </div>
 
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-outline-primary">
                             <i class="mdi mdi-content-save-edit"></i> Update PC
                         </button>
-                        <a href="{{ route($role . '.pc.index') }}" class="btn btn-secondary">
+                        <a href="{{ route($role . '.pc.index') }}" class="btn btn-outline-secondary">
                             <i class="mdi mdi-arrow-left"></i> Cancel
                         </a>
                     </form>

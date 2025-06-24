@@ -10,8 +10,8 @@
             <small class="text-muted">{{ ucfirst($role) }} · Manage system users</small>
         </div>
         <div>
-            <a href="{{ route('admin.user.create') }}" class="btn btn-primary">
-            <i class="fa fa-plus color-info"></i>  Add
+            <a href="{{ route('admin.user.create') }}" class="btn btn-outline-primary">
+            <i class="fa fa-plus"></i>  Add
             </a>
         </div>
     </div>
@@ -43,7 +43,7 @@
                 <form method="GET" action="{{ route('admin.user.index') }}" class="d-flex">
                     <input type="text" name="search" class="form-control mr-2 shadow-sm" placeholder="Search..."
                         value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-primary"><i class="mdi mdi-magnify"></i></button>
+                    <button type="submit" class="btn btn-outline-primary"><i class="mdi mdi-magnify"></i></button>
                 </form>
             </div>
         </header>
@@ -81,9 +81,9 @@
                             </span>
                         </td>
                         <td><span>
-                            <a href="{{route ('admin.user.edit', $user)}}" class="mr-4 " data-toggle="tooltip"
+                            <a href="{{route ('admin.user.edit', $user)}}" class="btn btn-outline-warning mr-3 " data-toggle="tooltip"
                             data-placement="top" title="Edit"><i
-                            class="fa fa-pencil text-muted">  Edit</i>
+                            class="fa fa-pencil">  Edit</i>
                         </td>
                     </tr>
                     @endforeach

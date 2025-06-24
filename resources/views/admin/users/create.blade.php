@@ -27,19 +27,19 @@
                     <form action="{{ route('admin.user.store') }}" method="POST">
                         @csrf
                         <div class="form-row">
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-6 text-dark">
                                 <label>Name</label>
                                 <input type="text" name="name" class="form-control" value="{{ old('name') }}" required>
                             </div>
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-6 text-dark">
                                 <label>Email</label>
                                 <input type="email" name="email" class="form-control" value="{{ old('email') }}" required>
                             </div>
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-6 text-dark">
                                 <label>Password</label>
                                 <input type="password" name="password" class="form-control" required>
                             </div>
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-6 text-dark">
                                 <label>Role</label>
                                 <select id="role" name="role" class="form-control" required>
                                     <option value="" disabled selected>Select Role</option>
@@ -51,8 +51,8 @@
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary"><i class="mdi mdi-account-plus"></i> Save User</button>
-                        <a href="{{ route('admin.user.index') }}" class="btn btn-secondary"><i class="mdi mdi-arrow-left"></i> Cancel</a>
+                        <button type="submit" class="btn btn-outline-primary"><i class="mdi mdi-account-plus"></i> Save User</button>
+                        <a href="{{ route('admin.user.index') }}" class="btn btn-outline-secondary"><i class="mdi mdi-arrow-left"></i> Cancel</a>
                     </form>
                 </div>
             </div>

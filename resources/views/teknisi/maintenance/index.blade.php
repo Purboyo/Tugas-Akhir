@@ -34,7 +34,7 @@
                         <p class="mb-3 text-muted"><small>Reminder Date: {{ \Carbon\Carbon::parse($reminder->reminder_date)->format('d M Y') }}</small></p>
 
                         <a href="{{ route('teknisi.maintenance.create', $reminder->id) }}" 
-                           class="btn btn-primary d-inline-flex align-items-center">
+                           class="btn btn-outline-primary d-inline-flex align-items-center">
                             <span class="material-icons md-18 me-2">build </span> Perform Maintenance
                         </a>
                     </div>
@@ -60,11 +60,11 @@
                         <p class="mb-3 text-muted"><small>Reminder Date: {{ \Carbon\Carbon::parse($reminder->reminder_date)->format('d M Y') }}</small></p>
 
                         @if(!is_null($reminder->historyMaintenance))
-                            <button type="button" class="btn btn-light mt-3 d-inline-flex align-items-center opacity-50" disabled aria-disabled="true" tabindex="-1">
+                            <button type="button" class="btn outline-light mt-3 d-inline-flex align-items-center opacity-50 text-dark" disabled aria-disabled="true" tabindex="-1">
                                 <span class="material-icons md-18 me-2"></span> Maintenance Completed
                             </button>
                         @else
-                            <button type="button" class="btn btn-dark mt-3 d-inline-flex align-items-center opacity-50" disabled aria-disabled="true" tabindex="-1">
+                            <button type="button" class="btn outline-dark mt-3 d-inline-flex align-items-center opacity-50" disabled aria-disabled="true" tabindex="-1">
                                 <span class="material-icons md-18 me-2"></span> Maintenance Not Yet Available
                             </button>
                         @endif

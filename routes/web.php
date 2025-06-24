@@ -7,7 +7,6 @@ use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\PCController;
 use App\Http\Controllers\FormController;
 use App\Http\Controllers\MaintenanceController;
-use App\Http\Controllers\HistoryMaintenanceController;
 use App\Http\Controllers\LaboratoryReportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PublicFormController;
@@ -59,7 +58,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
         Route::get('/maintenance/history', [MaintenanceController::class, 'history'])->name('maintenance.history');
-        Route::get('/history-maintenance', [HistoryMaintenanceController::class, 'index'])->name('history.index');
         Route::get('/maintenance/create/{reminder}', [MaintenanceController::class, 'create'])->name('maintenance.create');
 
 

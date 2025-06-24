@@ -20,7 +20,7 @@
 @endforeach
 
 
-    <button type="submit" class="btn btn-primary">Kirim Laporan ke Kepala Lab</button>
+    <button type="submit" class="btn btn-outline-primary">Kirim Laporan ke Kepala Lab</button>
 </form>
 
 @endsection

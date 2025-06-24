@@ -1,105 +1,128 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Reminder;
 use App\Models\Pc;
-use Illuminate\Support\Facades\DB;
 use App\Models\Maintenance;
 use App\Models\HistoryMaintenance;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class MaintenanceController extends Controller
 {
+    // Tampilkan semua reminder untuk teknisi
+    public function index()
+    {
+        $userId = auth::id();
 
-public function index()
-{
-    $userId = auth::id();
+        $reminders = Reminder::with('laboratory')
+            ->where('user_id', $userId)
+            ->latest()
+            ->get();
 
-    // Ambil semua reminder yang dikirim ke teknisi ini
-    $reminders = Reminder::with('laboratory')
-        ->where('user_id', $userId)
-        ->latest()
-        ->get();
-
-    return view('teknisi.maintenance.index', compact('reminders'));
-}
-
-
-public function create(Reminder $reminder)
-{
-    if ($reminder->user_id !== auth::id()) {
-        abort(403, 'Akses ditolak.');
+        return view('teknisi.maintenance.index', compact('reminders'));
     }
 
-    $pcs = Pc::where('lab_id', $reminder->laboratory_id)->get();
-    return view('teknisi.maintenance.create', compact('reminder', 'pcs'));
-}
+    // Form pengisian maintenance berdasarkan reminder
+    public function create(Reminder $reminder)
+    {
+        if ($reminder->user_id !== auth::id()) {
+            abort(403, 'Akses ditolak.');
+        }
 
+        // Ambil PC sesuai laboratorium dari reminder
+        $pcs = Pc::where('lab_id', $reminder->laboratory_id)->get();
 
-public function store(Request $request)
-{
-    $validated = $request->validate([
-        'reminder_id' => 'required|exists:reminders,id',
-        'laboratory_id' => 'required|exists:laboratories,id',
-        'user_id' => 'required|exists:users,id',
-        'note' => 'nullable|string',
-        'pcs' => 'required|array',
-        'pcs.*.pc_id' => 'required|exists:pcs,id',
-        'pcs.*.status' => 'required|in:Good,Bad',
-    ]);
+        return view('teknisi.maintenance.create', compact('reminder', 'pcs'));
+    }
 
-
-    // 1. Simpan ke tabel `maintenances`
-    $maintenance = Maintenance::create([
-        'reminder_id' => $validated['reminder_id'],
-        'laboratory_id' => $validated['laboratory_id'],
-        'user_id' => $validated['user_id'],
-        'note' => $validated['note'] ?? null,
-    ]);
-
-    // 2. Simpan ke tabel `history_maintenances`
-    foreach ($validated['pcs'] as $pc) {
-        HistoryMaintenance::create([
-            'maintenance_id' => $maintenance->id,
-            'pc_id' => $pc['pc_id'],
-            'status' => $pc['status'],
+    // Simpan maintenance dan history pengecekan PC
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'reminder_id' => 'required|exists:reminders,id',
+            'note' => 'nullable|string',
+            'pcs' => 'required|array',
+            'pcs.*.pc_id' => 'required|exists:pcs,id',
+            'pcs.*.status' => 'required|in:Good,Bad',
         ]);
+
+        // Ambil reminder untuk keperluan penyimpanan
+        $reminder = Reminder::findOrFail($validated['reminder_id']);
+
+        // Buat maintenance tanpa user_id
+        $maintenance = Maintenance::create([
+            'reminder_id' => $reminder->id,
+            'note' => $validated['note'] ?? null,
+        ]);
+
+        // Buat histori tiap PC
+        foreach ($validated['pcs'] as $pc) {
+            HistoryMaintenance::create([
+                'maintenance_id' => $maintenance->id,
+                'pc_id' => $pc['pc_id'],
+                'status' => $pc['status'],
+            ]);
+        }
+
+        return redirect()->route('teknisi.maintenance.index')->with('success', 'Maintenance berhasil disimpan!');
     }
 
-    return redirect()->route('teknisi.maintenance.index')->with('success', 'Maintenance berhasil disimpan!');
-}
-
-
+    // Tampilkan histori pemeliharaan
 public function history(Request $request)
 {
-    $selectedId = $request->input('maintenance_id');
+    // Get the logged-in user's ID
+    $userId = auth::id();
 
-    // Ambil semua maintenance milik teknisi
-    $maintenances = Maintenance::where('user_id', auth::id())->with('laboratory')->latest()->get();
+    // Get all maintenances related to the logged-in technician
+    $maintenances = Maintenance::whereHas('reminder.user', function ($query) use ($userId) {
+        $query->where('id', $userId);
+    })->orderBy('created_at', 'desc')->get();
 
-    // Jika ada ID yang dipilih, filter history berdasarkan itu
-    $query = HistoryMaintenance::with(['pc', 'maintenance.laboratory', 'maintenance.user'])
-        ->latest();
+    // Main query for the data table - filter by technician's labs
+    $dataQuery = HistoryMaintenance::with([
+            'pc',
+            'maintenance.reminder.laboratory',
+            'maintenance.reminder.user'
+        ])
+        ->whereHas('maintenance.reminder.user', function ($query) use ($userId) {
+            $query->where('id', $userId);
+        });
 
-    if ($selectedId) {
-        $query->where('maintenance_id', $selectedId);
+    // Additional filter if maintenance_id is provided
+    if ($request->filled('maintenance_id')) {
+        $dataQuery->where('maintenance_id', $request->maintenance_id);
     }
 
-    $history = $query->paginate(10);
+    // Fetch history data with pagination
+    $pcs = $dataQuery->paginate(10);
 
-    // Chart data hanya untuk maintenance terpilih
-    $chartData = HistoryMaintenance::select('status', DB::raw('count(*) as total'))
-        ->when($selectedId, function ($q) use ($selectedId) {
-            $q->where('maintenance_id', $selectedId);
-        })
+    // Query for chart - also filter by technician's labs
+    $chartQuery = HistoryMaintenance::whereHas('maintenance.reminder.user', function ($query) use ($userId) {
+            $query->where('id', $userId);
+        });
+
+    if ($request->filled('maintenance_id')) {
+        $chartQuery->where('maintenance_id', $request->maintenance_id);
+    }
+
+    $selectedId = $request->input('maintenance_id');
+
+    $chartData = $chartQuery->select('status', DB::raw('count(*) as total'))
         ->groupBy('status')
         ->pluck('total', 'status')
         ->toArray();
 
-    return view('teknisi.maintenance.history', compact('history', 'chartData', 'maintenances', 'selectedId'));
+    return view('teknisi.maintenance.history', [
+        'pcs' => $pcs,
+        'chartData' => $chartData,
+        'maintenances' => $maintenances,
+        'selectedId' => $selectedId,
+    ]);
 }
+
 
 
 }

@@ -14,8 +14,8 @@ return new class extends Migration
     Schema::create('maintenances', function (Blueprint $table) {
         $table->id();
         $table->foreignId('reminder_id')->constrained()->onDelete('cascade');
-        $table->foreignId('laboratory_id')->constrained()->onDelete('cascade');
-        $table->foreignId('user_id')->constrained()->onDelete('cascade'); // teknisi
+        // $table->foreignId('laboratory_id')->constrained()->onDelete('cascade');
+        // $table->foreignId('user_id')->constrained()->onDelete('cascade'); // teknisi
         $table->text('note')->nullable(); // keterangan umum
         $table->timestamps();
     });

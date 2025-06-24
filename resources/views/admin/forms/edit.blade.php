@@ -44,16 +44,16 @@
                         <label>Questions</label>
                         <div id="questions-container" class="space-y-4">
                         </div>
-                        <button type="button" class="btn btn-success btn-sm mt-2" onclick="addQuestion()">
+                        <button type="button" class="btn btn-outline-success btn-sm mt-2" onclick="addQuestion()">
                             <i class="mdi mdi-plus"></i> Add Question
                         </button>
                     </div>
 
                     <div class="mt-4 d-flex justify-content-between">
-                        <a href="{{ route($role.'.form.index') }}" class="btn btn-secondary">
+                        <a href="{{ route($role.'.form.index') }}" class="btn btn-outline-secondary">
                             <i class="mdi mdi-arrow-left"></i> Cancel
                         </a>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-outline-primary">
                             <i class="mdi mdi-content-save"></i> Update Form
                         </button>
                     </div>
@@ -86,7 +86,7 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
         const optionsHtml = (question.options || []).map(opt => `
             <div class="input-group mb-2 option-item">
                 <input type="text" name="questions[${qIndex}][options][]" class="form-control" value="${opt}">
-                <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.parentElement.remove()">
                     <i class="mdi mdi-close"></i>
                 </button>
             </div>
@@ -117,12 +117,12 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
                 <div id="options-list-${qIndex}">
                     ${optionsHtml}
                 </div>
-                <button type="button" class="btn btn-success btn-sm mt-2" onclick="addOption(${qIndex})">
+                <button type="button" class="btn btn-outline-success btn-sm mt-2" onclick="addOption(${qIndex})">
                     <i class="mdi mdi-plus"></i> Tambah Opsi
                 </button>
             </div>
             <div class="mt-3 d-flex gap-2">
-                <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.question-item').remove()">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.question-item').remove()">
                     <i class="mdi mdi-delete"></i> Hapus
                 </button>
                 <button type="button" class="btn btn-outline-secondary btn-sm" onclick="duplicateQuestion(this)">
@@ -150,7 +150,7 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
         list.insertAdjacentHTML('beforeend', `
             <div class="input-group mb-2 option-item">
                 <input type="text" name="questions[${qIndex}][options][]" class="form-control" placeholder="Isi pilihan...">
-                <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.parentElement.remove()">
                     <i class="mdi mdi-close"></i>
                 </button>
             </div>

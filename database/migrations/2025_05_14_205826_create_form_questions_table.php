@@ -16,7 +16,7 @@ return new class extends Migration
         $table->foreignId('form_id')->constrained('forms')->onDelete('cascade');
         $table->text('question_text');
         $table->enum('type', ['text', 'number', 'checkbox', 'radio', 'textarea']);
-        $table->boolean('is_required')->default(false);
+        // $table->boolean('is_required')->default(false);
         $table->json('options')->nullable();
         $table->timestamps();
         });

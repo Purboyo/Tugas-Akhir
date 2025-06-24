@@ -23,7 +23,7 @@
                 <h4 class="card-title">Form Edit Laboratory</h4>
             </div>
             <div class="card-body">
-                <div class="basic-form">
+                <div class="basic-form text-dark">
                     <form action="{{ route($role . '.lab.update', $lab->id) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -52,10 +52,10 @@
                             @enderror
                         </div>
 
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-outline-primary">
                             <i class="mdi mdi-content-save"></i> Update Laboratory
                         </button>
-                        <a href="{{ route($role . '.lab.index') }}" class="btn btn-secondary">
+                        <a href="{{ route($role . '.lab.index') }}" class="btn btn-outline-secondary">
                             <i class="mdi mdi-arrow-left"></i> Cancel
                         </a>
                     </form>

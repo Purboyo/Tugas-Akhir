@@ -54,7 +54,7 @@ class ReportController extends Controller
             ->latest()
             ->get();
 
-        return view('admin.report.index', compact('reports', 'role'));
+        return view('teknisi.report.index', compact('reports', 'role'));
     }
 
     
@@ -79,7 +79,7 @@ public function create()
     {
         $report->load(['reporter', 'pc.lab', 'form', 'answers.question']);
     
-        return view('admin.report.show', compact('report'));
+        return view('teknisi.report.show', compact('report'));
     }
     
     /**
@@ -120,7 +120,7 @@ public function create()
     }
     public function getAnswers($id)
     {
-        $report = \App\Models\Report::with('answers.question')->findOrFail($id);
+        $report = Report::with('answers.question')->findOrFail($id);
         return $report->answers->map(function ($a) {
             return [
                 'question' => $a->question->question_text,
@@ -128,22 +128,23 @@ public function create()
             ];
         });
     }
-public function check(Request $request, $id)
-{
-    try {
-        $report = Report::findOrFail($id); // cari report yang sudah ada
-        $report->checked = $request->input('checked') ? true : false;
-        $report->save();
-
-        return;
-        // return response()->json(['message' => 'Checklist status updated.']);
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Failed to update status',
-            'error' => $e->getMessage()
-        ], 500);
-    }
-}
+   public function check(Request $request, $id)
+   {
+       try {
+           $report = Report::findOrFail($id); // Find the existing report
+           $report->checked = $request->input('checked') ? true : false;
+           $report->save();
+           return response()->noContent();
+           // Return a JSON response indicating success
+            //    return response()->json(['message' => 'Checklist status updated.']);
+       } catch (\Exception $e) {
+           return response()->json([
+               'message' => 'Failed to update status',
+               'error' => $e->getMessage()
+           ], 500);
+       }
+   }
+   
 
 
 public function checkAll()
@@ -164,7 +165,7 @@ public function checkAll()
     // Hapus laporan yang sudah dipindahkan
     Report::where('checked', true)->delete();
 
-    return response()->json(['message' => 'Semua laporan telah dicentang dan dipindahkan ke riwayat.']);
+    return response()->json(['message' => 'Semua laporan telah dicentang dan dipindahkan ke riwayat. resfresh halaman untuk melihat perubahan.']);
 }
 
 public function updateStatus(Request $request, $id)
@@ -223,11 +224,5 @@ public function submitBadReport(Request $request)
 
     return redirect()->route('teknisi.report.index')->with('success', 'Laporan berhasil dikirim ke Kepala Lab.');
 }
-
-
-
-
-
-
 
 }

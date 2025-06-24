@@ -32,7 +32,7 @@
             <textarea name="note" id="note" class="form-control w-full" rows="3" placeholder="Optional note..."></textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-outline-primary">
             <i class="mdi mdi-content-save"></i> Submit Maintenance
         </button>
     </form>

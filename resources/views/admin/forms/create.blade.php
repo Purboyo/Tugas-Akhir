@@ -22,7 +22,7 @@
             <div class="card-header">
                 <h4 class="card-title">Form Builder</h4>
             </div>
-            <div class="card-body">
+            <div class="card-body text-dark">
                 <form action="{{ route($role.'.form.store') }}" method="POST" id="form-builder">
                     @csrf
 
@@ -42,23 +42,23 @@
 
                     <hr class="my-4">
 
-                    <div class="form-group">
+                    <div class="form-group text-dark">
                         <label>Questions</label>
                         <div id="questions-container" class="space-y-4"></div>
-                        <button type="button" class="btn btn-success btn-sm mt-2" onclick="addQuestion()">
+                        <button type="button" class="btn btn-outline-success btn-sm mt-2" onclick="addQuestion()">
                             <i class="mdi mdi-plus"></i> Add Question
                         </button>
                     </div>
 
                     <div class="mt-4 d-flex justify-content-between">
-                        <button type="button" class="btn btn-info" onclick="previewForm()">
+                        <button type="button" class="btn btn-outline-info" onclick="previewForm()">
                             <i class="mdi mdi-eye"></i> Preview
                         </button>
                         <div>
-                            <a href="{{ route($role.'.form.index') }}" class="btn btn-secondary">
+                            <a href="{{ route($role.'.form.index') }}" class="btn btn-outline-secondary">
                                 <i class="mdi mdi-arrow-left"></i> Cancel
                             </a>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-outline-primary">
                                 <i class="mdi mdi-content-save"></i> Save Form
                             </button>
                         </div>
@@ -81,7 +81,7 @@ function addQuestion(question = {}) {
     const optionsHtml = (question.options || []).map(opt => `
         <div class="input-group mb-2 option-item">
             <input type="text" name="questions[${qIndex}][options][]" class="form-control" value="${opt}">
-            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.parentElement.remove()">
                 <i class="mdi mdi-close"></i>
             </button>
         </div>
@@ -110,12 +110,12 @@ function addQuestion(question = {}) {
             <div id="options-list-${qIndex}">
                 ${optionsHtml}
             </div>
-            <button type="button" class="btn btn-success btn-sm mt-2" onclick="addOption(${qIndex})">
+            <button type="button" class="btn btn-outline-success btn-sm mt-2" onclick="addOption(${qIndex})">
                 <i class="mdi mdi-plus"></i> Add Option
             </button>
         </div>
         <div class="mt-3 d-flex gap-2">
-            <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('.question-item').remove()">
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.question-item').remove()">
                 <i class="mdi mdi-delete"></i> Delete
             </button>
             <button type="button" class="btn btn-outline-secondary btn-sm" onclick="duplicateQuestion(this)">
@@ -143,7 +143,7 @@ function addOption(qIndex) {
     list.insertAdjacentHTML('beforeend', `
         <div class="input-group mb-2 option-item">
             <input type="text" name="questions[${qIndex}][options][]" class="form-control" placeholder="Isi pilihan...">
-            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()">
+            <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.parentElement.remove()">
                 <i class="mdi mdi-close"></i>
             </button>
         </div>

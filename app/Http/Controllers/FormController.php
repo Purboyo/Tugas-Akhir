@@ -96,7 +96,6 @@ public function create()
                             'question_text' => $q->question_text,
                             'type' => $q->type,
                             'options' => $q->options,
-                            'is_editable' => false, // Buat kolom baru jika perlu
                         ]);
                     }
                 }
@@ -112,7 +111,6 @@ public function create()
                         'options' => in_array($question['type'], ['radio', 'checkbox']) 
                             ? json_encode($question['options'] ?? [])
                             : null,
-                        'is_editable' => true,
                     ]);
                 }
             }

@@ -47,7 +47,7 @@ public function index(Request $request)
 
     $pcs = $pcsQuery->paginate(10);
 
-    return view('admin.pcs.index', compact('pcs', 'labs', 'selectedLabId', 'role'));
+    return view('teknisi.pcs.index', compact('pcs', 'labs', 'selectedLabId', 'role'));
 }
 
 
@@ -61,7 +61,7 @@ public function create()
         ? Lab::where('technician_id', $user->id)->get()
         : Lab::all();
 
-    return view('admin.pcs.create', compact('labs', 'role'));
+    return view('teknisi.pcs.create', compact('labs', 'role'));
 }
 
 
@@ -94,7 +94,7 @@ public function edit($id)
         ? Lab::where('technician_id', $user->id)->get()
         : Lab::all();
 
-    return view('admin.pcs.edit', compact('pc', 'labs', 'role'));
+    return view('teknisi.pcs.edit', compact('pc', 'labs', 'role'));
 }
 
 

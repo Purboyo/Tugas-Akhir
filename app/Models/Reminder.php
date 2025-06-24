@@ -47,11 +47,6 @@ class Reminder extends Model
         );
     }
 
-    /**
-     * Get the computed status of the reminder.
-     * Possible values: 'completed', 'missed', 'pending'
-     */
-
     public function getComputedStatusAttribute()
     {
         if ($this->historyMaintenance) {

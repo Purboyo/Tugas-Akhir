@@ -25,19 +25,19 @@
                             @csrf
                             @method('PUT')
                             <div class="form-row">
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-6 text-dark">
                                     <label>First Name</label>
                                     <input type="text" name="name" class="form-control" value="{{old('name', $user->name)}}">
                                 </div>
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-6 text-dark">
                                     <label>Email</label>
                                     <input type="email" name="email" class="form-control" value="{{old('email', $user->email)}}">
                                 </div>
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-6 text-dark">
                                     <label>Password</label>
                                     <input type="password" name="password" class="form-control" placeholder="Password (leave blank to keep current)">
                                 </div>
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-6 text-dark">
                                     <label>Role</label>
                                     <select id="role" name="role" class="form-control">
                                         @foreach(['admin', 'teknisi', 'kepala_lab', 'jurusan'] as $role)
@@ -48,15 +48,15 @@
                                     </select>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary"><i class="mdi mdi-content-save"></i> Update User</button>
-                            <a href="{{ route('admin.user.index') }}" class="btn btn-secondary"><i class="mdi mdi-arrow-left"></i> Cancel</a>
+                            <button type="submit" class="btn btn-outline-primary"><i class="mdi mdi-content-save"></i> Update User</button>
+                            <a href="{{ route('admin.user.index') }}" class="btn btn-outline-secondary"><i class="mdi mdi-arrow-left"></i> Cancel</a>
                         </form>
                         @if($user->id !== Auth::id())
                         <form id="delete-form-{{ $user->id }}" action="{{ route('admin.user.destroy', $user) }}" method="POST" class="mt-2">
                             @csrf
                             @method('DELETE')
                             <!-- Trigger Button -->
-                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal-{{ $user->id }}">
+                            <button type="button" class="btn btn-outline-danger" data-toggle="modal" data-target="#deleteModal-{{ $user->id }}">
                                 <span class="mr-2"><i class="mdi mdi-trash-can"></i></span>
                                 <span>Delete</span>
                             </button>  

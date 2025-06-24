@@ -19,7 +19,7 @@
             </div>
         </header>
         <div class="card">
-            <div class="card-body">
+            <div class="card-body text-dark">
                 <div class="basic-form">
                     <form action="{{ route('admin.reminder.store') }}" method="POST">
                         @csrf
@@ -63,10 +63,10 @@
                         </div>
 
                         </div>
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-outline-primary">
                             <i class="mdi mdi-calendar-plus"></i> Save Reminder
                         </button>
-                        <a href="{{ route('admin.reminder.index') }}" class="btn btn-secondary">
+                        <a href="{{ route('admin.reminder.index') }}" class="btn btn-outline-secondary">
                             <i class="mdi mdi-arrow-left"></i> Cancel
                         </a>
                     </form>

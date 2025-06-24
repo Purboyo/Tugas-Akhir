@@ -18,7 +18,7 @@
                 </div>
             </div>
         @endforeach
-        <button type="submit" class="btn btn-primary">Kirim ke Kepala Lab</button>
+        <button type="submit" class="btn btn-outline-primary">Kirim ke Kepala Lab</button>
     </form>
 </div>
 @endsection

@@ -10,7 +10,7 @@
             <small class="text-muted">{{ ucfirst(Auth::user()->role) }} · Manage laboratories</small>
         </div>
         <div>
-            <a href="{{ route($role . '.lab.create') }}" class="btn btn-primary">
+            <a href="{{ route($role . '.lab.create') }}" class="btn btn-outline-primary">
                 <i class="fa fa-plus color-info"></i> Add
             </a>
         </div>
@@ -41,17 +41,17 @@
                 <form method="GET" action="{{ route($role . '.lab.index') }}" class="d-flex">
                     <input type="text" name="search" class="form-control mr-2 shadow-sm" placeholder="Search..."
                         value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-primary"><i class="mdi mdi-magnify"></i></button>
+                    <button type="submit" class="btn btn-outline-primary"><i class="mdi mdi-magnify"></i></button>
                 </form>
             </div>
         </header>
 
-        <div class="px-4 py-2">
+        <div class="px-4 py-2 text-dark">
             <strong>Total laboratories: <span id="labCount">{{ $labs->total() }}</span></strong>
         </div>
 
         <div class="card-content">
-            <table class="table" id="labTable">
+            <table class="table text-dark" id="labTable">
                 <thead>
                     <tr>
                         <th>Laboratory Name</th>
@@ -65,11 +65,11 @@
                         <td>{{ $lab->lab_name }}</td>
                         <td>{{ $lab->technician->name ?? 'N/A' }}</td>
                         <td>
-                            <a href="{{ route($role . '.lab.edit', $lab) }}" class="mr-3" data-toggle="tooltip"
+                            <a href="{{ route($role . '.lab.edit', $lab) }}" class="btn btn-outline-warning mr-3" data-toggle="tooltip"
                                 title="Edit">
                                 <i class="fa fa-pencil color-muted"> Edit</i>
                             </a>
-                            <a href="javascript:void(0)" title="Delete"
+                            <a href="javascript:void(0)" title="Delete" class="btn btn-outline-danger mr-3"
                                data-toggle="modal" data-target="#deleteModal-{{ $lab->id }}">
                                 <i class="fa fa-close"></i> Delete
                             </a>                    
@@ -87,11 +87,11 @@
                                     Are you sure you want to delete laboratory <strong>{{ $lab->lab_name }}</strong>?
                                   </div>
                                   <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
                                     <form action="{{ route($role . '.lab.destroy', $lab) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                        <button type="submit" class="btn btn-outline-danger">Yes, Delete</button>
                                     </form>
                                   </div>
                                 </div>

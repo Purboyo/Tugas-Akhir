@@ -46,7 +46,7 @@
             </div>
         </header>
 
-        <div class="px-4 py-2">
+        <div class="px-4 py-2 text-dark">
             <strong>Total PCs: <span id="pcCount">{{ $pcs->total() }}</span></strong>
         </div>
 
@@ -93,11 +93,11 @@
                                             Are you sure you want to delete PC <strong>{{ $pc->pc_name }}</strong>?
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
                                             <form action="{{ route($role . '.pc.destroy', $pc) }}" method="POST">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                                <button type="submit" class="btn btn-outline-danger">Yes, Delete</button>
                                             </form>
                                         </div>
                                     </div>

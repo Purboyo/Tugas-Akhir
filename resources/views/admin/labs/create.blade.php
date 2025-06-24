@@ -23,7 +23,7 @@
                 <h4 class="card-title">Form Add Laboratory</h4>
             </div>
             <div class="card-body">
-                <div class="basic-form">
+                <div class="basic-form text-dark">
                     <form action="{{ route($role . '.lab.store') }}" method="POST">
                         @csrf
                         <div class="form-group">
@@ -50,10 +50,10 @@
                             @enderror
                         </div>
 
-                        <button type="submit" class="btn btn-success">
+                        <button type="submit" class="btn btn-outline-success">
                             <i class="mdi mdi-flask-plus"></i> Save Laboratory
                         </button>
-                        <a href="{{ route($role . '.lab.index') }}" class="btn btn-secondary">
+                        <a href="{{ route($role . '.lab.index') }}" class="btn btn-outline-secondary">
                             <i class="mdi mdi-arrow-left"></i> Cancel
                         </a>
                     </form>

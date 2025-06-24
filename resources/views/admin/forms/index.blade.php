@@ -8,7 +8,7 @@
             <h1 class="h3 mb-1 text-dark">Form Management</h1>
             <small class="text-muted">{{ ucfirst($role) }} · Management Formulir</small>
         </div>
-        <a href="{{ route($role . '.form.create') }}" class="btn btn-primary">
+        <a href="{{ route($role . '.form.create') }}" class="btn btn-outline-primary">
             <i class="mdi mdi-plus"></i> Add Form
         </a>
     </div>
@@ -38,15 +38,15 @@
                 <form method="GET" action="{{ route($role . '.form.index') }}" class="d-flex">
                     <input type="text" name="search" class="form-control mr-2 shadow-sm" placeholder="Search..."
                         value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-primary"><i class="mdi mdi-magnify"></i></button>
+                    <button type="submit" class="btn btn-outline-primary"><i class="mdi mdi-magnify"></i></button>
                 </form>
             </div>
         </header>
-        <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap gap-2 p-3">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap gap-2 p-3 text-dark">
             <strong>Total Form: {{ count($forms) }}</strong>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover mb-0" id="formTable">
+            <table class="table table-hover mb-0 text-dark" id="formTable">
                 <thead class="thead-light">
                     <tr>
                         <th>Form Title</th>
@@ -72,10 +72,10 @@
                         <td>
                             <div class="btn-group btn-group-sm">
                                 @if(!$form->is_default || auth()->user()->role === 'admin')
-                                <a href="{{ route($role . '.form.edit', $form) }}" class="mr-3" data-toggle="tooltip" title="Edit">
+                                <a href="{{ route($role . '.form.edit', $form) }}" class="btn btn-outline-warning mr-3" data-toggle="tooltip" title="Edit">
                                     <i class="fa fa-pencil color-muted"> Edit</i>
                                 </a>
-                                <a href="javascript:void(0)" title="Delete" data-toggle="modal" data-target="#deleteModal-{{ $form->id }}">
+                                <a href="javascript:void(0)" title="Delete" class="btn btn-outline-danger mr-3" data-toggle="modal" data-target="#deleteModal-{{ $form->id }}">
                                     <i class="fa fa-close"></i> Delete
                                 </a>
                                 @else
@@ -96,11 +96,11 @@
                                             Are you sure you want to delete this form <strong>{{ $form->title }}</strong>?
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Close</button>
                                             <form action="{{ route($role . '.form.destroy', $form) }}" method="POST">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                                <button type="submit" class="btn btn-outline-danger">Delete</button>
                                             </form>
                                         </div>
                                     </div>

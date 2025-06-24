@@ -34,13 +34,13 @@
                 <form method="GET" action="{{ route($role . '.report.index') }}" class="d-flex">
                     <input type="text" name="search" class="form-control mr-2 shadow-sm" placeholder="Cari nama/NPM/PC..."
                         value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-primary"><i class="mdi mdi-magnify"></i></button>
+                    <button type="submit" class="btn btn-outline-primary"><i class="mdi mdi-magnify"></i></button>
                 </form> 
             </div>
         </header>
 
         <div class="card-content px-4 py-2">
-            <table class="table is-fullwidth is-striped">
+            <table class="table is-fullwidth is-striped text-dark">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -108,11 +108,11 @@
                                                 Are you sure you want to delete the report <strong>{{ $report->form->title }}</strong>?
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
                                                 <form action="{{ route($role . '.report.destroy', $report->id) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                                                    <button type="submit" class="btn btn-outline-danger">Yes, Delete</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -142,8 +142,8 @@
           </select>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-          <button type="submit" class="btn btn-info">Simpan</button>
+          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+          <button type="submit" class="btn btn-outline-info">Simpan</button>
         </div>
       </form>
     </div>
@@ -162,12 +162,12 @@
             </table>
 @if(auth()->user()->role === 'teknisi')
 <div class="mt-3 text-end">
-    <button id="done-button" class="btn btn-success" disabled>Done</button>
+    <button id="done-button" class="btn btn-outline-success" disabled>Done</button>
 </div>
 @endif
 @if(auth()->user()->role === 'teknisi' && $reports->where('status', 'Bad')->count() > 0)
 <div class="mt-3 text-end">
-    <a href="{{ route('teknisi.report.reportBadForm') }}" class="btn btn-warning">
+    <a href="{{ route('teknisi.report.reportBadForm') }}" class="btn btn-outline-warning">
         <i class="fa fa-paper-plane"></i> Laporkan ke Kepala Lab
     </a>
 </div>
@@ -194,9 +194,9 @@
                     },
                     body: JSON.stringify({ checked: checked })
                 })
-                .then(response => response.json())
+                // .then(response => response.json())
                 .then(data => {
-                    toastr.success(data.message);
+                    // toastr.success(data.message);
                     checkAllDone();
                 });
             });
@@ -236,6 +236,8 @@ if (doneButton) {
 }
 
     });
+
+    
 </script>
 @endsection
 
