@@ -13,7 +13,7 @@
 
 <section class="section main-section py-8">
     <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="card">
+        <div class="card text-dark">
             <div class="card-header">
                 <h4 class="card-title">Edit Form</h4>
             </div>

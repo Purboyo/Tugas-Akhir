@@ -107,36 +107,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 labSelect.innerHTML = '';
 
-                let allDisabled = true;
+                const chooseOption = document.createElement('option');
+                chooseOption.disabled = true;
+                chooseOption.selected = true;
+                chooseOption.textContent = "-- Choose Laboratory --";
+                labSelect.appendChild(chooseOption);
 
                 data.forEach(lab => {
                     const option = document.createElement('option');
                     option.value = lab.id;
                     option.textContent = lab.lab_name;
-
-                    if (lab.has_reminder) {
-                        option.disabled = true;
-                        option.textContent += " (Already assigned)";
-                    } else {
-                        allDisabled = false;
-                    }
-
                     labSelect.appendChild(option);
                 });
-
-                if (allDisabled) {
-                    const infoOption = document.createElement('option');
-                    infoOption.disabled = true;
-                    infoOption.selected = true;
-                    infoOption.textContent = "All laboratories already assigned to reminders.";
-                    labSelect.appendChild(infoOption);
-                } else {
-                    const chooseOption = document.createElement('option');
-                    chooseOption.disabled = true;
-                    chooseOption.selected = true;
-                    chooseOption.textContent = "-- Choose Laboratory --";
-                    labSelect.prepend(chooseOption);
-                }
             })
             .catch(error => {
                 console.error('🚨 Error fetching laboratories:', error);
@@ -145,6 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+
 
 
 

@@ -70,58 +70,6 @@ class MaintenanceController extends Controller
         return redirect()->route('teknisi.maintenance.index')->with('success', 'Maintenance berhasil disimpan!');
     }
 
-    // Tampilkan histori pemeliharaan
-public function history(Request $request)
-{
-    // Get the logged-in user's ID
-    $userId = auth::id();
-
-    // Get all maintenances related to the logged-in technician
-    $maintenances = Maintenance::whereHas('reminder.user', function ($query) use ($userId) {
-        $query->where('id', $userId);
-    })->orderBy('created_at', 'desc')->get();
-
-    // Main query for the data table - filter by technician's labs
-    $dataQuery = HistoryMaintenance::with([
-            'pc',
-            'maintenance.reminder.laboratory',
-            'maintenance.reminder.user'
-        ])
-        ->whereHas('maintenance.reminder.user', function ($query) use ($userId) {
-            $query->where('id', $userId);
-        });
-
-    // Additional filter if maintenance_id is provided
-    if ($request->filled('maintenance_id')) {
-        $dataQuery->where('maintenance_id', $request->maintenance_id);
-    }
-
-    // Fetch history data with pagination
-    $pcs = $dataQuery->paginate(10);
-
-    // Query for chart - also filter by technician's labs
-    $chartQuery = HistoryMaintenance::whereHas('maintenance.reminder.user', function ($query) use ($userId) {
-            $query->where('id', $userId);
-        });
-
-    if ($request->filled('maintenance_id')) {
-        $chartQuery->where('maintenance_id', $request->maintenance_id);
-    }
-
-    $selectedId = $request->input('maintenance_id');
-
-    $chartData = $chartQuery->select('status', DB::raw('count(*) as total'))
-        ->groupBy('status')
-        ->pluck('total', 'status')
-        ->toArray();
-
-    return view('teknisi.maintenance.history', [
-        'pcs' => $pcs,
-        'chartData' => $chartData,
-        'maintenances' => $maintenances,
-        'selectedId' => $selectedId,
-    ]);
-}
 
 
 

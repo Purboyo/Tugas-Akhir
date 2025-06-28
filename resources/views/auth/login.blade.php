@@ -20,7 +20,7 @@
                     <div class="authincation-content">
                         <div class="row no-gutters">
                             <div class="col-xl-12">
-                                <div class="auth-form">
+                                <div class="auth-form text-dark">
                                     <h4 class="text-center mb-4">Sign in your account</h4>
                                       <form method="POST" action="{{ url('login') }}">
                                           @csrf

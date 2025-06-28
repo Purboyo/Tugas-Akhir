@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\PCController;
 use App\Http\Controllers\FormController;
+use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\LaboratoryReportController;
 use App\Http\Controllers\ReportController;
@@ -35,7 +36,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('user', UserController::class);
         Route::resource('lab', LaboratoryController::class);
         // Route::resource('pc', PCController::class);
-        Route::resource('form', FormController::class);
+        Route::resource('form', FormController::class); //Default Form
         // Route::post('/admin/report/check/{id}', [ReportController::class, 'check']);
         // Route::resource('report', ReportController::class);
     });
@@ -53,21 +54,19 @@ Route::middleware(['auth'])->group(function () {
         Route::get('report-bad', [ReportController::class, 'reportBadForm'])->name('report.reportBadForm');
         Route::post('report-bad/submit', [ReportController::class, 'submitBadReport'])->name('report.submitBadReport');
         Route::get('/history-reports', [ReportController::class, 'historyReports'])->name('historyReports');
-        Route::get('/lab-reports', [ReportController::class, 'labReports'])->name('labReports'); //tambahkan di kepala_lab nanti
+        // Route::get('/lab-reports', [ReportController::class, 'labReports'])->name('labReports'); //tambahkan di kepala_lab nanti
         Route::patch('/report/{report}/status', [ReportController::class, 'updateStatus'])->name('report.updateStatus'); 
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
-        Route::get('/maintenance/history', [MaintenanceController::class, 'history'])->name('maintenance.history');
+        Route::get('/maintenance/history', [HistoryController::class, 'historyreportpc'])->name('maintenance.history');
         Route::get('/maintenance/create/{reminder}', [MaintenanceController::class, 'create'])->name('maintenance.create');
-
-
     });
 
-    // Routes yang bisa diakses oleh admin & teknisi sekaligus
-    Route::middleware(['auth','role:admin,teknisi'])->group(function () {
-        Route::get('/api/report/{id}/answers', [ReportController::class, 'getAnswers'])->name('api.report.answers');
-        Route::delete('/reports/{id}', [ReportController::class, 'destroy'])->name('reports.destroy');
-    });
+    // // Routes yang bisa diakses oleh admin & teknisi sekaligus
+    // Route::middleware(['auth','role:admin,teknisi'])->group(function () {
+    //     Route::get('/api/report/{id}/answers', [ReportController::class, 'getAnswers'])->name('api.report.answers');
+    //     Route::delete('/reports/{id}', [ReportController::class, 'destroy'])->name('reports.destroy');
+    // });
 
     // Routes khusus jurusan
     Route::middleware(['auth','role:jurusan'])->prefix('jurusan')->name('jurusan.')->group(function () {
@@ -78,7 +77,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth','role:kepala_lab'])->prefix('kepala_lab')->name('kepala_lab.')->group(function () {
         Route::get('/dashboard', fn() => view('kepala_lab.dashboard'))->name('kepala_lab.dashboard');
         Route::get('/lab-reports', [LaboratoryReportController::class, 'labReports'])->name('labReports'); //tambahkan di kepala_lab nanti
-
+        Route::get('/maintenance/history', [MaintenanceController::class, 'history'])->name('maintenance.history');
     });
 
 });

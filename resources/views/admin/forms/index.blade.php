@@ -6,7 +6,7 @@
     <div class="d-flex justify-content-between align-items-center px-4">
         <div>
             <h1 class="h3 mb-1 text-dark">Form Management</h1>
-            <small class="text-muted">{{ ucfirst($role) }} · Management Formulir</small>
+            <small class="text-muted">{{ ucfirst($role) }} · Management Forms</small>
         </div>
         <a href="{{ route($role . '.form.create') }}" class="btn btn-outline-primary">
             <i class="mdi mdi-plus"></i> Add Form

@@ -10,7 +10,7 @@
             <small class="text-muted">{{ ucfirst(Auth::user()->role) }} · Manage PCs</small>
         </div>
         <div>
-            <a href="{{ route($role . '.pc.create') }}" class="btn btn-outline-primary">
+            <a href="{{ route(auth()->user()->role . '.pc.create') }}" class="btn btn-outline-primary">
                 <i class="fa fa-plus color-info"></i> Add PC
             </a>
         </div>
@@ -32,117 +32,81 @@
         </script>
     @endif
 
-    <div class="card has-table">
-        <header class="card-header">
-            <div class="card-header-title">
-                <span class="icon h2"><i class="mdi mdi-desktop-classic"> PC List</i></span>
+    @php $role = auth()->user()->role; @endphp
+
+    @forelse($labs as $lab)
+        <div class="card mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-primary">{{ $lab->lab_name }}</h5>
+                <span class="badge bg-secondary">Total PCs: {{ $lab->pcs->count() }}</span>
             </div>
-            <div class="card-header-actions">
-                <form method="GET" action="{{ route($role . '.pc.index') }}" class="d-flex">
-                    <input type="text" name="search" class="form-control mr-2 shadow-sm" placeholder="Search..."
-                        value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-outline-primary"><i class="mdi mdi-magnify"></i></button>
-                </form>
-            </div>
-        </header>
-
-        <div class="px-4 py-2 text-dark">
-            <strong>Total PCs: <span id="pcCount">{{ $pcs->total() }}</span></strong>
-        </div>
-
-        <div class="card-content">
-            <table class="table text-dark" id="pcTable">
-                <thead>
-                    <tr>
-                        <th>PC Name</th>
-                        <th>Laboratory</th>
-                        <th>QR Code</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($pcs as $pc)
-                    <tr>
-                        <td>{{ $pc->pc_name }}</td>
-                        <td>{{ $pc->lab->lab_name ?? 'N/A' }}</td>
-                        <td>
-                        <a href="{{ route('welcome', $pc->id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
-                            Lihat Halaman QR
-                        </a>
-                    </td>
-                        <td>
-                            <a href="{{ route($role . '.pc.edit', $pc) }}" class="btn btn-outline-warning mr-3" data-toggle="tooltip" title="Edit">
-                                <i class="fa fa-pencil"> Edit</i>
-                            </a>
-                            <a href="javascript:void(0)" title="Delete" class="btn btn-outline-danger"
-                               data-toggle="modal" data-target="#deleteModal-{{ $pc->id }}">
-                                <i class="fa fa-close"></i> Delete
-                            </a>
-
-                            <!-- Modal -->
-                            <div class="modal fade" id="deleteModal-{{ $pc->id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ $pc->id }}" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-danger text-white">
-                                            <h5 class="modal-title" id="deleteModalLabel-{{ $pc->id }}">Confirm Delete</h5>
-                                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            Are you sure you want to delete PC <strong>{{ $pc->pc_name }}</strong>?
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
-                                            <form action="{{ route($role . '.pc.destroy', $pc) }}" method="POST">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-outline-danger">Yes, Delete</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="4" class="text-center">No PCs found.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
 
             <div class="card-body">
-                <nav>
-                    <ul class="pagination pagination-sm pagination-gutter">
-                        {{-- Previous Page --}}
-                        <li class="page-item {{ $pcs->onFirstPage() ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ $pcs->previousPageUrl() }}">
-                                <i class="icon-arrow-left"></i>
-                            </a>
-                        </li>
+                @if($lab->pcs->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-bordered text-dark">
+                            <thead>
+                                <tr>
+                                    <th>PC Name</th>
+                                    <th>QR Code</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($lab->pcs as $pc)
+                                    <tr>
+                                        <td>{{ $pc->pc_name }}</td>
+                                        <td>
+                                            <a href="{{ route('welcome', $pc->id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                                Lihat Halaman QR
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="{{ route($role . '.pc.edit', $pc) }}" class="btn btn-sm btn-outline-warning mr-2">
+                                                <i class="fa fa-pencil"></i> Edit
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-danger" data-toggle="modal" data-target="#deleteModal-{{ $pc->id }}">
+                                                <i class="fa fa-trash"></i> Delete
+                                            </button>
 
-                        {{-- Page Numbers --}}
-                        @for ($i = 1; $i <= $pcs->lastPage(); $i++)
-                        <li class="page-item {{ $i == $pcs->currentPage() ? 'active' : '' }}">
-                            <a class="page-link" href="{{ $pcs->url($i) }}">{{ $i }}</a>
-                        </li>
-                        @endfor
-
-                        {{-- Next Page --}}
-                        <li class="page-item {{ !$pcs->hasMorePages() ? 'disabled' : '' }}">
-                            <a class="page-link" href="{{ $pcs->nextPageUrl() }}">
-                                <i class="icon-arrow-right"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
+                                            <!-- Modal Delete -->
+                                            <div class="modal fade" id="deleteModal-{{ $pc->id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ $pc->id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header bg-danger text-white">
+                                                            <h5 class="modal-title" id="deleteModalLabel-{{ $pc->id }}">Confirm Delete</h5>
+                                                            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            Are you sure you want to delete PC <strong>{{ $pc->pc_name }}</strong>?
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                                                            <form action="{{ route($role . '.pc.destroy', $pc) }}" method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-outline-danger">Yes, Delete</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <p class="text-muted">Tidak ada PC pada lab ini.</p>
+                @endif
             </div>
-
         </div>
-    </div>
+    @empty
+        <div class="alert alert-info text-center">Tidak ada data laboratorium.</div>
+    @endforelse
 </section>
 
 @endsection

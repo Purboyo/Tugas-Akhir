@@ -32,7 +32,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="lab_id">Pilih Laboratorium</label>
+                        <label for="lab_id">Select Laboratory</label>
                         <select class="form-control multi-select" name="lab_id[]" multiple="multiple" required>
                             @foreach ($labs as $lab)
                                 <option value="{{ $lab->id }}">{{ $lab->lab_name }}</option>
@@ -142,7 +142,7 @@ function addOption(qIndex) {
     const list = document.getElementById(`options-list-${qIndex}`);
     list.insertAdjacentHTML('beforeend', `
         <div class="input-group mb-2 option-item">
-            <input type="text" name="questions[${qIndex}][options][]" class="form-control" placeholder="Isi pilihan...">
+            <input type="text" name="questions[${qIndex}][options][]" class="form-control" placeholder="Choose an option...">
             <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.parentElement.remove()">
                 <i class="mdi mdi-close"></i>
             </button>

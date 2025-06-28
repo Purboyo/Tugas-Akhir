@@ -24,10 +24,10 @@ public function index(Request $request)
     $role = $user->role;
     $search = $request->input('search');
 
-    // Base query dengan eager load relasi
-    $query = Lab::with('technician');
+    // Base query dengan eager load relasi pcs dan technician
+    $query = Lab::with('pcs', 'technician');
 
-    // Jika user adalah teknisi, filter berdasarkan teknisi_id
+    // Jika user adalah teknisi, filter berdasarkan technician_id
     if ($role === 'teknisi') {
         $query->where('technician_id', $user->id);
     }
@@ -39,8 +39,9 @@ public function index(Request $request)
 
     $labs = $query->orderBy('lab_name')->paginate(10);
 
-    return view('admin.labs.index', compact('labs', 'role'));
+    return view($this->role .'.labs.index', compact('labs', 'role'));
 }
+
 
     // Menampilkan form untuk membuat lab baru
     public function create()

@@ -13,7 +13,7 @@ class Reminder extends Model
         'reminder_date',
         'laboratory_id',
         'user_id',
-        'status'
+        // 'status'
     ];
 
     protected $casts = [

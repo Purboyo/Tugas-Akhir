@@ -49,7 +49,7 @@
 
     {{-- Not Active Yet / Completed Reminders --}}
     <h3 class="fs-4 fw-bold mb-4">Inactive or Completed Reminders</h3>
-    <div class="row row-cols-1 row-cols-md-2 g-4">
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
         @forelse ($reminderTidakBisa as $reminder)
             <div class="col">
                 <div class="card bg-light shadow-sm h-100 border-0" style="transition: transform 0.3s ease;">

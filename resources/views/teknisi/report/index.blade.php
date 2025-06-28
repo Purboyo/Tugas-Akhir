@@ -25,20 +25,11 @@
         </script>
     @endif
 
-    <div class="card has-table">
-        <header class="card-header">
-            <div class="card-header-title">
-                <span class="icon h2"><i class="mdi mdi-file-document-box"> Report List</i></span>
-            </div>
-            <div class="card-header-actions">
-                <form method="GET" action="{{ route($role . '.report.index') }}" class="d-flex">
-                    <input type="text" name="search" class="form-control mr-2 shadow-sm" placeholder="Cari nama/NPM/PC..."
-                        value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-outline-primary"><i class="mdi mdi-magnify"></i></button>
-                </form> 
-            </div>
-        </header>
-
+    @forelse ($reports as $labName => $groupedReports)
+    <div class="card mb-5" id="lab-{{ Str::slug($labName) }}">
+        <div class="card-header bg-light">
+            <h5 class="mb-0 text-primary">{{ $labName }}</h5>
+        </div>
         <div class="card-content px-4 py-2">
             <table class="table is-fullwidth is-striped text-dark">
                 <thead>
@@ -57,133 +48,129 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($reports as $index => $report)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $report->reporter->name }}</td>
-                            <td>{{ $report->reporter->npm }}</td>
-                            <td>{{ $report->pc->pc_name ?? 'PC-' . $report->pc_id }}<br>
-                                {{ $report->pc->lab->lab_name ?? 'Lab-' . optional($report->pc)->lab_id }}
-                            </td>
-                            <td>{{ $report->form->title }}</td>
-                            <td>{{ $report->created_at->format('d M Y H:i') }}</td>                            
-<td>
-    {{ $report->status }} 
-    @if(auth()->user()->role === 'teknisi')
-    <a href="javascript:void(0)" title="Ubah Status"
-        data-toggle="modal" data-target="#statusModal-{{ $report->id }}">   
-        <i class="fa fa-pencil"></i>
-    </a>
-    @endif
-</td>
-<td>
-    @if(auth()->user()->role === 'teknisi')
-        <input type="checkbox" class="report-checkbox" data-id="{{ $report->id }}"
-            {{ $report->checked ? 'checked' : '' }}>
-    @endif
-</td>
- 
-@if(auth()->user()->role === 'teknisi')
-                            <td>
-                                <a href="{{ route('teknisi.report.show', $report->id) }}" class="mr-4" data-toggle="tooltip"
-                                   data-placement="top" title="Show">
-                                    <i class="fa fa-eye"></i> Show
-                                </a>
-    <a href="javascript:void(0)" title="Delete"
-       data-toggle="modal" data-target="#deleteModal-{{ $report->id }}">
-        <i class="fa fa-close"></i> Delete
-    </a>
-                            
-                                <!-- Modal -->
-                                <div class="modal fade" id="deleteModal-{{ $report->id }}" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel-{{ $report->id }}" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-danger text-white">
-                                                <h5 class="modal-title" id="deleteModalLabel-{{ $report->id }}">Confirm Delete</h5>
-                                                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                Are you sure you want to delete the report <strong>{{ $report->form->title }}</strong>?
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
-                                                <form action="{{ route($role . '.report.destroy', $report->id) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger">Yes, Delete</button>
-                                                </form>
-                                            </div>
+                    @foreach ($groupedReports as $i => $report)
+                    <tr>
+                        <td>{{ $i + 1 }}</td>
+                        <td>{{ $report->reporter->name }}</td>
+                        <td>{{ $report->reporter->npm }}</td>
+                        <td>{{ $report->pc->pc_name }}</td>
+                        <td>{{ $report->form->title }}</td>
+                        <td>{{ $report->created_at->format('d M Y H:i') }}</td>
+                        <td>
+                            @if(auth()->user()->role === 'teknisi')
+                            <a href="javascript:void(0)" data-toggle="modal" data-target="#statusModal-{{ $report->id }}">
+                                <span class="btn btn-outline-warning btn-sm">{{ $report->status }}</span>
+                            </a>
+                            @else
+                                {{ $report->status }}
+                            @endif
+                        </td>
+                        @if(auth()->user()->role === 'teknisi')
+                        <td class="text-center">
+                            <input type="checkbox" 
+                                   class="report-checkbox" 
+                                   data-lab="{{ Str::slug($labName) }}"
+                                   data-id="{{ $report->id }}" 
+                                   {{ $report->checked ? 'checked' : '' }}>
+                        </td>
+                        <td>
+                            <a href="{{ route('teknisi.report.show', $report->id) }}" class="btn btn-outline-info btn-sm">
+                                <i class="fa fa-eye"></i> Show
+                            </a>
+                            <a href="javascript:void(0)" data-toggle="modal" data-target="#deleteModal-{{ $report->id }}" class="btn btn-outline-danger btn-sm">
+                                <i class="fa fa-close"></i> Delete
+                            </a>
+
+                            {{-- Delete Modal --}}
+                            <div class="modal fade" id="deleteModal-{{ $report->id }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-danger text-white">
+                                            <h5 class="modal-title">Confirm Delete</h5>
+                                            <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete report <strong>{{ $report->form->title }}</strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                                            <form method="POST" action="{{ route($role . '.report.destroy', $report->id) }}">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="btn btn-outline-danger">Yes, Delete</button>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
-                                @endif
-                                <!-- Modal Ubah Status -->
-@if(auth()->user()->role === 'teknisi')
-<!-- Modal Ubah Status -->
-<div class="modal fade" id="statusModal-{{ $report->id }}" tabindex="-1" role="dialog" aria-labelledby="statusModalLabel-{{ $report->id }}" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <form action="{{ route('teknisi.report.updateStatus', $report->id) }}" method="POST">
-        @csrf
-        @method('PATCH')
-        <div class="modal-header bg-info text-white">
-          <h5 class="modal-title">Ubah Status</h5>
-          <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
-        </div>
-        <div class="modal-body">
-          <label for="status-{{ $report->id }}">Status:</label>
-          <select name="status" class="form-control" id="status-{{ $report->id }}" required>
-            <option value="Good" {{ $report->status == 'Good' ? 'selected' : '' }}>Good</option>
-            <option value="Bad" {{ $report->status == 'Bad' ? 'selected' : '' }}>Bad</option>
-            <option value="Repairing" {{ $report->status == 'Repairing' ? 'selected' : '' }}>Repairing</option>
-            <option value="Pending" {{ $report->status == 'Pending' ? 'selected' : '' }}>Pending</option>
-          </select>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
-          <button type="submit" class="btn btn-outline-info">Simpan</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-@endif
+                            </div>
 
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="text-center">Belum ada laporan.</td>
-                        </tr>
-                    @endforelse
+                            {{-- Status Modal --}}
+                            <div class="modal fade" id="statusModal-{{ $report->id }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <form method="POST" action="{{ route('teknisi.report.updateStatus', $report->id) }}">
+                                            @csrf @method('PATCH')
+                                            <div class="modal-header bg-info text-white">
+                                                <h5 class="modal-title">Ubah Status</h5>
+                                                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <select name="status" class="form-control" required>
+                                                    <option value="Good" {{ $report->status == 'Good' ? 'selected' : '' }}>Good</option>
+                                                    <option value="Bad" {{ $report->status == 'Bad' ? 'selected' : '' }}>Bad</option>
+                                                    <option value="Repairing" {{ $report->status == 'Repairing' ? 'selected' : '' }}>Repairing</option>
+                                                    <option value="Pending" {{ $report->status == 'Pending' ? 'selected' : '' }}>Pending</option>
+                                                </select>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
+                                                <button type="submit" class="btn btn-outline-info">Simpan</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        @endif
+                    </tr>
+                    @endforeach
                 </tbody>
             </table>
-@if(auth()->user()->role === 'teknisi')
-<div class="mt-3 text-end">
-    <button id="done-button" class="btn btn-outline-success" disabled>Done</button>
-</div>
-@endif
-@if(auth()->user()->role === 'teknisi' && $reports->where('status', 'Bad')->count() > 0)
-<div class="mt-3 text-end">
-    <a href="{{ route('teknisi.report.reportBadForm') }}" class="btn btn-outline-warning">
-        <i class="fa fa-paper-plane"></i> Laporkan ke Kepala Lab
-    </a>
-</div>
-@endif
 
+            @if(auth()->user()->role === 'teknisi')
+            <div class="mt-3 text-end">
+                <button class="done-button btn btn-outline-success"
+                        data-lab="{{ Str::slug($labName) }}"
+                        disabled>
+                    Done
+                </button>
+            </div>
+            @endif
 
+            @if(auth()->user()->role === 'teknisi' && $groupedReports->where('status', 'Bad')->count() > 0)
+            <div class="mt-2 text-end">
+                <a href="{{ route('teknisi.report.reportBadForm') }}?lab={{ $labName }}" 
+                   class="btn btn-outline-secondary">
+                    <i class="fa fa-paper-plane"></i> Laporkan ke Kepala Lab
+                </a>
+            </div>
+            @endif
         </div>
     </div>
+    @empty
+        <div class="alert alert-info text-center">Belum ada laporan yang tersedia.</div>
+    @endforelse
 </section>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Checklist individual
+        document.querySelectorAll('.done-button').forEach(button => {
+            checkLabDone(button.getAttribute('data-lab'));
+        });
+
         document.querySelectorAll('.report-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function () {
                 const reportId = this.getAttribute('data-id');
+                const labName = this.getAttribute('data-lab');
                 const checked = this.checked;
 
                 fetch(`/teknisi/report/${reportId}/check`, {
@@ -194,50 +181,67 @@
                     },
                     body: JSON.stringify({ checked: checked })
                 })
-                // .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Request failed');
+                    // return response.json();
+                        checkLabDone(labName);
+                })
                 .then(data => {
-                    // toastr.success(data.message);
-                    checkAllDone();
+                    this.checked = checked;
+                    checkLabDone(labName);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    this.checked = !checked;
                 });
             });
         });
 
-        // Cek apakah semua checkbox dicentang
-function checkAllDone() {
-    const all = document.querySelectorAll('.report-checkbox');
-    const allChecked = [...all].length > 0 && [...all].every(c => c.checked);
-    const doneButton = document.getElementById('done-button');
-    if (doneButton) {
-        doneButton.disabled = !allChecked;
-    }
-}
+        document.querySelectorAll('.done-button').forEach(button => {
+            button.addEventListener('click', function () {
+                const labName = this.getAttribute('data-lab');
+                const reportIds = Array.from(document.querySelectorAll(`.report-checkbox[data-lab="${labName}"]`))
+                    .map(cb => cb.getAttribute('data-id'));
 
-
-        checkAllDone();
-
-        // Tombol Done
-const doneButton = document.getElementById('done-button');
-if (doneButton) {
-    doneButton.addEventListener('click', function () {
-        fetch(`/teknisi/report/check-all`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({})
-        })
-        .then(response => response.json())
-        .then(data => {
-            toastr.success(data.message);
-            checkAllDone();
+                fetch(`/teknisi/report/check-all`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ lab_name: labName, report_ids: reportIds })
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    toastr.success(data.message);
+                    button.disabled = true;
+                
+                    // Tandai semua checkbox sebagai checked
+                    document.querySelectorAll(`.report-checkbox[data-lab="${labName}"]`).forEach(cb => cb.checked = true);
+                
+                    // Reload halaman setelah 1.5 detik
+                    setTimeout(() => {
+                        location.reload();
+                    }, 3000);
+                })        
+                .catch(error => {
+                    console.error('Error:', error);
+                    toastr.error('Gagal menyimpan perubahan');
+                });
+            });
         });
-    });
-}
 
-    });
+        function checkLabDone(labName) {
+            const checkboxes = document.querySelectorAll(`.report-checkbox[data-lab="${labName}"]`);
+            const doneButton = document.querySelector(`.done-button[data-lab="${labName}"]`);
+            if (!doneButton) return;
 
-    
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+            doneButton.disabled = !allChecked;
+        }
+    });
 </script>
 @endsection
-

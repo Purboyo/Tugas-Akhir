@@ -17,15 +17,33 @@ public function index(Request $request)
 {
     $search = $request->input('search');
 
-    $reminders = Reminder::with('user')
-        ->when($search, function ($query, $search) {
-            $query->where('title', 'like', "%{$search}%");
-        })
-        ->latest()
-        ->get();
+    // Ambil semua data dengan relasi yang dibutuhkan
+$allReminders = Reminder::with(['user', 'laboratory', 'maintenance', 'historyMaintenance'])
+    ->when($search, function ($query, $search) {
+        $query->where('title', 'like', "%{$search}%")
+              ->orWhereHas('laboratory', function ($labQuery) use ($search) {
+                  $labQuery->where('lab_name', 'like', "%{$search}%");
+              });
+    })
+    ->latest()
+    ->get();
 
-    return view('admin.reminder.index', compact('reminders'));
+
+    // Pisahkan berdasarkan status yang dihitung secara dinamis
+    $activeReminders = $allReminders->filter(function ($reminder) {
+        return $reminder->computed_status !== 'completed';
+    });
+
+    $completedReminders = $allReminders->filter(function ($reminder) {
+        return $reminder->computed_status === 'completed';
+    });
+
+    return view('admin.reminder.index', [
+        'activeReminders' => $activeReminders,
+        'completedReminders' => $completedReminders,
+    ]);
 }
+
 
 
 
@@ -108,7 +126,6 @@ public function update(Request $request, $id)
         'description',
         'reminder_date',
     ]));
-
     return redirect()->route('admin.reminder.index')
         ->with('success', 'Reminder berhasil diperbarui.');
 }

@@ -17,12 +17,12 @@ class LaboratoryReportController extends Controller
         return view('kepala_lab.lab_reports.index', compact('labReports'));
     }
 
-    public function historyReports()
-    {
-        $historyReports = HistoryReportPC::with(['pc', 'technician']) // pastikan relasi ada
-            ->orderBy('created_at', 'desc')
-            ->get();
+//     public function historyReports()
+//     {
+//         $historyReports = HistoryReportPC::with(['pc', 'technician']) // pastikan relasi ada
+//             ->orderBy('created_at', 'desc')
+//             ->get();
 
-        return view('teknisi.history_reports.index', compact('historyReports'));
-    }
+//         return view('teknisi.history_reports.index', compact('historyReports'));
+//     }
 }

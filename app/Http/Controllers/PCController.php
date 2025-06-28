@@ -6,41 +6,27 @@ use App\Models\PC;
 use App\Models\Laboratory as Lab;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use App\Traits\HasUserRole;
 use Illuminate\Support\Facades\Auth;
 
 
 class PCController extends Controller
 {
-    use HasUserRole;
-
-    public function __construct()
-    {
-        $this->setUserRole();
-    }
     // Menampilkan semua PC
 public function index(Request $request)
 {
     $user = auth::user();
     $role = $user->role;
 
-    // Dropdown lab hanya sesuai role
-    $labs = $role === 'teknisi'
-        ? Lab::where('technician_id', $user->id)->get()
-        : Lab::all();
+    // Ambil semua lab milik teknisi
+    $labs = Lab::where('technician_id', $user->id)->get();
 
     $selectedLabId = $request->input('lab_id');
 
-    $pcsQuery = PC::with('lab');
+    // Ambil semua PC dari lab teknisi, dan filter lab_id jika dipilih
+    $pcsQuery = PC::with('lab')->whereHas('lab', function ($query) use ($user) {
+        $query->where('technician_id', $user->id);
+    });
 
-    // Filter lab milik teknisi jika role teknisi
-    if ($role === 'teknisi') {
-        $pcsQuery->whereHas('lab', function ($query) use ($user) {
-            $query->where('technician_id', $user->id);
-        });
-    }
-
-    // Jika ada lab_id dipilih via dropdown
     if ($selectedLabId) {
         $pcsQuery->where('lab_id', $selectedLabId);
     }
@@ -49,6 +35,7 @@ public function index(Request $request)
 
     return view('teknisi.pcs.index', compact('pcs', 'labs', 'selectedLabId', 'role'));
 }
+
 
 
     // Menampilkan form untuk membuat PC baru
@@ -80,7 +67,7 @@ public function create()
 
         PC::create($request->only(['pc_name', 'lab_id']));
 
-        return redirect()->route($this->role . '.pc.index')->with('success', 'PC add successfully.');
+        return redirect()->route('teknisi.pc.index')->with('success', 'PC add successfully.');
     }
 
     // Menampilkan form untuk mengedit PC
@@ -113,13 +100,13 @@ public function edit($id)
 
         $pc->update($request->only(['pc_name', 'lab_id']));
 
-        return redirect()->route($this->role . '.pc.index')->with('success', 'PC update successfully.');
+        return redirect()->route('teknisi.pc.index')->with('success', 'PC update successfully.');
     }
 
     // Menghapus PC
     public function destroy(PC $pc)
     {
         $pc->delete();
-        return redirect()->route($this->role . '.pc.index')->with('success', 'PC delete successfully.');
+        return redirect()->route('teknisi.pc.index')->with('success', 'PC delete successfully.');
     }
 }

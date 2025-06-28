@@ -13,18 +13,11 @@ use Illuminate\Http\Request;
 use App\Models\LabReport;
 use App\Models\HistoryReportPC;
 use Illuminate\Support\Facades\DB;
-use App\Traits\HasUserRole;
 use Illuminate\Support\Facades\Auth;
 
 
 class ReportController extends Controller
 {
-    use HasUserRole;
-
-    public function __construct()
-    {
-        $this->setUserRole();
-    }
     /**
      * Display a listing of the resource.
      */
@@ -32,44 +25,20 @@ class ReportController extends Controller
     {
         $user = auth::user();
         $role = $user->role;
-        $search = $request->input('search');
-
+    
         $reports = Report::with(['reporter', 'pc.lab', 'form', 'answers.question'])
             ->when($role === 'teknisi', function ($query) use ($user) {
-                // Filter report berdasarkan PC yang lab-nya dimiliki teknisi
+                // Filter report berdasarkan lab teknisi
                 $query->whereHas('pc.lab', function ($q) use ($user) {
                     $q->where('technician_id', $user->id);
                 });
             })
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->whereHas('reporter', function ($q2) use ($search) {
-                        $q2->where('name', 'like', '%' . $search . '%')
-                        ->orWhere('npm', 'like', '%' . $search . '%');
-                    })->orWhereHas('pc', function ($q2) use ($search) {
-                        $q2->where('pc_name', 'like', '%' . $search . '%');
-                    });
-                });
-            })
-            ->latest()
-            ->get();
-
-        return view('teknisi.report.index', compact('reports', 'role'));
-    }
-
+            ->get()
+            ->sortByDesc(fn($report) => $report->status === 'Bad' ? 1 : 0)
+            ->sortByDesc('created_at')
+            ->groupBy(fn($r) => $r->pc->lab->lab_name ?? 'Lab Tidak Diketahui');
     
-
-    /**
-     * Show the form for creating a new resource.
-     */
-public function create()
-{
-
-}
-
-
-    public function store(Request $request)
-    {
+        return view('teknisi.report.index', compact('reports', 'role'));
     }
 
     /**
@@ -82,21 +51,6 @@ public function create()
         return view('teknisi.report.show', compact('report'));
     }
     
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(report $report)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, report $report)
-    {
-        //
-    }
 
     /**
      * Remove the specified resource from storage.
@@ -116,7 +70,7 @@ public function create()
             $report->delete();
         });
 
-        return redirect()->route($this->role. '.report.index')->with('success', 'Laporan berhasil dihapus.');
+        return redirect()->route('teknisi.report.index')->with('success', 'Laporan berhasil dihapus.');
     }
     public function getAnswers($id)
     {
@@ -165,7 +119,7 @@ public function checkAll()
     // Hapus laporan yang sudah dipindahkan
     Report::where('checked', true)->delete();
 
-    return response()->json(['message' => 'Semua laporan telah dicentang dan dipindahkan ke riwayat. resfresh halaman untuk melihat perubahan.']);
+    return response()->json(['message' => 'Semua laporan telah dicentang dan dipindahkan ke riwayat. halaman akan direfresh dalam beberapa detik.']);
 }
 
 public function updateStatus(Request $request, $id)

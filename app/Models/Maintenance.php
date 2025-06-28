@@ -8,9 +8,9 @@ class Maintenance extends Model
 {
     protected $fillable = [
         'reminder_id', 
+        'note'];
         // 'laboratory_id', 
         // 'user_id', 
-        'note'];
 
 //     public function laboratory()
 // {

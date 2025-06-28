@@ -26,7 +26,7 @@
                             @method('PUT')
                             <div class="form-row">
                                 <div class="form-group col-md-6 text-dark">
-                                    <label>First Name</label>
+                                    <label>Name</label>
                                     <input type="text" name="name" class="form-control" value="{{old('name', $user->name)}}">
                                 </div>
                                 <div class="form-group col-md-6 text-dark">
