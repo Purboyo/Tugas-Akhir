@@ -10,12 +10,13 @@
     </div>
 </section>
 
-<section class="section main-section">
+<section class="section main-section text-dark">
     <div class="card px-4 py-4 shadow-sm border-0">
         <div class="mb-4">
             <h5 class="text-dark">Reporter Information</h5>
             <p><strong>Name:</strong> {{ $report->reporter->name }}</p>
             <p><strong>ID:</strong> {{ $report->reporter->npm }}</p>
+            <p><strong>Telephone:</strong> {{ $report->reporter->telephone }}</p>
         </div>
 
         <div class="mb-4">

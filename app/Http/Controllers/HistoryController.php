@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Maintenance;
 use App\Models\HistoryMaintenance;
+use App\Models\HistoryReportPC;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -14,36 +15,49 @@ class HistoryController extends Controller
 {
 
 
-public function historyreportpc(Request $request)
+public function historymaintenancepc(Request $request)
 {
-    $userId = Auth::id();
+    $user = Auth::user();
 
+    // Query dasar
     $dataQuery = HistoryMaintenance::with([
         'pc',
         'maintenance.reminder.laboratory',
         'maintenance.reminder.user'
-    ])->whereHas('maintenance.reminder.user', fn($q) => $q->where('id', $userId));
+    ]);
 
-    // Global filter optional (maintenance_id)
+    // Filter teknisi jika role = teknisi
+    if ($user->role === 'teknisi') {
+        $dataQuery->whereHas('maintenance.reminder.user', fn($q) =>
+            $q->where('id', $user->id)
+        );
+    }
+
+    // Filter optional maintenance_id
     if ($request->filled('maintenance_id')) {
         $dataQuery->where('maintenance_id', $request->maintenance_id);
     }
 
-    $allHistories = $dataQuery->get();
+    // Ambil semua data
+    $allHistories = $dataQuery->latest()->get();
 
-    // Semua lab tanpa difilter dulu, agar dropdown tetap penuh
-    $availableLabs = $allHistories->pluck('maintenance.reminder.laboratory.lab_name')
-        ->unique()->sort()->values();
+    // Semua lab untuk dropdown
+    $availableLabs = $allHistories
+        ->pluck('maintenance.reminder.laboratory.lab_name')
+        ->filter()
+        ->unique()
+        ->sort()
+        ->values();
 
     $globalLab = $request->lab;
 
-    // Dipakai hanya untuk filtering data yang ditampilkan di bawah
+    // Lab yang ditampilkan di bagian bawah (jika difilter)
     $filteredLabs = $availableLabs;
     if ($globalLab) {
         $filteredLabs = $availableLabs->filter(fn($lab) => $lab === $globalLab)->values();
     }
 
-    // Tanggal-tanggal tersedia per lab
+    // Tanggal-tanggal per lab untuk filter tanggal
     $availableDatesPerLab = $availableLabs->mapWithKeys(function ($labName) use ($allHistories) {
         $dates = $allHistories->filter(fn($item) =>
             optional($item->maintenance->reminder->laboratory)->lab_name === $labName
@@ -54,7 +68,7 @@ public function historyreportpc(Request $request)
         return [$labName => $dates];
     });
 
-    // Group dan paginasi berdasarkan lab yang difilter (filteredLabs)
+    // Group dan pagination per lab
     $groupedByLab = $filteredLabs->mapWithKeys(function ($labName) use ($allHistories, $request) {
         $slug = Str::slug($labName);
 
@@ -62,6 +76,7 @@ public function historyreportpc(Request $request)
             optional($item->maintenance->reminder->laboratory)->lab_name === $labName
         );
 
+        // Filter tanggal per lab
         $dateKey = "date_$slug";
         if ($request->filled($dateKey)) {
             $labData = $labData->filter(fn($item) =>
@@ -69,14 +84,14 @@ public function historyreportpc(Request $request)
             );
         }
 
+        // Pagination
         $pageKey = "page_$slug";
         $currentPage = $request->input($pageKey, 1);
         $perPage = 10;
-        $items = $labData->values();
 
         $paginated = new LengthAwarePaginator(
-            $items->slice(($currentPage - 1) * $perPage, $perPage),
-            $items->count(),
+            $labData->forPage($currentPage, $perPage)->values(),
+            $labData->count(),
             $perPage,
             $currentPage,
             ['pageName' => $pageKey, 'path' => request()->url(), 'query' => request()->query()]
@@ -85,23 +100,95 @@ public function historyreportpc(Request $request)
         return [$labName => $paginated];
     });
 
-    // Chart global (dari semua data, tidak hanya yang ditampilkan)
-    $chartData = $dataQuery->select('status', DB::raw('count(*) as total'))
-        ->groupBy('status')
-        ->pluck('total', 'status')
-        ->toArray();
+    // Chart global
+    $chartData = $allHistories->groupBy('status')->map->count()->toArray();
 
+    // Hilangkan 'Pending'
     unset($chartData['Pending']);
 
-    return view('Share.maintenance.history', [
+    return view('share.maintenance.history', [
         'chartData' => $chartData,
-        'availableLabs' => $availableLabs, // semua lab untuk dropdown
-        'groupedByLab' => $groupedByLab,   // hanya lab yang difilter untuk tampilan bawah
+        'availableLabs' => $availableLabs,
+        'groupedByLab' => $groupedByLab,
         'availableDatesPerLab' => $availableDatesPerLab,
         'selectedId' => $request->input('maintenance_id'),
-        'role' => Auth::user()->role,
+        'role' => $user->role,
     ]);
 }
 
+
+public function historyReportPC(Request $request)
+{
+    $user = Auth::user();
+    $selectedLab = $request->lab;
+
+    // Ambil semua data history (per teknisi jika teknisi, semua jika bukan)
+    $query = HistoryReportPC::with(['pc.lab', 'technician'])->latest();
+
+    if ($user->role === 'teknisi') {
+        $query->where('technician_id', $user->id);
+    }
+
+    $allHistories = $query->get();
+
+    // Ambil daftar lab yang tersedia dari relasi PC
+    $availableLabs = $allHistories
+        ->pluck('pc.lab.lab_name')
+        ->filter()
+        ->unique()
+        ->sort()
+        ->values();
+
+    // Filter berdasarkan lab jika dipilih
+    if ($selectedLab) {
+        $allHistories = $allHistories->filter(function ($history) use ($selectedLab) {
+            return optional($history->pc->lab)->lab_name === $selectedLab;
+        });
+    }
+
+    // Grouping per lab
+    $groupedByLab = $allHistories->groupBy(fn ($item) => optional($item->pc->lab)->lab_name ?? 'Unknown');
+    $availableDatesPerLab = [];
+
+    foreach ($groupedByLab as $labName => $items) {
+        $labSlug = Str::slug($labName);
+        $dateFilter = $request->input("date_$labSlug");
+
+        // Ambil daftar tanggal tersedia per lab
+        $availableDatesPerLab[$labName] = $items->pluck('created_at')->map(fn($d) => $d->toDateString())->unique()->values();
+
+        // Filter tanggal jika dipilih
+        if ($dateFilter) {
+            $items = $items->filter(fn($item) => $item->created_at->toDateString() === $dateFilter);
+        }
+
+        // Pagination per lab
+        $currentPage = $request->input("page_lab_$labSlug", 1);
+        $perPage = 10;
+        $pagedItems = new LengthAwarePaginator(
+            $items->forPage($currentPage, $perPage),
+            $items->count(),
+            $perPage,
+            $currentPage,
+            ['pageName' => "page_lab_$labSlug"]
+        );
+
+        $groupedByLab[$labName] = $pagedItems;
+    }
+
+    // Chart global
+    $chartData = [
+        'Good' => $allHistories->where('status', 'Good')->count(),
+        'Bad'  => $allHistories->where('status', 'Bad')->count(),
+    ];
+
+    return view('share.reports.report', compact(
+        'groupedByLab',
+        'availableLabs',
+        'chartData',
+        'availableDatesPerLab',
+        'selectedLab'
+    ));
+}
 
 }

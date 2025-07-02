@@ -33,4 +33,8 @@ class report extends Model
     public function answers() {
         return $this->hasMany(Report_answer::class);
     }
+    public function lab()
+    {
+        return $this->belongsTo(Laboratory::class, 'lab_id');
+    }
 }

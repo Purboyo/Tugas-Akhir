@@ -10,6 +10,8 @@ class LabReport extends Model
         'pc_id',
         'technician_id',
         'description',
+        'status',
+        'handling_notes'
     ];
 public function pc()
 {

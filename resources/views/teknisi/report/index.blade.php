@@ -59,7 +59,7 @@
                         <td>
                             @if(auth()->user()->role === 'teknisi')
                             <a href="javascript:void(0)" data-toggle="modal" data-target="#statusModal-{{ $report->id }}">
-                                <span class="btn btn-outline-warning btn-sm">{{ $report->status }}</span>
+                                <span class="btn btn-outline-warning btn-sm"><i class="fa fa-edit"> {{ $report->status }}</i></span>
                             </a>
                             @else
                                 {{ $report->status }}
@@ -150,14 +150,14 @@
             <div class="mt-2 text-end">
                 <a href="{{ route('teknisi.report.reportBadForm') }}?lab={{ $labName }}" 
                    class="btn btn-outline-secondary">
-                    <i class="fa fa-paper-plane"></i> Laporkan ke Kepala Lab
+                    <i class="fa fa-paper-plane"></i> Send to Kepala Laboratorim
                 </a>
             </div>
             @endif
         </div>
     </div>
     @empty
-        <div class="alert alert-info text-center">Belum ada laporan yang tersedia.</div>
+        <div class="alert alert-info text-center">No report found.</div>
     @endforelse
 </section>
 

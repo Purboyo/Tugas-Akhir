@@ -34,10 +34,10 @@ class ReportController extends Controller
                 });
             })
             ->get()
-            ->sortByDesc(fn($report) => $report->status === 'Bad' ? 1 : 0)
-            ->sortByDesc('created_at')
-            ->groupBy(fn($r) => $r->pc->lab->lab_name ?? 'Lab Tidak Diketahui');
-    
+               ->sortByDesc('created_at')
+                ->sortByDesc(fn($report) => $report->status === 'Bad')
+                ->groupBy(fn($r) => $r->pc->lab->lab_name ?? 'Lab Tidak Diketahui');
+        
         return view('teknisi.report.index', compact('reports', 'role'));
     }
 
@@ -70,7 +70,7 @@ class ReportController extends Controller
             $report->delete();
         });
 
-        return redirect()->route('teknisi.report.index')->with('success', 'Laporan berhasil dihapus.');
+        return redirect()->route('teknisi.report.index')->with('success', 'Report and its answers deleted successfully.');
     }
     public function getAnswers($id)
     {
@@ -101,26 +101,35 @@ class ReportController extends Controller
    
 
 
-public function checkAll()
+public function checkAll(Request $request)
 {
-    // Ambil semua laporan yang belum dicek
-    $reports = Report::where('checked', true)->get();
+    $reportIds = $request->input('report_ids');
+
+    if (empty($reportIds)) {
+        return response()->json(['message' => 'No report selected.'], 400);
+    }
+
+    // Ambil report + relasi lab
+    $reports = Report::with('lab')->whereIn('id', $reportIds)->get();
 
     foreach ($reports as $report) {
-        // Simpan ke history_reports
         HistoryReportPC::create([
             'pc_id' => $report->pc_id,
-            'technician_id' => $report->technician_id,
+            'technician_id' => optional($report->lab)->technician_id ?? auth::id(),
             'description' => $report->description,
-            'status' => $report->status,
+            'status' => $report->status, // sudah ikut disimpan ke tabel history
         ]);
     }
 
-    // Hapus laporan yang sudah dipindahkan
-    Report::where('checked', true)->delete();
+    Report::whereIn('id', $reportIds)->delete();
 
-    return response()->json(['message' => 'Semua laporan telah dicentang dan dipindahkan ke riwayat. halaman akan direfresh dalam beberapa detik.']);
+    return response()->json([
+        'message' => 'All reports have been moved to history, page will be refreshed in 3 seconds.'
+    ]);
 }
+
+
+
 
 public function updateStatus(Request $request, $id)
 {
@@ -132,7 +141,7 @@ public function updateStatus(Request $request, $id)
     $report->status = $request->status;
     $report->save();
 
-    return redirect()->back()->with('success', 'Status berhasil diperbarui.');
+    return redirect()->back()->with('success', 'Status report updated successfully.');
 }
 public function reportBadForm()
 {
@@ -166,7 +175,7 @@ public function submitBadReport(Request $request)
             'pc_id' => $pc_id,
             'technician_id' => auth::id(),
             'description' => $description,
-            'status' => 'Reported',
+            'status' => 'Bad',
         ]);
 
         // Hapus data dari tabel report
@@ -176,7 +185,7 @@ public function submitBadReport(Request $request)
             ->delete();
     }
 
-    return redirect()->route('teknisi.report.index')->with('success', 'Laporan berhasil dikirim ke Kepala Lab.');
+    return redirect()->route('teknisi.report.index')->with('success', 'Report has been submitted to kepala lab successfully.');
 }
 
 }

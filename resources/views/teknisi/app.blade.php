@@ -163,6 +163,9 @@
                     <li><a href="{{ route($role .'.maintenance.history') }}"><i 
                                 class="mdi mdi-history"></i><span class="nav-text">History Maintenance</span></a>
                     </li>
+                    <li><a href="{{ route($role .'.report.history') }}"><i 
+                                class="mdi mdi-history"></i><span class="nav-text">History Report</span></a>
+                    </li>
 
                 </ul>
             </div>

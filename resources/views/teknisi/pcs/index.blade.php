@@ -38,7 +38,7 @@
         <div class="card mb-4">
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-primary">{{ $lab->lab_name }}</h5>
-                <span class="badge bg-secondary">Total PCs: {{ $lab->pcs->count() }}</span>
+                <span class="text-dark">Total PCs: {{ $lab->pcs->count() }}</span>
             </div>
 
             <div class="card-body">

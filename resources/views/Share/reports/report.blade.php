@@ -1,15 +1,15 @@
 @extends(auth()->user()->role . '.app')
 
-@section('title', 'Maintenance History')
+@section('title', 'Report History')
 
 @section('content')
 <div class="container-fluid py-4 text-dark">
-    <h2 class="mb-4">Maintenance History</h2>
+    <h2 class="mb-4">Report History</h2>
 
     {{-- Filter Lab --}}
     <div class="card mb-4 shadow-lg">
         <div class="card-body">
-            <form id="filterForm" method="GET" action="{{ route($role . '.maintenance.history') }}">
+            <form id="filterForm" method="GET" action="{{ route($role.'.report.history') }}">
                 <div class="row">
                     <div class="col-md-12">
                         <label for="lab">Choose Laboratory:</label>
@@ -41,7 +41,7 @@
     @forelse ($groupedByLab as $labName => $data)
     @php
         $labId = Str::slug($labName);
-        $total = $data->total();
+        $total = $data->count();
         $good = $data->filter(fn($d) => $d->status === 'Good')->count();
         $bad = $data->filter(fn($d) => $d->status === 'Bad')->count();
     @endphp
@@ -100,7 +100,7 @@
                                         {{ $row->status }}
                                     </span>
                                 </td>
-                                <td>{{ $row->maintenance->reminder->user->name ?? '-' }}</td>
+                                <td>{{ $row->technician->name ?? '-' }}</td>
                                 <td>{{ $row->created_at->format('d M Y') }}</td>
                             </tr>
                         @endforeach
@@ -111,24 +111,42 @@
                 <div class="card-body">
                     <nav>
                         <ul class="pagination pagination-sm pagination-gutter justify-content-center">
+                            {{-- Previous Page --}}
+                            @php
+                                $labQueryPrev = request()->except("page_lab_$labId");
+                                $labQueryPrev["page_lab_$labId"] = $data->currentPage() - 1;
+                            @endphp
                             <li class="page-item {{ $data->onFirstPage() ? 'disabled' : '' }}">
-                                <a class="page-link" href="{{ $data->previousPageUrl() ?? '#' }}"><i class="icon-arrow-left"></i></a>
+                                <a class="page-link" href="{{ $data->onFirstPage() ? '#' : request()->fullUrlWithQuery($labQueryPrev) }}">
+                                    <i class="icon-arrow-left"></i>
+                                </a>
                             </li>
+
+                            {{-- Page Number --}}
                             @for ($i = 1; $i <= $data->lastPage(); $i++)
                                 @php
                                     $query = request()->except("page_lab_$labId");
                                     $query["page_lab_$labId"] = $i;
                                 @endphp
                                 <li class="page-item {{ $i == $data->currentPage() ? 'active' : '' }}">
-                                    <a class="page-link" href="{{ url()->current() . '?' . http_build_query($query) }}">{{ $i }}</a>
+                                    <a class="page-link" href="{{ request()->fullUrlWithQuery($query) }}">{{ $i }}</a>
                                 </li>
                             @endfor
+
+                            {{-- Next Page --}}
+                            @php
+                                $labQueryNext = request()->except("page_lab_$labId");
+                                $labQueryNext["page_lab_$labId"] = $data->currentPage() + 1;
+                            @endphp
                             <li class="page-item {{ !$data->hasMorePages() ? 'disabled' : '' }}">
-                                <a class="page-link" href="{{ $data->nextPageUrl() ?? '#' }}"><i class="icon-arrow-right"></i></a>
+                                <a class="page-link" href="{{ !$data->hasMorePages() ? '#' : request()->fullUrlWithQuery($labQueryNext) }}">
+                                    <i class="icon-arrow-right"></i>
+                                </a>
                             </li>
                         </ul>
                     </nav>
                 </div>
+
 
                 {{-- Note --}}
                 @php

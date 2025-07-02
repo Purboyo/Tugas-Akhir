@@ -160,11 +160,14 @@
                     {{-- <li><a class="" href="{{ route($role. '.maintenance.index') }}" aria-expanded="false"><i
                                 class="mdi mdi-wrench"></i><span class="nav-text">Maintenance</span></a>
                     </li> --}}
-                    <li><a href="{{ route($role .'.maintenance.history') }}"><i 
-                                class="mdi mdi-history"></i><span class="nav-text">History Maintenance</span></a>
                     </li>
                     <li><a class="" href="{{route ($role. '.labReports')}}" aria-expanded="false"><i
-                                class="mdi mdi-file-document-outline"></i><span class="nav-text">Laboratory Reports</span></a>
+                                class="mdi mdi-file-document-outline"></i><span class="nav-text">laboratory Damage Report</span></a>
+                    </li>
+                    <li><a href="{{ route($role .'.maintenance.history') }}"><i 
+                                class="mdi mdi-history"></i><span class="nav-text">History Maintenance</span></a>
+                    <li><a href="{{ route($role .'.report.history') }}"><i 
+                                class="mdi mdi-history"></i><span class="nav-text">History Report</span></a>
                     </li>
                 </ul>
             </div>

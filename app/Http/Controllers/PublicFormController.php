@@ -43,9 +43,9 @@ $form = Form::whereHas('laboratories', function ($query) use ($pc) {
         $pc = PC::with('lab')->findOrFail($pcId);
 
         // Cari form berdasarkan laboratory_id PC
-$form = Form::whereHas('laboratories', function ($query) use ($pc) {
-    $query->where('laboratories.id', $pc->lab_id);
-})->where('created_by', $pc->lab->technician->id)->first();
+    $form = Form::whereHas('laboratories', function ($query) use ($pc) {
+        $query->where('laboratories.id', $pc->lab_id);
+    })->where('created_by', $pc->lab->technician->id)->first();
 
 
         if (!$form) {

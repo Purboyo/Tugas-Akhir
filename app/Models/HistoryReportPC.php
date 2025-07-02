@@ -12,6 +12,7 @@ class HistoryReportPC extends Model
         'technician_id',
         'id_report',
         'description',
+        'status'
     ];
 public function pc()
 {

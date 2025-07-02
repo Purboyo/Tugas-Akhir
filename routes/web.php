@@ -53,12 +53,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/report/check-all', [ReportController::class, 'checkAll'])->name('report.checkAll');
         Route::get('report-bad', [ReportController::class, 'reportBadForm'])->name('report.reportBadForm');
         Route::post('report-bad/submit', [ReportController::class, 'submitBadReport'])->name('report.submitBadReport');
-        Route::get('/history-reports', [ReportController::class, 'historyReports'])->name('historyReports');
+        Route::get('/history-report', [HistoryController::class, 'historyReportPC'])->name('report.history');
+        // Route::get('/history-reports', [ReportController::class, 'historyReports'])->name('historyReports');
         // Route::get('/lab-reports', [ReportController::class, 'labReports'])->name('labReports'); //tambahkan di kepala_lab nanti
         Route::patch('/report/{report}/status', [ReportController::class, 'updateStatus'])->name('report.updateStatus'); 
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
-        Route::get('/maintenance/history', [HistoryController::class, 'historyreportpc'])->name('maintenance.history');
+        Route::get('/maintenance/history', [HistoryController::class, 'historymaintenancepc'])->name('maintenance.history');
         Route::get('/maintenance/create/{reminder}', [MaintenanceController::class, 'create'])->name('maintenance.create');
     });
 
@@ -77,7 +78,10 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['auth','role:kepala_lab'])->prefix('kepala_lab')->name('kepala_lab.')->group(function () {
         Route::get('/dashboard', fn() => view('kepala_lab.dashboard'))->name('kepala_lab.dashboard');
         Route::get('/lab-reports', [LaboratoryReportController::class, 'labReports'])->name('labReports'); //tambahkan di kepala_lab nanti
-        Route::get('/maintenance/history', [MaintenanceController::class, 'history'])->name('maintenance.history');
+        Route::put('/lab-report/{id}', [LaboratoryReportController::class, 'update'])->name('labreport.update');
+        Route::get('/maintenance/history', [HistoryController::class, 'historymaintenancepc'])->name('maintenance.history');
+        Route::get('/history-report', [HistoryController::class, 'historyReportPC'])->name('report.history');
+
     });
 
 });
