@@ -170,21 +170,44 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-    // Global Chart
+    // Global Chart (Overall)
     new Chart(document.getElementById('globalChart').getContext('2d'), {
         type: 'doughnut',
         data: {
             labels: ['Good', 'Bad'],
             datasets: [{
                 data: [{{ $chartData['Good'] ?? 0 }}, {{ $chartData['Bad'] ?? 0 }}],
-                backgroundColor: ['#28a745', '#dc3545'],
-                borderWidth: 1
+                backgroundColor: ['#51cf66', '#ff6b6b'],
+                borderColor: '#fff',
+                borderWidth: 2,
+                hoverOffset: 20
             }]
         },
         options: {
-            plugins: { legend: { position: 'bottom' } }
+            cutout: '65%',
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            size: 13,
+                            weight: 'bold'
+                        },
+                        color: '#343a40',
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    backgroundColor: '#fff',
+                    titleColor: '#000',
+                    bodyColor: '#000',
+                    borderColor: '#dee2e6',
+                    borderWidth: 1
+                }
+            }
         }
     });
 
@@ -195,27 +218,50 @@
             $good = $data->where('status', 'Good')->count();
             $bad = $data->where('status', 'Bad')->count();
         @endphp
+
         new Chart(document.getElementById('chart-lab-{{ $labId }}').getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: ['Good', 'Bad'],
                 datasets: [{
                     data: [{{ $good }}, {{ $bad }}],
-                    backgroundColor: ['#28a745', '#dc3545'],
-                    borderWidth: 1
+                    backgroundColor: ['#63e6be', '#ffa8a8'],
+                    borderColor: '#fff',
+                    borderWidth: 2,
+                    hoverOffset: 15
                 }]
             },
             options: {
-                plugins: { legend: { position: 'bottom' } }
+                cutout: '60%',
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                size: 12,
+                                weight: '600'
+                            },
+                            color: '#343a40',
+                            padding: 10
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#fff',
+                        titleColor: '#000',
+                        bodyColor: '#000',
+                        borderColor: '#dee2e6',
+                        borderWidth: 1
+                    }
+                }
             }
         });
     @endforeach
-</script>
 
-{{-- Lab Filter --}}
-<script>
+    // Lab Filter
     document.getElementById('lab').addEventListener('change', function () {
         this.form.submit();
     });
 </script>
 @endpush
+

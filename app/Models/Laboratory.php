@@ -31,4 +31,16 @@ class Laboratory extends Model
         return $this->belongsToMany(Form::class, 'form_laboratory');
     }
 
+    public function reports()
+    {
+        return $this->hasManyThrough(
+            \App\Models\Report::class,  // target model
+            \App\Models\PC::class,      // intermediate model
+            'lab_id',                   // Foreign key di table PCs
+            'pc_id',                    // Foreign key di table reports
+            'id',                       // Local key di laboratories
+            'id'                        // Local key di PCs
+        );
+    }
+
 }

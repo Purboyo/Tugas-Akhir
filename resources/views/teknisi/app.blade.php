@@ -274,6 +274,7 @@
     <script src="{{asset ('vendor/focus-2/vendor/select2/js/select2.full.min.js')}}"></script>
     <script src="{{asset ('vendor/focus-2/js/plugins-init/select2-init.js')}}"></script>
     @stack('scripts')
+@yield('scripts')
 
 
 </body>

@@ -1,105 +1,112 @@
 @extends('teknisi.app')
 
 @section('content')
+<div class="container-fluid mt-4 text-dark">
+    <h2 class="font-weight-bold mb-3">Technician Dashboard</h2>
+    <p class="text-muted">Summary of your labs, today's reports, and upcoming maintenance.</p>
+    {{-- Maintenance Reminders --}}
+    <div class="row">
+        <div class="col-12 mb-3">
+            <h5 class="font-weight-bold">Upcoming Maintenance</h5>
+        </div>
 
-{{-- Page Heading --}}
-            <!-- row -->
-                <div class="row">
-                    <div class="col-lg-3 col-sm-6">
-                        <div class="card">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">Today Expenses </div>
-                                    <div class="stat-digit"> <i class="fa fa-usd"></i>8500</div>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-success w-85" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6">
-                        <div class="card">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">Income Detail</div>
-                                    <div class="stat-digit"> <i class="fa fa-usd"></i>7800</div>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-primary w-75" role="progressbar" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6">
-                        <div class="card">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">Task Completed</div>
-                                    <div class="stat-digit"> <i class="fa fa-usd"></i> 500</div>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-warning w-50" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6">
-                        <div class="card">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">Task Completed</div>
-                                    <div class="stat-digit"> <i class="fa fa-usd"></i>650</div>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-danger w-65" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- /# card -->
-                        
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="card-title">
-                                    @if(Auth::user()->role === 'admin')
-                                        Reminder Hari Ini
-                                    @else
-                                        Reminder Kamu
-                                    @endif
-                                </h4>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-group">
-                                    @forelse($todayReminders as $reminder)
-                                        <li class="list-group-item d-flex justify-content-between align-items-center 
-                                            {{ Auth::user()->role === 'admin' ? 'bg-info text-white' : '' }}">
-                                            <div>
-                                                <strong>
-                                                    @if(Auth::user()->role === 'admin')
-                                                        {{ $reminder->user->name }}:
-                                                    @endif
-                                                    {{ $reminder->title }}
-                                                </strong>
-                                                <br>
-                                                <small>{{ $reminder->reminder_date->format('d M Y') }}</small>
-                                            </div>
-
-                                            @if(Auth::user()->role === 'admin')
-                                                <form action="{{ route('admin.reminder.destroy', $reminder->id) }}" method="POST" onsubmit="return confirm('Hapus reminder ini?')">
-                                                    @csrf @method('DELETE')
-                                                    <button class="btn btn-sm btn-light">Hapus</button>
-                                                </form>
-                                            @endif
-                                        </li>
-                                    @empty
-                                        <li class="list-group-item text-muted">Tidak ada reminder.</li>
-                                    @endforelse
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- /# column -->
+        @foreach ($reminders as $reminder)
+        <div class="col-md-4 mb-3">
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ $reminder->title }}</h5>
+                    <p class="mb-1"><strong>Lab:</strong> {{ $reminder->laboratory->lab_name }}</p>
+                    <p class="mb-1"><strong>Date:</strong> {{ $reminder->reminder_date->format('d M Y') }}</p>
+                    <p class="mb-0">
+                        <strong>Status:</strong>
+                        @php
+                            $status = $reminder->computed_status;
+                        @endphp
+                        @if ($status === 'completed')
+                            <span class="badge badge-success">Completed</span>
+                        @elseif ($status === 'missed')
+                            <span class="badge badge-danger">Missed</span>
+                        @else
+                            <span class="badge badge-warning">Upcoming</span>
+                        @endif
+                    </p>
                 </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+    {{-- Chart --}}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary ">
+                    <h6 class="mb-0 text-white">Report Summary (Today)</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="reportChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
+
+</div>
+@endsection
+
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('reportChart').getContext('2d');
+
+    const reportChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {!! json_encode($chartLabels) !!},
+            datasets: [
+                {
+                    label: 'Total PCs',
+                    data: {!! json_encode($chartPCs) !!},
+                    backgroundColor: 'rgba(0, 123, 255, 0.4)',
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Good Reports',
+                    data: {!! json_encode($chartGood) !!},
+                    backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Bad Reports',
+                    data: {!! json_encode($chartBad) !!},
+                    backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            }
+        }
+    });
+</script>
 @endsection

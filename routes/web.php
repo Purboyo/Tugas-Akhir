@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\PCController;
@@ -25,12 +26,15 @@ Route::get('/form/{form}/fill/{pc}', [PublicFormController::class, 'fill'])->nam
 Route::post('/form/{form}/submit', [PublicFormController::class, 'submit'])->name('form.submit');
 Route::get('/form/success/{pc}', [PublicFormController::class, 'success'])->name('form.success');
 
+Route::get('/send-reminder-emails', [ReminderController::class, 'sendReminderEmails']);
+
+
 // Route group dengan middleware auth
 Route::middleware(['auth'])->group(function () {
 
     // Routes khusus admin
     Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', fn() => view('admin.dashboard'))->name('admin.dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
         Route::resource('reminder', ReminderController::class);
         Route::get('/get-laboratories/{userId}', [ReminderController::class, 'getLaboratories']);
         Route::resource('user', UserController::class);
@@ -43,7 +47,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Routes khusus teknisi
     Route::middleware(['auth','role:teknisi'])->prefix('teknisi')->name('teknisi.')->group(function () {
-        Route::get('/dashboard', fn() => view('teknisi.dashboard'))->name('teknisi.dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'teknisi'])->name('teknisi.dashboard');
 
         Route::resource('lab', LaboratoryController::class);
         Route::resource('pc', PCController::class);
@@ -76,7 +80,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Routes khusus kepala_lab
     Route::middleware(['auth','role:kepala_lab'])->prefix('kepala_lab')->name('kepala_lab.')->group(function () {
-        Route::get('/dashboard', fn() => view('kepala_lab.dashboard'))->name('kepala_lab.dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'kepalaLab'])->name('kepala_lab.dashboard');
         Route::get('/lab-reports', [LaboratoryReportController::class, 'labReports'])->name('labReports'); //tambahkan di kepala_lab nanti
         Route::put('/lab-report/{id}', [LaboratoryReportController::class, 'update'])->name('labreport.update');
         Route::get('/maintenance/history', [HistoryController::class, 'historymaintenancepc'])->name('maintenance.history');
