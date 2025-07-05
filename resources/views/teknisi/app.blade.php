@@ -80,27 +80,40 @@
                         <div class="header-left">
                         </div>
                         <ul class="navbar-nav header-right">
-                            <li class="nav-item dropdown notification_dropdown">
-                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <i class="mdi mdi-bell"></i>
-                                    <div class="pulse-css"></div>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <ul class="list-unstyled">
-                                        <li class="media dropdown-item">
-                                            <span class="success"><i class="ti-user"></i></span>
-                                            <div class="media-body">
-                                                <a href="#">
-                                                    <p><strong>Martin</strong> has added a <strong>customer</strong> Successfully</p>
-                                                </a>
-                                            </div>
-                                            <span class="notify-time">3:20 am</span>
-                                        </li>
-                                        <!-- Item notifikasi lainnya tetap -->
-                                    </ul>
-                                    <a class="all-notification" href="#">See all notifications <i class="ti-arrow-right"></i></a>
-                                </div>
-                            </li>
+   <li class="nav-item dropdown notification_dropdown">
+    <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+        <i class="mdi mdi-bell"></i>
+        <div class="pulse-css"></div>
+    </a>
+    <div class="dropdown-menu dropdown-menu-right">
+        <ul class="list-unstyled">
+
+            {{-- 📅 Reminder Hari Ini --}}
+            @foreach($todayReminders ?? [] as $reminder)
+                <li class="media dropdown-item">
+                    <span class="info"><i class="ti-calendar"></i></span>
+                    <div class="media-body">
+                        <p><strong>Reminder:</strong> {{ $reminder->title }}</p>
+                    </div>
+                    <span class="notify-time">{{ \Carbon\Carbon::parse($reminder->reminder_date)->format('H:i') }}</span>
+                </li>
+            @endforeach
+
+            {{-- 🛠️ Bad Report Hari Ini --}}
+            @foreach($badReportsByLab ?? [] as $lab => $count)
+                <li class="media dropdown-item">
+                    <span class="danger"><i class="ti-alert"></i></span>
+                    <div class="media-body">
+                        <p><strong>{{ $lab }}</strong> memiliki <strong>{{ $count }}</strong> bad report hari ini</p>
+                    </div>
+                </li>
+            @endforeach
+
+        </ul>
+        <a class="all-notification" href="#">Lihat semua notifikasi <i class="ti-arrow-right"></i></a>
+    </div>
+</li>
+
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
                                     {{ ucfirst(Auth::user()->name) }} <i class="mdi mdi-account"></i>

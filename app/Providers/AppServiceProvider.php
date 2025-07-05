@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Reminder;
+use App\Models\LabReport;
+use Illuminate\Support\Facades\Log;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -21,26 +23,34 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
-    {
-    View::composer('*', function ($view) {
-        if (Auth::check()) {
-            $user = Auth::user();
-            $view->with('role', $user->role);
+public function boot(): void
+{
+View::composer('*', function ($view) {
+    if (Auth::check()) {
+        $user = Auth::user();
+        $view->with('role', $user->role);
 
-            // Default kosong
-            $todayReminders = collect();
+        // 📅 Reminder hari ini
+        $todayReminders = Reminder::whereDate('reminder_date', now())->get();
 
-            if ($user->role === 'admin') {
-                // Admin hanya melihat reminder hari ini
-                $todayReminders = Reminder::whereDate('reminder_date', now())->get();
-            } elseif ($user->role === 'teknisi') {
-                // Teknisi melihat semua reminder miliknya, tidak peduli tanggal
-                $todayReminders = Reminder::where('user_id', $user->id)->get();
-            }
+        // 🛠️ Bad Reports hari ini
+$badReportsRaw = LabReport::with('pc.lab')
+    ->whereRaw('LOWER(status) = ?', ['bad'])
+    ->whereDate('created_at', now())
+    ->get();
 
-            $view->with('todayReminders', $todayReminders);
-        }
-    });
+Log::info('📦 Bad reports found:', $badReportsRaw->toArray());
+
+$badReportsByLab = $badReportsRaw
+    ->groupBy(fn($report) => optional($report->pc->lab)->lab_name ?? 'Unknown')
+    ->map->count();
+
+Log::info('🔔 Notifikasi: Jumlah Bad Report Hari Ini', $badReportsByLab->toArray());
+
+
+        $view->with('todayReminders', $todayReminders);
+        $view->with('badReportsByLab', $badReportsByLab);
     }
+});
+}
 }

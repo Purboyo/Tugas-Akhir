@@ -55,8 +55,8 @@ public function teknisi()
                 });
 
                 // Hitung jumlah report good/bad
-                $lab->good_reports = $todayReports->where('status', 'good')->count();
-                $lab->bad_reports = $todayReports->where('status', 'bad')->count();
+                $lab->good_reports = $todayReports->where('status', 'Good')->count();
+                $lab->bad_reports = $todayReports->where('status', 'Bad')->count();
 
                 return $lab;
             });

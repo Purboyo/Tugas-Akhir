@@ -43,7 +43,7 @@
                     <h6 class="mb-0 text-white">Report Summary (Today)</h6>
                 </div>
                 <div class="card-body">
-                    <canvas id="reportChart" height="100"></canvas>
+                    <canvas id="reportChart" height="70"></canvas>
                 </div>
             </div>
         </div>
