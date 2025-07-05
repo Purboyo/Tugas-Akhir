@@ -13,11 +13,11 @@
 
 <section class="section main-section py-8">
     <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-        <div class="card text-dark">
-            <div class="card-header">
-                <h4 class="card-title">Edit Form</h4>
-            </div>
-            <div class="card-body">
+        <header class="bg-gray-200 p-4">
+            <h2 class="text-gray-800 text-l font-semibold">Edit Form</h2>
+        </header>
+        <div class="card">
+            <div class="card-body text-dark">
                 <form action="{{ route($role.'.form.update', $form->id) }}" method="POST">
                     @csrf
                     @method('PUT')
@@ -28,33 +28,61 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Pilih Laboratorium</label>
-                        <select class="form-control multi-select" name="lab_id[]" multiple="multiple" required>
+                        <label>Select Laboratory</label>
+                        <select class="form-control multi-select text-dark" name="lab_id[]" multiple="multiple" required>
                             @foreach ($labs as $lab)
-                                <option value="{{ $lab->id }}" {{ in_array($lab->id, $form->laboratories->pluck('id')->toArray()) ? 'selected' : '' }}>
+                                <option class="text-dark" value="{{ $lab->id }}" {{ in_array($lab->id, $form->laboratories->pluck('id')->toArray()) ? 'selected' : '' }}>
                                     {{ $lab->lab_name }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
 
-                    <hr class="my-4">
+                    @if(auth()->user()->role === 'teknisi' && $defaultQuestions->isNotEmpty())
+                        <hr class="my-4">
+                        <div class="form-group">
+                            <h5 class="text-dark mb-3">📌 Default Questions by Admin</h5>
 
-                    <div class="form-group">
-                        <label>Questions</label>
+                            @foreach($defaultQuestions as $dq)
+                                @php
+                                    $options = is_string($dq->options) ? json_decode($dq->options, true) : $dq->options;
+                                @endphp
+
+                                <div class="p-3 mb-3 border rounded bg-light shadow-sm">
+                                    <label class="form-label mb-1 fw-bold d-block">
+                                        {{ $dq->question_text }}
+                                        <span class="badge bg-secondary text-white">{{ ucfirst($dq->type) }}</span>
+                                    </label>
+
+                                    @if(in_array($dq->type, ['radio', 'checkbox']) && is_array($options))
+                                        <ul class="mb-0 ps-3">
+                                            @foreach($options as $opt)
+                                                <li>{{ $opt }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <hr class="my-4">
+                    <div class="form-group text-dark">
+                        <label>Technician Questions</label>
                         <div id="questions-container" class="space-y-4">
+                            {{-- Akan diisi dengan JavaScript dari existingQuestions --}}
                         </div>
                         <button type="button" class="btn btn-outline-success btn-sm mt-2" onclick="addQuestion()">
                             <i class="mdi mdi-plus"></i> Add Question
                         </button>
                     </div>
 
-                    <div class="mt-4 d-flex justify-content-between">
-                        <a href="{{ route($role.'.form.index') }}" class="btn btn-outline-secondary">
+                    <div class="mt-4 d-flex justify-content-end">
+                        <a href="{{ route($role.'.form.index') }}" class="btn btn-outline-secondary me-2">
                             <i class="mdi mdi-arrow-left"></i> Cancel
                         </a>
                         <button type="submit" class="btn btn-outline-primary">
-                            <i class="mdi mdi-content-save"></i> Update Form
+                            <i class="mdi mdi-content-save"></i> Save Form
                         </button>
                     </div>
                 </form>
@@ -64,17 +92,16 @@
 </section>
 
 @php
-$existingQuestions = old('questions', $form->questions->map(function($q) {
-    return [
-        'question_text' => $q->question_text,
-        'type' => $q->type,
-        'options' => $q->options ? json_decode($q->options) : [],
-    ];
-})->toArray());
+    $existingQuestions = $customQuestions->map(function($q) {
+        return [
+            'question_text' => $q->question_text,
+            'type' => $q->type,
+            'options' => is_string($q->options) ? json_decode($q->options, true) : ($q->options ?? []),
+        ];
+    })->values()->toArray();
 @endphp
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-
 <script>
     let questionCount = 0;
     const existingQuestions = @json($existingQuestions);
@@ -99,11 +126,11 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
         questionEl.innerHTML = `
             <div class="position-absolute end-0 top-0 m-2 drag-handle cursor-move"><i class="mdi mdi-drag"></i></div>
             <div class="form-group">
-                <label>Pertanyaan</label>
+                <label>Questions</label>
                 <input type="text" name="questions[${qIndex}][question_text]" class="form-control" required value="${question.question_text || ''}">
             </div>
             <div class="form-group">
-                <label>Jenis Jawaban</label>
+                <label>Answer Type</label>
                 <select name="questions[${qIndex}][type]" class="form-control type-select" onchange="toggleOptions(this, ${qIndex})" required>
                     <option value="text" ${selectedType === 'text' ? 'selected' : ''}>Text</option>
                     <option value="number" ${selectedType === 'number' ? 'selected' : ''}>Number</option>
@@ -113,24 +140,19 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
                 </select>
             </div>
             <div class="form-group" id="options-${qIndex}" style="display: ${(selectedType === 'checkbox' || selectedType === 'radio') ? 'block' : 'none'};">
-                <label>Opsi Jawaban</label>
-                <div id="options-list-${qIndex}">
-                    ${optionsHtml}
-                </div>
+                <label>Options</label>
+                <div id="options-list-${qIndex}">${optionsHtml}</div>
                 <button type="button" class="btn btn-outline-success btn-sm mt-2" onclick="addOption(${qIndex})">
-                    <i class="mdi mdi-plus"></i> Tambah Opsi
+                    <i class="mdi mdi-plus"></i> Add Option
                 </button>
             </div>
             <div class="mt-3 d-flex gap-2">
                 <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.question-item').remove()">
-                    <i class="mdi mdi-delete"></i> Hapus
+                    <i class="mdi mdi-delete"></i> Delete
                 </button>
-                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="duplicateQuestion(this)">
-                    Duplikat
-                </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="duplicateQuestion(this)">Duplicate</button>
             </div>
         `;
-
         container.appendChild(questionEl);
 
         new Sortable(container, {
@@ -149,7 +171,7 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
         const list = document.getElementById(`options-list-${qIndex}`);
         list.insertAdjacentHTML('beforeend', `
             <div class="input-group mb-2 option-item">
-                <input type="text" name="questions[${qIndex}][options][]" class="form-control" placeholder="Isi pilihan...">
+                <input type="text" name="questions[${qIndex}][options][]" class="form-control" placeholder="Enter option...">
                 <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.parentElement.remove()">
                     <i class="mdi mdi-close"></i>
                 </button>
@@ -160,27 +182,19 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
     function duplicateQuestion(button) {
         const original = button.closest('.question-item');
         const clone = original.cloneNode(true);
-
         const container = document.getElementById('questions-container');
         const newIndex = questionCount++;
 
         clone.querySelectorAll('input, select').forEach(el => {
             if(el.name) {
-                el.name = el.name.replace(/questions\$\d+\$/, `questions[${newIndex}]`);
+                el.name = el.name.replace(/questions\[\d+\]/, `questions[${newIndex}]`);
                 if(el.tagName === 'INPUT' && el.type === 'text') el.value = el.value || '';
             }
         });
 
-        const oldId = clone.querySelector('[id^="options-"]').id;
-        const newOptionsId = `options-${newIndex}`;
-        clone.querySelector('[id^="options-"]').id = newOptionsId;
-
-        const oldOptionsListId = clone.querySelector('[id^="options-list-"]').id;
-        const newOptionsListId = `options-list-${newIndex}`;
-        clone.querySelector('[id^="options-list-"]').id = newOptionsListId;
-
-        const btnAddOption = clone.querySelector('button.btn-success');
-        btnAddOption.setAttribute('onclick', `addOption(${newIndex})`);
+        clone.querySelector('[id^="options-"]').id = `options-${newIndex}`;
+        clone.querySelector('[id^="options-list-"]').id = `options-list-${newIndex}`;
+        clone.querySelector('button.btn-success').setAttribute('onclick', `addOption(${newIndex})`);
 
         container.appendChild(clone);
     }
@@ -193,75 +207,4 @@ $existingQuestions = old('questions', $form->questions->map(function($q) {
         }
     };
 </script>
-
-<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
-    function previewForm() {
-        const title = document.querySelector('input[name="title"]').value;
-        const labSelect = document.querySelector('select[name="lab_id"]');
-        const labName = labSelect.options[labSelect.selectedIndex].text;
-
-        const questionItems = document.querySelectorAll('.question-item');
-        let questionsHtml = '';
-
-        if (questionItems.length === 0) {
-            questionsHtml = '<p class="text-muted">Belum ada pertanyaan ditambahkan.</p>';
-        } else {
-            questionItems.forEach((item, index) => {
-                const qText = item.querySelector('input[name*="[question_text]"]').value;
-                const qType = item.querySelector('select[name*="[type]"]').value;
-                const optionList = item.querySelectorAll('.option-item input');
-
-                let optionsHtml = '';
-                if (optionList.length > 0) {
-                    optionsHtml = '<ul class="mb-0 ps-4">';
-                    optionList.forEach(opt => {
-                        optionsHtml += `<li class="text-sm">${opt.value}</li>`;
-                    });
-                    optionsHtml += '</ul>';
-                }
-
-                questionsHtml += `
-                    <div class="border rounded p-3 mb-3 bg-white shadow-sm">
-                        <p class="mb-1"><strong>Pertanyaan ${index + 1}:</strong> ${qText}</p>
-                        <p class="mb-2"><span class="badge bg-info text-dark">Jenis: ${qType}</span></p>
-                        ${optionsHtml}
-                    </div>
-                `;
-            });
-        }
-
-        Swal.fire({
-            title: 'Preview Form',
-            html: `
-                <div class="text-start align-items-center">
-                    <div class="mb-3">
-                        <table class="table table-sm mb-0">
-                            <tbody>
-                                <tr>
-                                    <th class="text-nowrap">Judul Form</th>
-                                    <td>: ${title || '-'}</td>
-                                </tr>
-                                <tr>
-                                    <th class="text-nowrap">Laboratorium</th>
-                                    <td>: ${labName || '-'}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <hr>
-                    <h5 class="mb-3">Pertanyaan:</h5>
-                    ${questionsHtml}
-                </div>
-            `,
-            width: '750px',
-            confirmButtonText: 'Tutup',
-            customClass: {
-                htmlContainer: 'text-start'
-            }
-        });
-    }
-</script>
-
 @endsection

@@ -18,7 +18,7 @@
 
         <div class="tab-content">
             @foreach($labs as $index => $lab)
-            <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="lab-{{ $lab->id }}" role="tabpanel">
+            <div class="tab-pane fade text-dark {{ $index === 0 ? 'show active' : '' }}" id="lab-{{ $lab->id }}" role="tabpanel">
                 <div class="pt-3">
                     @php
                         $labReports = $labReportsGrouped[$lab->id] ?? collect();

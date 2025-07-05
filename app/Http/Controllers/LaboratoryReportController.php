@@ -9,18 +9,18 @@ use Illuminate\Http\Request;
 
 class LaboratoryReportController extends Controller
 {
-public function labReports()
-{
-    $labs = Laboratory::with('pcs')->get();
-    $labReports = LabReport::with(['pc', 'technician', 'pc.lab'])
-        ->orderBy('created_at', 'desc')
-        ->get();
+    public function labReports()
+    {
+        $labs = Laboratory::with('pcs')->get();
+        $labReports = LabReport::with(['pc', 'technician', 'pc.lab'])
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-    // Kelompokkan berdasarkan lab
-    $labReportsGrouped = $labReports->groupBy(fn($report) => $report->pc->lab->id ?? 'unknown');
+        // Kelompokkan berdasarkan lab
+        $labReportsGrouped = $labReports->groupBy(fn($report) => $report->pc->lab->id ?? 'unknown');
 
-    return view('kepala_lab.lab_reports.index', compact('labs', 'labReportsGrouped'));
-}
+        return view('kepala_lab.lab_reports.index', compact('labs', 'labReportsGrouped'));
+    }
 
     public function update(Request $request, $id)
     {
@@ -32,14 +32,18 @@ public function labReports()
         return redirect()->back()->with('success', 'Report updated successfully.');
     }
 
+    public function labReportsJurusan()
+    {
+        $labs = Laboratory::with('pcs')->get();
+        $labReports = LabReport::with(['pc', 'technician', 'pc.lab'])
+            ->where('status', 'reviewed')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
+        // Kelompokkan berdasarkan lab
+        $labReportsGrouped = $labReports->groupBy(fn($report) => $report->pc->lab->id ?? 'unknown');
 
-//     public function historyReports()
-//     {
-//         $historyReports = HistoryReportPC::with(['pc', 'technician']) // pastikan relasi ada
-//             ->orderBy('created_at', 'desc')
-//             ->get();
+        return view('jurusan.lab_reports.index', compact('labs', 'labReportsGrouped'));
+}
 
-//         return view('teknisi.history_reports.index', compact('historyReports'));
-//     }
 }

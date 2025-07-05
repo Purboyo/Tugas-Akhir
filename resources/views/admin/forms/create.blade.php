@@ -33,15 +33,41 @@
 
                     <div class="form-group">
                         <label for="lab_id">Select Laboratory</label>
-                        <select class="form-control multi-select" name="lab_id[]" multiple="multiple" required>
+                        <select class="form-control multi-select text-dark" name="lab_id[]" multiple="multiple" required>
                             @foreach ($labs as $lab)
-                                <option value="{{ $lab->id }}">{{ $lab->lab_name }}</option>
+                                <option class="text-dark" value="{{ $lab->id }}">{{ $lab->lab_name }}</option>
                             @endforeach
                         </select>
                     </div>
+                   <hr class="my-4">
 
-                    <hr class="my-4">
-
+                   @if(auth()->user()->role === 'teknisi' && $defaultQuestions->isNotEmpty())
+                       <div class="form-group">
+                           <h5 class="text-dark mb-3">📌 Defaul Questions by Admin</h5>
+                   
+                           @foreach($defaultQuestions as $dq)
+                               @php
+                                   $options = is_string($dq->options) ? json_decode($dq->options, true) : $dq->options;
+                               @endphp
+                   
+                               <div class="p-3 mb-3 border rounded bg-light shadow-sm">
+                                   <label class="form-label mb-1 fw-bold d-block">
+                                       {{ $dq->question_text }}
+                                       <span class="badge bg-secondary text-white">{{ ucfirst($dq->type) }}</span>
+                                   </label>
+                   
+                                   @if(in_array($dq->type, ['radio', 'checkbox']) && is_array($options))
+                                       <ul class="mb-0 ps-3">
+                                           @foreach($options as $opt)
+                                               <li>{{ $opt }}</li>
+                                           @endforeach
+                                       </ul>
+                                   @endif
+                               </div>
+                           @endforeach
+                       </div>
+                   @endif
+                   
                     <div class="form-group text-dark">
                         <label>Questions</label>
                         <div id="questions-container" class="space-y-4"></div>
@@ -50,18 +76,13 @@
                         </button>
                     </div>
 
-                    <div class="mt-4 d-flex justify-content-between">
-                        <button type="button" class="btn btn-outline-info" onclick="previewForm()">
-                            <i class="mdi mdi-eye"></i> Preview
+                   <div class="mt-4 d-flex justify-content-end">
+                        <a href="{{ route($role.'.form.index') }}" class="btn btn-outline-secondary me-2">
+                            <i class="mdi mdi-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="mdi mdi-content-save"></i> Save Form
                         </button>
-                        <div>
-                            <a href="{{ route($role.'.form.index') }}" class="btn btn-outline-secondary">
-                                <i class="mdi mdi-arrow-left"></i> Cancel
-                            </a>
-                            <button type="submit" class="btn btn-outline-primary">
-                                <i class="mdi mdi-content-save"></i> Save Form
-                            </button>
-                        </div>
                     </div>
                 </form>
             </div>
@@ -155,58 +176,6 @@ function duplicateQuestion(button) {
     const clone = original.cloneNode(true);
     const container = document.getElementById('questions-container');
     container.appendChild(clone);
-}
-</script>
-
-<script>
-function previewForm() {
-    const title = document.querySelector('input[name="title"]').value;
-    const labSelect = document.querySelector('select[name="lab_id"]');
-    const labName = labSelect.options[labSelect.selectedIndex].text;
-
-    const questionItems = document.querySelectorAll('.question-item');
-    let questionsHtml = '';
-
-    if (questionItems.length === 0) {
-        questionsHtml = '<p class="text-muted">no questions yet.</p>';
-    } else {
-        questionsHtml += '<ol class="text-start">';
-        questionItems.forEach((item, index) => {
-            const qText = item.querySelector('input[name*="[question_text]"]').value;
-            const qType = item.querySelector('select[name*="[type]"]').value;
-            const optionList = item.querySelectorAll('.option-item input');
-            let optionsHtml = '';
-
-            if (optionList.length > 0) {
-                optionsHtml = '<ul>';
-                optionList.forEach(opt => {
-                    optionsHtml += `<li>${opt.value}</li>`;
-                });
-                optionsHtml += '</ul>';
-            }
-
-            questionsHtml += `<li><strong>${qText}</strong><br><em>Type: ${qType}</em>${optionsHtml}</li>`;
-        });
-        questionsHtml += '</ol>';
-    }
-
-    Swal.fire({
-        title: 'Preview Form',
-        html: `
-            <div class="text-start">
-                <p><strong>title:</strong> ${title || '-'}<br>
-                <strong>Laboratory:</strong> ${labName || '-'}</p>
-                <hr>
-                <h5>Questions:</h5>
-                ${questionsHtml}
-            </div>
-        `,
-        width: '700px',
-        confirmButtonText: 'Close',
-        customClass: {
-            htmlContainer: 'text-start'
-        }
-    });
 }
 </script>
 @endsection

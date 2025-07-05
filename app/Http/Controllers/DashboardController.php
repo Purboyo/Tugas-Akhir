@@ -116,5 +116,20 @@ public function kepalaLab()
     ));
 }
 
+public function jurusan()
+{
+    $totalReviewed = LabReport::where('status', 'reviewed')->count();
+    $totalResolved = LabReport::where('status', 'resolved')->count();
+    $totalLab = Laboratory::count();
 
+    $latestReports = LabReport::with(['pc.lab', 'technician'])
+        ->whereIn('status', ['reviewed', 'resolved'])
+        ->latest()
+        ->take(5)
+        ->get();
+
+    return view('jurusan.dashboard', compact(
+        'totalReviewed', 'totalResolved', 'totalLab', 'latestReports'
+    ));
+}
 }

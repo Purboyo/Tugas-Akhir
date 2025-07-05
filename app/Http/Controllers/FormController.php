@@ -51,99 +51,28 @@ public function index(Request $request)
 public function create()
 {
     $user = Auth::user();
+    $labs = $user->role === 'admin'
+        ? Lab::all()
+        : Lab::where('technician_id', $user->id)->get();
 
-    $labs = $user->role === 'teknisi'
-        ? Lab::where('technician_id', $user->id)->get()
-        : Lab::all();
+    $defaultQuestions = collect();
 
-    return view('admin.forms.create', compact('labs'));
-}
-
-    
-    public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'lab_id' => 'required|array|exists:laboratories,id',
-            'questions' => 'array',
-            'questions.*.question_text' => 'required|string',
-            'questions.*.type' => 'required|in:text,number,checkbox,radio,textarea',
-        ]);
-    
-        DB::beginTransaction();
-    
-        try {
-            $isAdmin = auth::user()->role === 'admin';
-    
-        $form = Form::create([
-            'title' => $request->title,
-            'is_default' => $isAdmin,
-            'created_by' => auth::id(),
-
-        ]);
-        $form->laboratories()->sync($request->lab_id);
-
-    
-            if (!$isAdmin) {
-                // Cari form default
-                $defaultForm = Form::where('is_default', true)->first();
-    
-                if ($defaultForm) {
-                    // Salin semua pertanyaan dari form default (tidak bisa diubah)
-                    foreach ($defaultForm->questions as $q) {
-                        Form_question::create([
-                            'form_id' => $form->id,
-                            'question_text' => $q->question_text,
-                            'type' => $q->type,
-                            'options' => $q->options,
-                        ]);
-                    }
-                }
-            }
-    
-            // Tambah pertanyaan tambahan dari user (admin atau teknisi)
-            if ($request->has('questions')) {
-                foreach ($request->questions as $question) {
-                    Form_question::create([
-                        'form_id' => $form->id,
-                        'question_text' => $question['question_text'],
-                        'type' => $question['type'],
-                        'options' => in_array($question['type'], ['radio', 'checkbox']) 
-                            ? json_encode($question['options'] ?? [])
-                            : null,
-                    ]);
-                }
-            }
-    
-            DB::commit();
-            return redirect()->route($this->role. '.form.index')->with('success', 'Form saved successfully.');
-        } catch (\Exception $e) {
-            DB::rollback();
-            return back()->with('error', 'Failed to save form.')->withInput();
+    if ($user->role !== 'admin') {
+        $defaultForm = \App\Models\Form::where('is_default', true)->first();
+        if ($defaultForm) {
+            $defaultQuestions = $defaultForm->questions;
         }
     }
 
-public function edit($id)
-{
-    $form = Form::with(['questions', 'laboratories'])->findOrFail($id);
-    $user = auth::user();
-
-    $labs = $user->role === 'teknisi'
-        ? Lab::where('technician_id', $user->id)->get()
-        : Lab::all();
-
-    return view('admin.forms.edit', compact('form', 'labs'));
+    return view('admin.forms.create', compact('labs', 'defaultQuestions'));
 }
 
-
-public function update(Request $request, $id)
+public function store(Request $request)
 {
-    $form = Form::findOrFail($id);
-
     $request->validate([
         'title' => 'required|string|max:255',
         'lab_id' => 'required|array|exists:laboratories,id',
-        'questions' => 'required|array|min:1',
+        'questions' => 'array',
         'questions.*.question_text' => 'required|string',
         'questions.*.type' => 'required|in:text,number,checkbox,radio,textarea',
     ]);
@@ -151,28 +80,120 @@ public function update(Request $request, $id)
     DB::beginTransaction();
 
     try {
-        // Update form data
+        $isAdmin = auth::user()->role === 'admin';
+
+        $form = Form::create([
+            'title' => $request->title,
+            'is_default' => $isAdmin,
+            'created_by' => auth::id(),
+        ]);
+
+        $form->laboratories()->sync($request->lab_id);
+
+        // Jika teknisi, salin pertanyaan default dari form admin
+        if (!$isAdmin) {
+            $defaultForm = Form::where('is_default', true)->first();
+
+            if ($defaultForm) {
+                foreach ($defaultForm->questions as $q) {
+                    Form_question::create([
+                        'form_id' => $form->id,
+                        'question_text' => $q->question_text,
+                        'type' => $q->type,
+                        'options' => $q->options,
+                        'is_default' => true, // Penting!
+                    ]);
+                }
+            }
+        }
+
+        // Simpan pertanyaan tambahan (buatan admin/teknisi)
+        if ($request->has('questions')) {
+            foreach ($request->questions as $question) {
+                Form_question::create([
+                    'form_id' => $form->id,
+                    'question_text' => $question['question_text'],
+                    'type' => $question['type'],
+                    'options' => in_array($question['type'], ['radio', 'checkbox']) 
+                        ? json_encode($question['options'] ?? [])
+                        : null,
+                    'is_default' => false, // Penting juga!
+                ]);
+            }
+        }
+
+        DB::commit();
+        return redirect()->route($this->role . '.form.index')->with('success', 'Form saved successfully.');
+    } catch (\Exception $e) {
+        DB::rollback();
+        return back()->with('error', 'Failed to save form.')->withInput();
+    }
+}
+
+
+
+public function edit($id)
+{
+    $form = Form::with(['laboratories', 'questions'])->findOrFail($id);
+    $labs = auth::user()->role === 'admin'
+        ? Lab::all()
+        : Lab::where('technician_id', auth::id())->get();
+
+    // Ambil pertanyaan default (is_default = true) dan non-default
+    $defaultQuestions = $form->questions->where('is_default', true);
+    $customQuestions = $form->questions->where('is_default', false);
+
+    return view('admin.forms.edit', [
+        'form' => $form,
+        'labs' => $labs,
+        'defaultQuestions' => $defaultQuestions,
+        'customQuestions' => $customQuestions,
+    ]);
+}
+
+public function update(Request $request, $id)
+{
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'lab_id' => 'required|array|exists:laboratories,id',
+        'questions' => 'nullable|array',
+        'questions.*.question_text' => 'required|string',
+        'questions.*.type' => 'required|in:text,number,checkbox,radio,textarea',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        $form = Form::findOrFail($id);
         $form->update([
             'title' => $request->title,
         ]);
 
-        // Sync lab relasi
         $form->laboratories()->sync($request->lab_id);
 
-        // Hapus pertanyaan lama
-        $form->questions()->delete();
+        // Ambil pertanyaan default dari form admin (tidak boleh dihapus)
+        $defaultForm = Form::where('is_default', true)->first();
+        $defaultQuestionsText = $defaultForm 
+            ? $defaultForm->questions->pluck('question_text')->toArray()
+            : [];
 
-        // Tambahkan pertanyaan baru
-        foreach ($request->questions as $question) {
-            Form_question::create([
-                'form_id' => $form->id,
-                'question_text' => $question['question_text'],
-                'type' => $question['type'],
-                'options' => in_array($question['type'], ['radio', 'checkbox']) 
-                    ? json_encode($question['options'] ?? [])
-                    : null,
-                'is_editable' => true,
-            ]);
+        // Hapus semua pertanyaan yang bukan default
+        $form->questions()
+            ->whereNotIn('question_text', $defaultQuestionsText)
+            ->delete();
+
+        // Tambahkan pertanyaan baru dari teknisi
+        if ($request->has('questions')) {
+            foreach ($request->questions as $question) {
+                Form_question::create([
+                    'form_id' => $form->id,
+                    'question_text' => $question['question_text'],
+                    'type' => $question['type'],
+                    'options' => in_array($question['type'], ['radio', 'checkbox']) 
+                        ? json_encode($question['options'] ?? []) 
+                        : null,
+                ]);
+            }
         }
 
         DB::commit();
