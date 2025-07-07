@@ -13,8 +13,8 @@ return new class extends Migration
     {
     Schema::create('reporters', function (Blueprint $table) {
         $table->id();
-        $table->string('name');
-        $table->string('npm');
+        $table->string('name', 30);
+        $table->string('npm', 20);
         $table->timestamps(); // created_at dan updated_at
     });
     }

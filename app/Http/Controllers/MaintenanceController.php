@@ -12,23 +12,30 @@ use Illuminate\Support\Facades\DB;
 
 class MaintenanceController extends Controller
 {
-    // Tampilkan semua reminder untuk teknisi
     public function index()
     {
-        $userId = auth::id();
+        $user = auth()->user();
 
+        // Ambil semua lab milik user
+        $labIds = $user->labs()->pluck('id');
+
+        // Ambil semua reminder dari lab-lab tersebut
         $reminders = Reminder::with('laboratory')
-            ->where('user_id', $userId)
+            ->whereIn('laboratory_id', $labIds)
             ->latest()
             ->get();
 
         return view('teknisi.maintenance.index', compact('reminders'));
     }
 
+
     // Form pengisian maintenance berdasarkan reminder
     public function create(Reminder $reminder)
     {
-        if ($reminder->user_id !== auth::id()) {
+        $user = auth()->user();
+        $allowedLabIds = $user->labs()->pluck('id');
+
+        if (!in_array($reminder->laboratory_id, $allowedLabIds->toArray())) {
             abort(403, 'Akses ditolak.');
         }
 

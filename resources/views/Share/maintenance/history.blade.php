@@ -100,7 +100,7 @@
                                         {{ $row->status }}
                                     </span>
                                 </td>
-                                <td>{{ $row->maintenance->reminder->user->name ?? '-' }}</td>
+                                <td>{{ $row->maintenance->reminder->laboratory->technician->name ?? '-' }}</td>
                                 <td>{{ $row->created_at->format('d M Y') }}</td>
                             </tr>
                         @endforeach
@@ -146,7 +146,7 @@
         </div>
     </div>
     @empty
-        <div class="alert alert-info">No data found.</div>
+        <div class="alert alert-warning text-dark">No data found.</div>
     @endforelse
 </div>
 @endsection

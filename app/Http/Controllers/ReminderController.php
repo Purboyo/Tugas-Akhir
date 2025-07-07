@@ -18,15 +18,15 @@ public function index(Request $request)
     $search = $request->input('search');
 
     // Ambil semua data dengan relasi yang dibutuhkan
-$allReminders = Reminder::with(['user', 'laboratory', 'maintenance', 'historyMaintenance'])
-    ->when($search, function ($query, $search) {
-        $query->where('title', 'like', "%{$search}%")
-              ->orWhereHas('laboratory', function ($labQuery) use ($search) {
-                  $labQuery->where('lab_name', 'like', "%{$search}%");
-              });
-    })
-    ->latest()
-    ->get();
+    $allReminders = Reminder::with(['user', 'laboratory', 'maintenance', 'historyMaintenance'])
+        ->when($search, function ($query, $search) {
+            $query->where('title', 'like', "%{$search}%")
+                ->orWhereHas('laboratory', function ($labQuery) use ($search) {
+                    $labQuery->where('lab_name', 'like', "%{$search}%");
+                });
+        })
+        ->latest()
+        ->get();
 
 
     // Pisahkan berdasarkan status yang dihitung secara dinamis
@@ -65,7 +65,6 @@ $allReminders = Reminder::with(['user', 'laboratory', 'maintenance', 'historyMai
             }
         }
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'laboratory_id' => [
                 'required',
                 'exists:laboratories,id',
@@ -79,7 +78,6 @@ $allReminders = Reminder::with(['user', 'laboratory', 'maintenance', 'historyMai
         ]);
         
         Reminder::create([
-            'user_id' => $request->user_id,
             'laboratory_id' => $request->laboratory_id,
             'title' => $request->title,
             'description' => $request->description,

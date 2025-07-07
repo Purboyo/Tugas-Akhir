@@ -14,13 +14,13 @@
         <div class="card-body">
             <h5>{{ $pc->pc_name }}</h5>
             <input type="hidden" name="descriptions[{{ $pc->id }}]" value="PC rusak."> 
-            <textarea name="descriptions[{{ $pc->id }}]" class="form-control" placeholder="Keterangan kerusakan"></textarea>
+            <textarea name="descriptions[{{ $pc->id }}]" class="form-control" placeholder="Damage description"></textarea>
         </div>
     </div>
 @endforeach
 
 
-    <button type="submit" class="btn btn-outline-primary">Kirim Laporan ke Kepala Lab</button>
+    <button type="submit" class="btn btn-outline-primary">Submit Report to Lab Head</button>
 </form>
 
 @endsection

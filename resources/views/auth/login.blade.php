@@ -5,11 +5,9 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>login - LabSI </title>
-    <!-- Favicon icon -->
+    <title>Login - LabSI</title>
     <link rel="icon" type="image/png" sizes="16x16" href="./images/favicon.png">
-    <link href="{{asset('vendor/focus-2/css/style.css')}}" rel="stylesheet">
-
+    <link href="{{ asset('vendor/focus-2/css/style.css') }}" rel="stylesheet">
 </head>
 
 <body class="h-100">
@@ -21,21 +19,37 @@
                         <div class="row no-gutters">
                             <div class="col-xl-12">
                                 <div class="auth-form text-dark">
-                                    <h4 class="text-center mb-4">Sign in your account</h4>
-                                      <form method="POST" action="{{ url('login') }}">
-                                          @csrf
-                                          <div class="form-group">
-                                              <label><strong>Email</strong></label>
-                                              <input type="email" name="email" class="form-control" placeholder="user@example.com" required>
-                                          </div>
-                                          <div class="form-group">
-                                              <label><strong>Password</strong></label>
-                                              <input type="password" name="password" class="form-control" placeholder="Password" value="password" required>
-                                          </div>
-                                          <div class="text-center">
-                                              <button type="submit" class="btn btn-primary btn-block">Sign me in</button>
-                                          </div>
-                                      </form>
+                                    <h4 class="text-center mb-4">Sign in to your account</h4>
+
+                                    {{-- Pesan Error Umum --}}
+                                    @if (session('error'))
+                                        <div class="alert alert-danger text-center">
+                                            {{ session('error') }}
+                                        </div>
+                                    @elseif ($errors->any())
+                                        <div class="alert alert-danger text-center text-dark">
+                                            {{ $errors->first() }}
+                                        </div>
+                                    @endif
+
+                                    <form method="POST" action="{{ url('login') }}">
+                                        @csrf
+
+                                        <div class="form-group">
+                                            <label><strong>Email</strong></label>
+                                            <input type="email" name="email" class="form-control" placeholder="user@example.com" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label><strong>Password</strong></label>
+                                            <input type="password" name="password" class="form-control" placeholder="Password" value="password" required>
+                                        </div>
+
+                                        <div class="text-center mt-3">
+                                            <button type="submit" class="btn btn-primary btn-block">Sign me in</button>
+                                        </div>
+                                    </form>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -45,15 +59,10 @@
         </div>
     </div>
 
-
-    <!--**********************************
-        Scripts
-    ***********************************-->
-    <!-- Required vendors -->
-    <script src="{{asset('vendor/focus-2/vendor/global/global.min.js')}}"></script>
-    <script src="{{asset('vendor/focus-2/js/quixnav-init.js')}}"></script>
-    <script src="{{asset('vendor/focus-2/js/custom.min.js')}}"></script>
-
+    <!-- Scripts -->
+    <script src="{{ asset('vendor/focus-2/vendor/global/global.min.js') }}"></script>
+    <script src="{{ asset('vendor/focus-2/js/quixnav-init.js') }}"></script>
+    <script src="{{ asset('vendor/focus-2/js/custom.min.js') }}"></script>
 </body>
 
 </html>

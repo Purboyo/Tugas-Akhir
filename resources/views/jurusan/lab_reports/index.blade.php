@@ -21,7 +21,7 @@
             <div class="tab-pane fade {{ $index === 0 ? 'show active' : '' }}" id="lab-{{ $lab->id }}" role="tabpanel">
                 <div class="pt-3">
                     @php
-                        $labReports = $labReportsGrouped[$lab->id] ?? collect();
+                        $labReports = ($labReportsGrouped[$lab->id] ?? collect())->where('status', 'Send');
                     @endphp
 
                     @if($labReports->isEmpty())

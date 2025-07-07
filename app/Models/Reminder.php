@@ -12,7 +12,7 @@ class Reminder extends Model
         'description',
         'reminder_date',
         'laboratory_id',
-        'user_id',
+        // 'user_id',
         // 'status'
     ];
 

@@ -16,7 +16,7 @@ public function up()
         $table->unsignedBigInteger('pc_id');
         $table->unsignedBigInteger('technician_id')->nullable();
         $table->text('description')->nullable();
-        $table->string('status')->nullable(); // Optional, bisa ambil dari report
+        $table->string('status', 10);
         $table->timestamps();
 
         $table->foreign('pc_id')->references('id')->on('pcs')->onDelete('cascade');

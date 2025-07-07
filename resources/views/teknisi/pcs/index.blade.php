@@ -38,11 +38,11 @@
         <div class="card mb-4">
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-primary">{{ $lab->lab_name }}</h5>
-                <span class="text-dark">Total PCs: {{ $lab->pcs->count() }}</span>
+                <span class="text-dark">Total PCs: {{ $lab->pcs_paginated->total() }}</span>
             </div>
 
             <div class="card-body">
-                @if($lab->pcs->count() > 0)
+                @if($lab->pcs_paginated->count() > 0)
                     <div class="table-responsive">
                         <table class="table table-bordered text-dark">
                             <thead>
@@ -53,7 +53,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($lab->pcs as $pc)
+                                @foreach($lab->pcs_paginated as $pc)
                                     <tr>
                                         <td>{{ $pc->pc_name }}</td>
                                         <td>
@@ -98,6 +98,29 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    {{-- Pagination --}}
+                    <div class="card-body">
+                        <nav>
+                            <ul class="pagination pagination-sm pagination-gutter justify-content-center">
+                                <li class="page-item {{ $lab->pcs_paginated->onFirstPage() ? 'disabled' : '' }}">
+                                    <a class="page-link" href="{{ $lab->pcs_paginated->previousPageUrl() ?? '#' }}"><i class="icon-arrow-left"></i></a>
+                                </li>
+                                @for ($i = 1; $i <= $lab->pcs_paginated->lastPage(); $i++)
+                                    @php
+                                        $query = request()->except("page_lab_$lab->id");
+                                        $query["page_lab_$lab->id"] = $i;
+                                    @endphp
+                                    <li class="page-item {{ $i == $lab->pcs_paginated->currentPage() ? 'active' : '' }}">
+                                        <a class="page-link" href="{{ url()->current() . '?' . http_build_query($query) }}">{{ $i }}</a>
+                                    </li>
+                                @endfor
+                                <li class="page-item {{ !$lab->pcs_paginated->hasMorePages() ? 'disabled' : '' }}">
+                                    <a class="page-link" href="{{ $lab->pcs_paginated->nextPageUrl() ?? '#' }}"><i class="icon-arrow-right"></i></a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 @else
                     <p class="text-muted">Tidak ada PC pada lab ini.</p>

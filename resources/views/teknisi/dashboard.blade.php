@@ -39,8 +39,8 @@
     <div class="row mb-3">
         <div class="col-12">
             <div class="card shadow-sm">
-                <div class="card-header bg-primary ">
-                    <h6 class="mb-0 text-white">Report Summary (Today)</h6>
+                <div class="card-header bg-light ">
+                    <h6 class="mb-0 text-dark">Report Summary (Today)</h6>
                 </div>
                 <div class="card-body">
                     <canvas id="reportChart" height="70"></canvas>

@@ -22,16 +22,16 @@
                 <div class="pt-3">
                     @php
                         $labReports = $labReportsGrouped[$lab->id] ?? collect();
-                        $activeReports = $labReports->where('status', '!=', 'Resolved');
-                        $resolvedReports = $labReports->where('status', 'Resolved');
+                        $pendingReports = $labReports->where('status', 'Pending');
+                        $sendReports = $labReports->where('status', 'Send');
                     @endphp
 
-                    {{-- Tabel laporan aktif --}}
-                    @if($activeReports->isEmpty())
-                        <p class="text-muted">No active damage report found.</p>
+                    {{-- Tabel laporan PENDING --}}
+                    @if($pendingReports->isEmpty())
+                        <p class="text-muted">No pending damage report found.</p>
                     @else
                     <div class="table-responsive">
-                        <h5 class="mb-2">Active Damage Report</h5>
+                        <h5 class="mb-2">Pending Damage Report</h5>
                         <table class="table table-bordered text-dark">
                             <thead>
                                 <tr>
@@ -46,33 +46,23 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($activeReports as $i => $report)
+                                @foreach($pendingReports as $i => $report)
                                 <tr>
                                     <td>{{ $i + 1 }}</td>
                                     <td>{{ $report->pc->pc_name ?? '-' }}</td>
                                     <td>{{ $report->technician->name ?? '-' }}</td>
-                                    <td>
-                                        @php
-                                            $statusClass = match($report->status) {
-                                                'Pending' => 'bg-warning text-dark',
-                                                'Reviewed' => 'bg-info text-dark',
-                                                default => 'bg-secondary text-white',
-                                            };
-                                        @endphp
-                                        <span class="badge {{ $statusClass }}">{{ $report->status }}</span>
-                                    </td>
+                                    <td><span class="badge bg-warning text-dark">{{ $report->status }}</span></td>
                                     <td>{{ $report->description }}</td>
                                     <td>{{ $report->created_at->format('d M Y H:i') }}</td>
                                     <td>{{ $report->handling_notes }}</td>
                                     <td>
-                                        <!-- Tombol Edit Modal -->
                                         <button type="button" class="btn btn-sm btn-primary" data-toggle="modal" data-target="#editModal-{{ $report->id }}">
                                             Edit
                                         </button>
                                     </td>
                                 </tr>
 
-                                <!-- Modal Edit -->
+                                {{-- Modal Edit --}}
                                 <div class="modal fade" id="editModal-{{ $report->id }}" tabindex="-1" role="dialog">
                                     <div class="modal-dialog" role="document">
                                         <form method="POST" action="{{ route('kepala_lab.labreport.update', $report->id) }}">
@@ -90,8 +80,7 @@
                                                         <label>Status</label>
                                                         <select class="form-control" name="status" required>
                                                             <option value="Pending" {{ $report->status === 'Pending' ? 'selected' : '' }}>Pending</option>
-                                                            <option value="Reviewed" {{ $report->status === 'Reviewed' ? 'selected' : '' }}>Reviewed</option>
-                                                            <option value="Resolved" {{ $report->status === 'Resolved' ? 'selected' : '' }}>Resolved</option>
+                                                            <option value="Send" {{ $report->status === 'Send' ? 'selected' : '' }}>Send</option>
                                                         </select>
                                                     </div>
                                                     <div class="mb-3">
@@ -113,10 +102,10 @@
                     </div>
                     @endif
 
-                    {{-- Tabel laporan yang sudah diselesaikan --}}
-                    @if($resolvedReports->isNotEmpty())
+                    {{-- Tabel laporan SEND --}}
+                    @if($sendReports->isNotEmpty())
                     <div class="table-responsive mt-5">
-                        <h5 class="mb-2 text-success">Resolved Damage Report</h5>
+                        <h5 class="mb-2 text-info">Sent Damage Report</h5>
                         <table class="table table-bordered text-dark">
                             <thead>
                                 <tr>
@@ -130,14 +119,12 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($resolvedReports as $i => $report)
+                                @foreach($sendReports as $i => $report)
                                 <tr>
                                     <td>{{ $i + 1 }}</td>
                                     <td>{{ $report->pc->pc_name ?? '-' }}</td>
                                     <td>{{ $report->technician->name ?? '-' }}</td>
-                                    <td>
-                                        <span class="badge bg-success text-white">{{ $report->status }}</span>
-                                    </td>
+                                    <td><span class="badge bg-info text-dark">{{ $report->status }}</span></td>
                                     <td>{{ $report->description }}</td>
                                     <td>{{ $report->created_at->format('d M Y H:i') }}</td>
                                     <td>{{ $report->handling_notes }}</td>
@@ -147,7 +134,6 @@
                         </table>
                     </div>
                     @endif
-
                 </div>
             </div>
             @endforeach

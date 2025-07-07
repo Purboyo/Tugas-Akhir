@@ -38,71 +38,69 @@ public function admin()
 
 
 public function teknisi()
-    {
-        $user = auth::user();
-        $today = Carbon::today();
+{
+    $user = Auth::user();
+    $today = Carbon::today();
 
-        $labs = Laboratory::where('technician_id', $user->id)
-            ->with('pcs', 'reports') // relasi reports harus ada (lihat model)
-            ->get()
-            ->map(function ($lab) use ($today) {
-                // Hitung total PC
-                $lab->total_pcs = $lab->pcs->count();
+    // Ambil lab yang dimiliki teknisi ini
+    $labs = Laboratory::where('technician_id', $user->id)
+        ->with(['pcs', 'reports', 'reminders']) // pastikan relasi reminders ada di model
+        ->get()
+        ->map(function ($lab) use ($today) {
+            // Hitung total PC
+            $lab->total_pcs = $lab->pcs->count();
 
-                // Filter report hari ini
-                $todayReports = $lab->reports->filter(function ($report) use ($today) {
-                    return $report->created_at->isSameDay($today);
-                });
-
-                // Hitung jumlah report good/bad
-                $lab->good_reports = $todayReports->where('status', 'Good')->count();
-                $lab->bad_reports = $todayReports->where('status', 'Bad')->count();
-
-                return $lab;
+            // Filter report hari ini
+            $todayReports = $lab->reports->filter(function ($report) use ($today) {
+                return $report->created_at->isSameDay($today);
             });
 
-        // Jadwal maintenance
-        $reminders = Reminder::with('laboratory')
-            ->where('user_id', $user->id)
-            ->get()
-            ->filter(function ($reminder) {
-                return $reminder->computed_status !== 'completed';
-            });
+            // Hitung jumlah report good/bad
+            $lab->good_reports = $todayReports->where('status', 'Good')->count();
+            $lab->bad_reports = $todayReports->where('status', 'Bad')->count();
 
+            return $lab;
+        });
 
-        // Data untuk chart
-        $chartLabels = $labs->pluck('lab_name');
-        $chartGood = $labs->pluck('good_reports');
-        $chartBad = $labs->pluck('bad_reports');
+    // Ambil semua reminder dari lab yang dimiliki teknisi
+    $reminders = $labs->flatMap(function ($lab) {
+        return $lab->reminders;
+    })->filter(function ($reminder) {
+        return $reminder->computed_status !== 'completed';
+    });
 
-        $chartPCs = $labs->pluck('total_pcs');
-        return view('teknisi.dashboard', compact('labs', 'reminders', 'chartLabels', 'chartGood', 'chartBad', 'chartPCs'));
-    }
+    // Data untuk chart
+    $chartLabels = $labs->pluck('lab_name');
+    $chartGood = $labs->pluck('good_reports');
+    $chartBad = $labs->pluck('bad_reports');
+    $chartPCs = $labs->pluck('total_pcs');
+
+    return view('teknisi.dashboard', compact(
+        'labs', 'reminders',
+        'chartLabels', 'chartGood', 'chartBad', 'chartPCs'
+    ));
+}
 
 public function kepalaLab()
 {
     // Ambil semua data lab + pcs
     $labs = Laboratory::with('pcs')->get();
 
-    // Ambil semua laporan, dengan relasi PC dan Lab
-    $labReports = LabReport::with(['pc.lab', 'technician'])
-        ->latest()
-        ->get();
+    // Ambil semua laporan
+    $labReports = LabReport::with(['pc.lab', 'technician'])->latest()->get();
 
     // Hitung jumlah laporan
     $totalReports = $labReports->count();
-
-    // Filter berdasarkan status
     $pendingReports = $labReports->where('status', 'Pending')->count();
-    $resolvedReports = $labReports->where('status', 'Resolved')->count();
+    $sendReports = $labReports->where('status', 'Send')->count();
 
-    // Siapkan data untuk chart
+    // Data untuk chart
     $chartData = [
         'Pending' => $pendingReports,
-        'Resolved' => $resolvedReports,
+        'Send' => $sendReports,
     ];
 
-    // Grouping berdasarkan Lab
+    // Group berdasarkan lab
     $labReportsGrouped = $labReports->groupBy(fn($report) => $report->pc->lab->id ?? 'unknown');
 
     return view('kepala_lab.dashboard', compact(
@@ -111,25 +109,23 @@ public function kepalaLab()
         'labReportsGrouped',
         'totalReports',
         'pendingReports',
-        'resolvedReports',
+        'sendReports',
         'chartData'
     ));
 }
 
 public function jurusan()
 {
-    $totalReviewed = LabReport::where('status', 'reviewed')->count();
-    $totalResolved = LabReport::where('status', 'resolved')->count();
-    $totalLab = Laboratory::count();
-
-    $latestReports = LabReport::with(['pc.lab', 'technician'])
-        ->whereIn('status', ['reviewed', 'resolved'])
+    $labs = Laboratory::all();
+    $labReports = LabReport::with(['pc.lab', 'technician'])
+        ->where('status', 'Send')
         ->latest()
-        ->take(5)
         ->get();
 
-    return view('jurusan.dashboard', compact(
-        'totalReviewed', 'totalResolved', 'totalLab', 'latestReports'
-    ));
+    return view('jurusan.dashboard', [
+        'totalSend' => $labReports->count(),
+        'totalLab' => $labs->count(),
+    ]);
 }
+
 }

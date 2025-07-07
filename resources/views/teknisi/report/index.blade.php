@@ -77,12 +77,12 @@
                             <a href="{{ route('teknisi.report.show', $report->id) }}" class="btn btn-outline-info btn-sm">
                                 <i class="fa fa-eye"></i> Show
                             </a>
-                            <a href="javascript:void(0)" data-toggle="modal" data-target="#deleteModal-{{ $report->id }}" class="btn btn-outline-danger btn-sm">
+                            {{-- <a href="javascript:void(0)" data-toggle="modal" data-target="#deleteModal-{{ $report->id }}" class="btn btn-outline-danger btn-sm">
                                 <i class="fa fa-close"></i> Delete
-                            </a>
+                            </a> --}}
 
                             {{-- Delete Modal --}}
-                            <div class="modal fade" id="deleteModal-{{ $report->id }}" tabindex="-1">
+                            {{-- <div class="modal fade" id="deleteModal-{{ $report->id }}" tabindex="-1">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
                                         <div class="modal-header bg-danger text-white">
@@ -101,7 +101,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
 
                             {{-- Status Modal --}}
                             <div class="modal fade" id="statusModal-{{ $report->id }}" tabindex="-1">
@@ -117,8 +117,6 @@
                                                 <select name="status" class="form-control" required>
                                                     <option value="Good" {{ $report->status == 'Good' ? 'selected' : '' }}>Good</option>
                                                     <option value="Bad" {{ $report->status == 'Bad' ? 'selected' : '' }}>Bad</option>
-                                                    <option value="Repairing" {{ $report->status == 'Repairing' ? 'selected' : '' }}>Repairing</option>
-                                                    <option value="Pending" {{ $report->status == 'Pending' ? 'selected' : '' }}>Pending</option>
                                                 </select>
                                             </div>
                                             <div class="modal-footer">
@@ -150,8 +148,7 @@
             <div class="mt-2 text-end">
                 <a href="{{ route('teknisi.report.reportBadForm') }}?lab={{ $labName }}" 
                    class="btn btn-outline-secondary">
-                    <i class="fa fa-paper-plane"></i> Send to Kepala Laboratorim
-                </a>
+                    <i class="fa fa-paper-plane"></i> Send to Lab Head           </a>
             </div>
             @endif
         </div>

@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('reminders', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('title', 50);
             $table->text('description')->nullable();
             $table->date('reminder_date');
-            // $table->foreignId('user_id')->constrained()->onDelete('cascade'); // teknisi
             $table->unsignedBigInteger('laboratory_id')->nullable();
             $table->foreign('laboratory_id')->references('id')->on('laboratories')->onDelete('cascade');
             $table->timestamps();

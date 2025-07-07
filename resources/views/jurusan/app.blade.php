@@ -80,39 +80,14 @@
                         <div class="header-left">
                         </div>
                         <ul class="navbar-nav header-right">
-                            <li class="nav-item dropdown notification_dropdown">
-                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <i class="mdi mdi-bell"></i>
-                                    <div class="pulse-css"></div>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <ul class="list-unstyled">
-                                        <li class="media dropdown-item">
-                                            <span class="success"><i class="ti-user"></i></span>
-                                            <div class="media-body">
-                                                <a href="#">
-                                                    <p><strong>Martin</strong> has added a <strong>customer</strong> Successfully</p>
-                                                </a>
-                                            </div>
-                                            <span class="notify-time">3:20 am</span>
-                                        </li>
-                                        <!-- Item notifikasi lainnya tetap -->
-                                    </ul>
-                                    <a class="all-notification" href="#">See all notifications <i class="ti-arrow-right"></i></a>
-                                </div>
-                            </li>
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
                                     {{ ucfirst(Auth::user()->name) }} <i class="mdi mdi-account"></i>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right">
-                                    <a href="{{ asset('vendor/focus-2/app-profile.html') }}" class="dropdown-item">
+                                    <a href="#" class="dropdown-item" data-toggle="modal" data-target="#profileModal">
                                         <i class="mdi mdi-account-box-outline"></i>
                                         <span class="ml-2">Profile</span>
-                                    </a>
-                                    <a href="{{ asset('vendor/focus-2/email-inbox.html') }}" class="dropdown-item">
-                                        <i class="mdi mdi-email-outline"></i>
-                                        <span class="ml-2">Inbox</span>
                                     </a>
 
                                     <!-- Logout Form -->
@@ -219,7 +194,39 @@
     <!--**********************************
         Main wrapper end
     ***********************************-->
-
+    <!-- Modal Profile -->
+        <div class="modal fade" id="profileModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title text-white">Edit Profile</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <form method="POST" action="{{ route($role . '.profile.update') }}">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-body text-dark">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input id="name" type="text" name="name" class="form-control" value="{{ $authUser ->name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input id="email" type="email" name="email" class="form-control" value="{{ $authUser ->email }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">New Password (optional)</label>
+                            <input id="password" type="password" name="password" class="form-control" placeholder="Leave blank if you don't want to change">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-outline-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <!--**********************************
         Scripts
     ***********************************-->

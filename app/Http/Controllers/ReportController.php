@@ -55,23 +55,23 @@ class ReportController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
-    {
-        DB::transaction(function () use ($id) {
-            $report = Report::findOrFail($id);
+    // public function destroy($id)
+    // {
+    //     DB::transaction(function () use ($id) {
+    //         $report = Report::findOrFail($id);
 
-            // Hapus jawaban terkait
-            $report->answers()->delete();
+    //         // Hapus jawaban terkait
+    //         $report->answers()->delete();
 
-            // Hapus reporter jika ingin (opsional, tergantung logika sistem)
-            $report->reporter()->delete();
+    //         // Hapus reporter jika ingin (opsional, tergantung logika sistem)
+    //         $report->reporter()->delete();
 
-            // Hapus report
-            $report->delete();
-        });
+    //         // Hapus report
+    //         $report->delete();
+    //     });
 
-        return redirect()->route('teknisi.report.index')->with('success', 'Report and its answers deleted successfully.');
-    }
+    //     return redirect()->route('teknisi.report.index')->with('success', 'Report and its answers deleted successfully.');
+    // }
     public function getAnswers($id)
     {
         $report = Report::with('answers.question')->findOrFail($id);

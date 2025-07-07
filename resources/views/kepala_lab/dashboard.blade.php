@@ -4,7 +4,6 @@
 
 @section('content')
 <div class="container-fluid py-4 text-dark">
-    {{-- Di atas card --}}
     <h2 class="mb-4">Welcome, Head of Laboratory</h2>
 
     {{-- Summary Cards --}}
@@ -36,14 +35,14 @@
         <div class="col-md-3 mb-4">
             <div class="card shadow-sm border-left-info h-100">
                 <div class="card-body">
-                    <h6 class="text-muted">Resolved Reports</h6>
-                    <h3 class="text-info">{{ $resolvedReports }}</h3>
+                    <h6 class="text-muted">Send Reports</h6>
+                    <h3 class="text-info">{{ $sendReports }}</h3>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Chart Overview --}}
+    {{-- Chart --}}
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-light">
             <h6 class="mb-0">Report Status Overview</h6>
@@ -52,22 +51,6 @@
             <canvas id="overviewChart" height="100"></canvas>
         </div>
     </div>
-
-    {{-- Optional: Table or Cards per Lab --}}
-    {{-- 
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light">
-            <h6 class="mb-0">Reports per Laboratory</h6>
-        </div>
-        <div class="card-body">
-            @foreach ($labReportsGrouped as $labId => $reports)
-                <h5 class="mt-3">Lab: {{ $reports->first()->pc->lab->name ?? 'Unknown' }}</h5>
-                <p>Total Reports: {{ $reports->count() }}</p>
-            @endforeach
-        </div>
-    </div>
-    --}}
-
 </div>
 @endsection
 
@@ -84,11 +67,11 @@
                 data: {!! json_encode(array_values($chartData)) !!},
                 backgroundColor: [
                     'rgba(255, 193, 7, 0.6)', // Pending
-                    'rgba(40, 167, 69, 0.6)', // Resolved
+                    'rgba(23, 162, 184, 0.6)', // Send
                 ],
                 borderColor: [
                     'rgba(255, 193, 7, 1)',
-                    'rgba(40, 167, 69, 1)',
+                    'rgba(23, 162, 184, 1)',
                 ],
                 borderWidth: 1
             }]

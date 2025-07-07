@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('reports', function (Blueprint $table) {
-            $table->string('status')->default('Good', 'Bad', 'Repairing', 'Pending'); // example: "Good", "Bad", "Repairing"
+            $table->string('status',10)->default('Good', 'Bad'); // example: "Good", "Bad", "Repairing"
             $table->boolean('checked')->default(false);
         });
     }

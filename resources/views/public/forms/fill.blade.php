@@ -2,7 +2,7 @@
 
 @section('content')
 
-<section class="section main-section">
+<section class="section main-section text-dark">
     <div class="card mx-auto shadow-sm" style="max-width: 600px;">
         <div class="card-body">
             <h1 class="card-title text-center mb-4">Isi Form Laporan untuk <span class="text-primary">{{ $pc->lab->lab_name }}</span></h1>

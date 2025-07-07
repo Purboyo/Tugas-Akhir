@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('lab_reports', function (Blueprint $table) {
-            $table->enum('status', ['Pending', 'Reviewed', 'Resolved'])->default('Pending')->after('description');
+            $table->enum('status', ['Pending', 'Send'])->default('Pending')->after('description');
             $table->string('handling_notes')->nullable()->after('status');
         });
     }

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LaboratoryController;
@@ -36,6 +37,7 @@ Route::middleware(['auth'])->group(function () {
     // Routes khusus admin
     Route::middleware(['auth','role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('admin.dashboard');
+        Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
         Route::resource('reminder', ReminderController::class);
         Route::get('/get-laboratories/{userId}', [ReminderController::class, 'getLaboratories']);
         Route::resource('user', UserController::class);
@@ -46,7 +48,7 @@ Route::middleware(['auth'])->group(function () {
     // Routes khusus teknisi
     Route::middleware(['auth','role:teknisi'])->prefix('teknisi')->name('teknisi.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'teknisi'])->name('teknisi.dashboard');
-
+        Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
         Route::resource('lab', LaboratoryController::class);
         Route::resource('pc', PCController::class);
         Route::resource('form', FormController::class);
@@ -66,6 +68,7 @@ Route::middleware(['auth'])->group(function () {
     // Routes khusus jurusan
     Route::middleware(['auth','role:jurusan'])->prefix('jurusan')->name('jurusan.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'jurusan'])->name('jurusan.dashboard');
+        Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
         Route::get('/lab-reports', [LaboratoryReportController::class, 'labReportsJurusan'])->name('labReports');
         Route::get('/maintenance/history', [HistoryController::class, 'historymaintenancepc'])->name('maintenance.history');
         Route::get('/history-report', [HistoryController::class, 'historyReportPC'])->name('report.history');
@@ -74,6 +77,7 @@ Route::middleware(['auth'])->group(function () {
     // Routes khusus kepala_lab
     Route::middleware(['auth','role:kepala_lab'])->prefix('kepala_lab')->name('kepala_lab.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'kepalaLab'])->name('kepala_lab.dashboard');
+        Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
         Route::get('/lab-reports', [LaboratoryReportController::class, 'labReports'])->name('labReports');
         Route::put('/lab-report/{id}', [LaboratoryReportController::class, 'update'])->name('labreport.update');
         Route::get('/maintenance/history', [HistoryController::class, 'historymaintenancepc'])->name('maintenance.history');

@@ -7,34 +7,47 @@ use App\Models\Laboratory as Lab;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class PCController extends Controller
 {
     // Menampilkan semua PC
 public function index(Request $request)
 {
-    $user = auth::user();
+    $user = auth()->user();
     $role = $user->role;
 
     // Ambil semua lab milik teknisi
-    $labs = Lab::where('technician_id', $user->id)->get();
+    $labs = Lab::with('pcs')->where('technician_id', $user->id)->get();
 
-    $selectedLabId = $request->input('lab_id');
+    // Siapkan data PCs yang sudah dipaginasi per lab
+    $labsWithPaginatedPCs = $labs->map(function ($lab) use ($request) {
+        $pcs = $lab->pcs;
 
-    // Ambil semua PC dari lab teknisi, dan filter lab_id jika dipilih
-    $pcsQuery = PC::with('lab')->whereHas('lab', function ($query) use ($user) {
-        $query->where('technician_id', $user->id);
+        $labId = $lab->id;
+        $currentPage = $request->input("page_lab_$labId", 1);
+        $perPage = 10;
+
+        $paginated = new LengthAwarePaginator(
+            $pcs->forPage($currentPage, $perPage)->values(),
+            $pcs->count(),
+            $perPage,
+            $currentPage,
+            ['pageName' => "page_lab_$labId", 'path' => request()->url(), 'query' => request()->query()]
+        );
+
+        $lab->setRelation('pcs_paginated', $paginated);
+        return $lab;
     });
 
-    if ($selectedLabId) {
-        $pcsQuery->where('lab_id', $selectedLabId);
-    }
-
-    $pcs = $pcsQuery->paginate(10);
-
-    return view('teknisi.pcs.index', compact('pcs', 'labs', 'selectedLabId', 'role'));
+    return view('teknisi.pcs.index', [
+        'labs' => $labsWithPaginatedPCs,
+        'role' => $role,
+    ]);
 }
+
 
 
 

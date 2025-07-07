@@ -36,7 +36,7 @@ class LaboratoryReportController extends Controller
     {
         $labs = Laboratory::with('pcs')->get();
         $labReports = LabReport::with(['pc', 'technician', 'pc.lab'])
-            ->where('status', 'reviewed')
+            ->where('status', 'Send')
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -44,6 +44,6 @@ class LaboratoryReportController extends Controller
         $labReportsGrouped = $labReports->groupBy(fn($report) => $report->pc->lab->id ?? 'unknown');
 
         return view('jurusan.lab_reports.index', compact('labs', 'labReportsGrouped'));
-}
+    }
 
 }

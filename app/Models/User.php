@@ -46,4 +46,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function labs()
+    {
+        return $this->hasMany(\App\Models\Laboratory::class, 'technician_id');
+    }
+
 }

@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id()->length(20)->autoIncrement();
             $table->string('name')->length(50);
-            $table->string('email')->unique()->length(100);
+            $table->string('email')->unique()->length(30);
             // $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->length(255);
-            $table->enum('role', ['admin', 'teknisi', 'kepala_lab', 'jurusan'])->length(20); // atau enum('admin', 'user') jika mau dibatasi
+            $table->enum('role', ['admin', 'teknisi', 'kepala_lab', 'jurusan']); // atau enum('admin', 'user') jika mau dibatasi
             // $table->rememberToken()->length(100);
             $table->timestamps();
         });

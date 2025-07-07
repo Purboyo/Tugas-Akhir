@@ -164,7 +164,7 @@
         </div>
     </div>
     @empty
-        <div class="alert alert-info">No data found.</div>
+        <div class="alert alert-warning text-dark">No data found.</div>
     @endforelse
 </div>
 @endsection

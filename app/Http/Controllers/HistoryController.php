@@ -28,10 +28,11 @@ public function historymaintenancepc(Request $request)
 
     // Filter teknisi jika role = teknisi
     if ($user->role === 'teknisi') {
-        $dataQuery->whereHas('maintenance.reminder.user', fn($q) =>
-            $q->where('id', $user->id)
-        );
+        $dataQuery->whereHas('maintenance.reminder.laboratory', function ($q) use ($user) {
+            $q->where('technician_id', $user->id);
+        });
     }
+
 
     // Filter optional maintenance_id
     if ($request->filled('maintenance_id')) {
