@@ -1,6 +1,10 @@
 @extends('admin.app')
 
 @section('content')
+@php
+    $activeQuery = request()->except('active_page');
+    $completedQuery = request()->except('completed_page');
+@endphp
 
 <section class="is-title-bar py-3 border-bottom bg-white shadow-sm">
     <div class="d-flex justify-content-between align-items-center px-4">
@@ -69,7 +73,7 @@
                         <td>{{ \Carbon\Carbon::parse($reminder->reminder_date)->format('d M Y') }}</td>
                         <td>
                             {{ $reminder->laboratory->lab_name ?? '-' }}<br>
-                            <small class="text-muted">{{ $reminder->user->name ?? '-' }}</small>
+                            <small class="text-muted">{{ $reminder->laboratory->technician->name ?? '-' }}</small>
                         </td>
                         <td>
                             @php $status = $reminder->computed_status; @endphp
@@ -79,10 +83,6 @@
                             </span>
                         </td>
                         <td class="d-flex gap-2">
-                            <a href="{{ route('admin.reminder.edit', $reminder->id) }}" class="btn btn-outline-warning mr-3" data-toggle="tooltip" title="Edit">
-                                <i class="fa fa-pencil"></i> Edit
-                            </a>
-
                             <form action="{{ route('admin.reminder.destroy', $reminder->id) }}" method="POST" onsubmit="return confirm('Delete this reminder?')">
                                 @csrf
                                 @method('DELETE')
@@ -101,6 +101,33 @@
             </table>
         </div>
     </div>
+<div class="card-body">
+    <nav>
+        <ul class="pagination pagination-sm pagination-gutter justify-content-center">
+            {{-- Previous Page --}}
+            <li class="page-item {{ $activeReminders->onFirstPage() ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ $activeReminders->previousPageUrl() ?? '#' }}">
+                    <i class="icon-arrow-left"></i>
+                </a>
+            </li>
+
+            {{-- Page Numbers --}}
+            @for ($i = 1; $i <= $activeReminders->lastPage(); $i++)
+                <li class="page-item {{ $i == $activeReminders->currentPage() ? 'active' : '' }}">
+                    <a class="page-link" href="{{ $activeReminders->url($i) }}">{{ $i }}</a>
+                </li>
+            @endfor
+
+            {{-- Next Page --}}
+            <li class="page-item {{ !$activeReminders->hasMorePages() ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ $activeReminders->nextPageUrl() ?? '#' }}">
+                    <i class="icon-arrow-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
 
     {{-- Completed Reminders --}}
     <div class="card has-table">
@@ -129,7 +156,7 @@
                         <td>{{ \Carbon\Carbon::parse($reminder->reminder_date)->format('d M Y') }}</td>
                         <td>
                             {{ $reminder->laboratory->lab_name ?? '-' }}<br>
-                            <small class="text-muted">{{ $reminder->user->name ?? '-' }}</small>
+                            <small class="text-muted">{{ $reminder->laboratory->technician->name ?? '-' }}</small>
                         </td>
                         <td><span class="badge bg-success">Completed</span></td>
                     </tr>
@@ -142,6 +169,32 @@
             </table>
         </div>
     </div>
+<div class="card-body">
+    <nav>
+        <ul class="pagination pagination-sm pagination-gutter justify-content-center">
+            {{-- Previous Page --}}
+            <li class="page-item {{ $completedReminders->onFirstPage() ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ $completedReminders->previousPageUrl() ?? '#' }}">
+                    <i class="icon-arrow-left"></i>
+                </a>
+            </li>
+
+            {{-- Page Numbers --}}
+            @for ($i = 1; $i <= $completedReminders->lastPage(); $i++)
+                <li class="page-item {{ $i == $completedReminders->currentPage() ? 'active' : '' }}">
+                    <a class="page-link" href="{{ $completedReminders->url($i) }}">{{ $i }}</a>
+                </li>
+            @endfor
+
+            {{-- Next Page --}}
+            <li class="page-item {{ !$completedReminders->hasMorePages() ? 'disabled' : '' }}">
+                <a class="page-link" href="{{ $completedReminders->nextPageUrl() ?? '#' }}">
+                    <i class="icon-arrow-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
 
 </section>
 @endsection

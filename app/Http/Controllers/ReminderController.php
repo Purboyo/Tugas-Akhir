@@ -17,35 +17,58 @@ public function index(Request $request)
 {
     $search = $request->input('search');
 
-    // Ambil semua data dengan relasi yang dibutuhkan
-    $allReminders = Reminder::with(['user', 'laboratory', 'maintenance', 'historyMaintenance'])
+    $activeReminders = Reminder::with(['user', 'laboratory', 'maintenance', 'historyMaintenance'])
         ->when($search, function ($query, $search) {
             $query->where('title', 'like', "%{$search}%")
                 ->orWhereHas('laboratory', function ($labQuery) use ($search) {
                     $labQuery->where('lab_name', 'like', "%{$search}%");
                 });
         })
-        ->latest()
-        ->get();
+        ->get()
+        ->filter(function ($reminder) {
+            return $reminder->computed_status === 'pending';
+        })
+        ->values();
 
+    $completedReminders = Reminder::with(['user', 'laboratory', 'maintenance', 'historyMaintenance'])
+        ->when($search, function ($query, $search) {
+            $query->where('title', 'like', "%{$search}%")
+                ->orWhereHas('laboratory', function ($labQuery) use ($search) {
+                    $labQuery->where('lab_name', 'like', "%{$search}%");
+                });
+        })
+        ->get()
+        ->filter(function ($reminder) {
+            return $reminder->computed_status !== 'pending';
+        })
+        ->values();
 
-    // Pisahkan berdasarkan status yang dihitung secara dinamis
-    $activeReminders = $allReminders->filter(function ($reminder) {
-        return $reminder->computed_status !== 'completed';
-    });
+    // manual pagination per collection
+    $activePage = request()->get('active_page', 1);
+    $completedPage = request()->get('completed_page', 1);
+    $perPage = 5;
 
-    $completedReminders = $allReminders->filter(function ($reminder) {
-        return $reminder->computed_status === 'completed';
-    });
+    $activePaginated = new \Illuminate\Pagination\LengthAwarePaginator(
+        $activeReminders->forPage($activePage, $perPage),
+        $activeReminders->count(),
+        $perPage,
+        $activePage,
+        ['pageName' => 'active_page']
+    );
+
+    $completedPaginated = new \Illuminate\Pagination\LengthAwarePaginator(
+        $completedReminders->forPage($completedPage, $perPage),
+        $completedReminders->count(),
+        $perPage,
+        $completedPage,
+        ['pageName' => 'completed_page']
+    );
 
     return view('admin.reminder.index', [
-        'activeReminders' => $activeReminders,
-        'completedReminders' => $completedReminders,
+        'activeReminders' => $activePaginated,
+        'completedReminders' => $completedPaginated,
     ]);
 }
-
-
-
 
 
     public function create()
@@ -74,8 +97,9 @@ public function index(Request $request)
             ],
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'reminder_date' => 'required|date',
+            'reminder_date' => 'required|date|after_or_equal:today',
         ]);
+
         
         Reminder::create([
             'laboratory_id' => $request->laboratory_id,
@@ -87,47 +111,6 @@ public function index(Request $request)
 
         return redirect()->route('admin.reminder.index')->with('success', 'Reminder berhasil ditambahkan.');
     }
-
-public function edit($id)
-{
-    $reminder = Reminder::findOrFail($id);
-    $labs = Laboratory::where('technician_id', $reminder->user_id)->get();
-    $users = User::where('role', 'teknisi')->get();
-
-    return view('admin.reminder.edit', compact('reminder', 'users', 'labs'));
-}
-
-public function update(Request $request, $id)
-{
-    if ($request->has('reminder_date')) {
-        try {
-            $parsedDate = Carbon::parse($request->reminder_date)->format('Y-m-d');
-            $request->merge(['reminder_date' => $parsedDate]);
-        } catch (\Exception $e) {
-            return back()->withErrors(['reminder_date' => 'Format tanggal tidak valid.']);
-        }
-    }
-    $request->validate([
-        'user_id' => 'required|exists:users,id',
-        'laboratory_id' => 'required|exists:laboratories,id',
-        'title' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'reminder_date' => 'required|date',
-    ]);
-
-    $reminder = Reminder::findOrFail($id);
-
-    $reminder->update($request->only([
-        'user_id',
-        'laboratory_id',
-        'title',
-        'description',
-        'reminder_date',
-    ]));
-    return redirect()->route('admin.reminder.index')
-        ->with('success', 'Reminder berhasil diperbarui.');
-}
-
 
 
     public function destroy(Reminder $reminder)
@@ -145,6 +128,7 @@ public function update(Request $request, $id)
 
 public function getLaboratories($technicianId)
 {
+    // Ambil semua data laboratorium dengan teknisi tertentu
     $labs = Laboratory::where('technician_id', $technicianId)
         ->with('reminders') // relasi ke Reminder
         ->get()

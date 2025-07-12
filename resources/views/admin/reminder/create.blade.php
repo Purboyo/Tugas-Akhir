@@ -59,8 +59,10 @@
                             <div class="form-group col-md-12">
                                 <p class="mb-1">Reminder Date</p>
                                 <input name="reminder_date" class="datepicker-default form-control" id="datepicker" placeholder="Select date" required>
+                                @error('reminder_date')
+                                <div class="text-danger">{{ $message }}</div>
+                                @enderror
                             </div>
-                        </div>
 
                         </div>
                         <button type="submit" class="btn btn-outline-primary">
