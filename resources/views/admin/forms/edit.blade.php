@@ -180,24 +180,32 @@
     }
 
     function duplicateQuestion(button) {
-        const original = button.closest('.question-item');
-        const clone = original.cloneNode(true);
-        const container = document.getElementById('questions-container');
-        const newIndex = questionCount++;
+    const original = button.closest('.question-item');
+    const clone = original.cloneNode(true);
+    const container = document.getElementById('questions-container');
+    const newIndex = questionCount++;
 
-        clone.querySelectorAll('input, select').forEach(el => {
-            if(el.name) {
-                el.name = el.name.replace(/questions\[\d+\]/, `questions[${newIndex}]`);
-                if(el.tagName === 'INPUT' && el.type === 'text') el.value = el.value || '';
-            }
-        });
+    // Update semua input dan select name-nya
+    clone.querySelectorAll('input, select').forEach(el => {
+        if (el.name) {
+            el.name = el.name.replace(/questions\[\d+\]/, `questions[${newIndex}]`);
+            if (el.tagName === 'INPUT' && el.type === 'text') el.value = el.value || '';
+        }
+    });
 
-        clone.querySelector('[id^="options-"]').id = `options-${newIndex}`;
-        clone.querySelector('[id^="options-list-"]').id = `options-list-${newIndex}`;
-        clone.querySelector('button.btn-success').setAttribute('onclick', `addOption(${newIndex})`);
+    // Update ID pada elemen opsi jika ada
+    const optionsContainer = clone.querySelector('[id^="options-"]');
+    if (optionsContainer) optionsContainer.id = `options-${newIndex}`;
 
-        container.appendChild(clone);
-    }
+    const optionsList = clone.querySelector('[id^="options-list-"]');
+    if (optionsList) optionsList.id = `options-list-${newIndex}`;
+
+    const addBtn = clone.querySelector('button.btn-success');
+    if (addBtn) addBtn.setAttribute('onclick', `addOption(${newIndex})`);
+
+    container.appendChild(clone);
+}
+
 
     window.onload = function() {
         if(existingQuestions.length > 0) {
@@ -206,5 +214,16 @@
             addQuestion();
         }
     };
+    // Saat submit form, hapus field pertanyaan kosong
+    document.querySelector("form").addEventListener("submit", function(e) {
+        document.querySelectorAll(".question-group").forEach(group => {
+            const text = group.querySelector("input[name*='[question_text]']");
+            const type = group.querySelector("select[name*='[type]']");
+            if (!text.value.trim() || !type.value.trim()) {
+                group.remove();
+            }
+        });
+    });
+
 </script>
 @endsection

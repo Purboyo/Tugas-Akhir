@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class HistoryMaintenance extends Model
 {
-    protected $fillable = ['maintenance_id', 'pc_id', 'status'];
+protected $fillable = ['maintenance_id', 'pc_id', 'status', 'note'];
 
     public function pc()
 {

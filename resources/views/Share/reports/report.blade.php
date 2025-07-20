@@ -29,6 +29,9 @@
     <div class="card mb-4 shadow-lg">
         <div class="card-header bg-light">
             <h5 class="mb-0">Overall Statistics</h5>
+            <button class="btn btn-outline-primary mb-3" data-toggle="modal" data-target="#exportReportModal">
+                <i class="fa fa-file-pdf"></i> Export PDF
+            </button>
         </div>
         <div class="card-body text-center">
             <div style="max-width: 400px; margin: auto;">
@@ -36,6 +39,49 @@
             </div>
         </div>
     </div>
+
+{{-- Modal Export PDF --}}
+<div class="modal fade" id="exportReportModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered text-dark">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title text-white">Export Report PDF</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <form method="GET" action="{{ route($role . '.report.export') }}" target="_blank">
+                <div class="modal-body text-dark">
+                    <div class="form-group">
+                        <label for="labs">Select Laboratory</label>
+                        <select name="labs[]" id="labs" class="form-control select2 text-dark" multiple required>
+                            @foreach ($availableLabs as $lab)
+                                <option value="{{ $lab }}">{{ $lab }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dates">Select Dates</label>
+                        <select name="dates[]" id="dates" class="form-control select2 text-dark" multiple required>
+@foreach ($availableDatesPerLab as $labName => $dates)
+    @foreach ($dates as $date)
+<option value="{{ $date }}" data-lab="{{ $labName }}" style="display: none">
+    {{ \Carbon\Carbon::parse($date)->format('d M Y') }}
+</option>
+
+    @endforeach
+@endforeach
+
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-outline-primary">Export PDF</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
     {{-- Per Lab --}}
     @forelse ($groupedByLab as $labName => $data)
@@ -263,5 +309,29 @@
         this.form.submit();
     });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $('.select2').select2({ width: '200px', placeholder: "Choose..." });
+</script>
+<script>
+    $(document).ready(function () {
+        $('.select2').select2({
+            width: '100%',
+            dropdownParent: $('#exportReportModal')
+        });
+
+        $('#labs').on('change', function () {
+            const selectedLabs = $(this).val();
+
+            $('#dates option').hide().prop('disabled', true);
+            selectedLabs.forEach(lab => {
+                $('#dates option[data-lab="' + lab + '"]').show().prop('disabled', false);
+            });
+
+            $('#dates').val(null).trigger('change');
+        });
+    });
+</script>
+
 @endpush
 

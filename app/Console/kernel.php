@@ -9,7 +9,7 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('reminders:send-daily')->everyMinute()->appendOutputTo(storage_path('logs/reminder-log.txt'));
+        $schedule->command('reminders:send-daily')->everyMinute();
         // $schedule->command('reminders:send-daily')->dailyAt('07:00');
     }
 

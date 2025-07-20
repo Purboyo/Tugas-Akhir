@@ -83,7 +83,7 @@
                                 @endif
                             </div>
                             <!-- Delete Modal -->
-                            <div class="modal fade" id="deleteModal-{{ $form->id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                            <div class="modal fade text-dark" id="deleteModal-{{ $form->id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header bg-danger text-white">

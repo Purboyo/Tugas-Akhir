@@ -1,4 +1,4 @@
-@extends(auth()->user()->role . '.app')
+@extends('kepala_lab.app')
 
 @section('content')
 @php
@@ -10,15 +10,13 @@
     <div class="d-flex justify-content-between align-items-center px-4">
         <div>
             <h1 class="h3 mb-1 text-dark">Reminder Management</h1>
-            <small class="text-muted">Admin · Reminder</small>
+            <small class="text-muted">Kepala Lab · Reminder</small>
         </div>
-        @if (auth()->user()->role === 'admin')
-            <div>
-                <a href="{{ route('admin.reminder.create') }}" class="btn btn-outline-primary">
-                    <i class="fa fa-plus color-info"></i> Add Reminder
-                </a>
-            </div>
-        @endif
+        <div>
+            <a href="{{ route('kepala_lab.reminder.create') }}" class="btn btn-outline-primary">
+                <i class="fa fa-plus color-info"></i> Add Reminder
+            </a>
+        </div>
     </div>
 </section>
 
@@ -40,7 +38,7 @@
 
     {{-- Search --}}
     <div class="mb-3 mt-3 d-flex justify-content-end px-4">
-        <form method="GET" action="{{ route('admin.reminder.index') }}" class="d-flex">
+        <form method="GET" action="{{ route('kepala_lab.reminder.index') }}" class="d-flex">
             <input type="text" name="search" class="form-control mr-2 shadow-sm" placeholder="Search title..."
                 value="{{ request('search') }}">
             <button type="submit" class="btn btn-outline-primary"><i class="mdi mdi-magnify"></i></button>
@@ -85,17 +83,13 @@
                             </span>
                         </td>
                         <td class="d-flex gap-2">
-                            @if (auth()->user()->role === 'admin')
-                                <form action="{{ route('admin.reminder.destroy', $reminder->id) }}" method="POST" onsubmit="return confirm('Delete this reminder?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-outline-danger mr-3" data-toggle="tooltip" title="Delete">
-                                        <i class="fa fa-trash"></i> Delete
-                                    </button>
-                                </form>
-                            @else
-                                <span class="text-muted">-</span>
-                            @endif
+                            <form action="{{ route('kepala_lab.reminder.destroy', $reminder->id) }}" method="POST" onsubmit="return confirm('Delete this reminder?')">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-outline-danger mr-3" data-toggle="tooltip" title="Delete">
+                                    <i class="fa fa-trash"></i> Delete
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     @empty

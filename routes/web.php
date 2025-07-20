@@ -58,10 +58,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('report-bad', [ReportController::class, 'reportBadForm'])->name('report.reportBadForm');
         Route::post('report-bad/submit', [ReportController::class, 'submitBadReport'])->name('report.submitBadReport');
         Route::get('/history-report', [HistoryController::class, 'historyReportPC'])->name('report.history');
+        Route::get('report/export', [HistoryController::class, 'exportpc'])->name('report.export');
         Route::patch('/report/{report}/status', [ReportController::class, 'updateStatus'])->name('report.updateStatus'); 
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
+        Route::get('/maintenance/export/pdf', [HistoryController::class, 'exportPdf'])->name('maintenance.export.pdf');
         Route::get('/maintenance/history', [HistoryController::class, 'historymaintenancepc'])->name('maintenance.history');
+        Route::get('/maintenance/export/pdf', [HistoryController::class, 'exportPdf'])->name('maintenance.export.pdf');
         Route::get('/maintenance/create/{reminder}', [MaintenanceController::class, 'create'])->name('maintenance.create');
     });
 
@@ -71,7 +74,10 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
         Route::get('/lab-reports', [LaboratoryReportController::class, 'labReportsJurusan'])->name('labReports');
         Route::get('/maintenance/history', [HistoryController::class, 'historymaintenancepc'])->name('maintenance.history');
+        Route::get('/maintenance/export/pdf', [HistoryController::class, 'exportPdf'])->name('maintenance.export.pdf');
+        Route::get('/maintenance/export/pdf', [HistoryController::class, 'exportPdf'])->name('maintenance.export.pdf');
         Route::get('/history-report', [HistoryController::class, 'historyReportPC'])->name('report.history');
+        Route::get('report/export', [HistoryController::class, 'exportpc'])->name('report.export');
     });
 
     // Routes khusus kepala_lab
@@ -81,6 +87,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/lab-reports', [LaboratoryReportController::class, 'labReports'])->name('labReports');
         Route::put('/lab-report/{id}', [LaboratoryReportController::class, 'update'])->name('labreport.update');
         Route::get('/maintenance/history', [HistoryController::class, 'historymaintenancepc'])->name('maintenance.history');
+        Route::get('/maintenance/export/pdf', [HistoryController::class, 'exportPdf'])->name('maintenance.export.pdf');
         Route::get('/history-report', [HistoryController::class, 'historyReportPC'])->name('report.history');
+        Route::get('report/export', [HistoryController::class, 'exportpc'])->name('report.export');
+        Route::resource('reminder', ReminderController::class);
     });
 });

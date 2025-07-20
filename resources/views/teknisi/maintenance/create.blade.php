@@ -27,17 +27,25 @@
                     <div class="row">
                         @foreach($pcs as $pc)
                             <div class="col-md-3 mb-3">
-                                <div class="border p-4 rounded h-100">
-                                    <h4 class="font-medium mb-3">{{ $pc->pc_name }}</h4>
-                                    <input type="hidden" name="pcs[{{ $pc->id }}][pc_id]" value="{{ $pc->id }}">
+                                <div class="border p-4 rounded h-100 d-flex flex-column justify-content-between">
+                                    <div>
+                                        <h4 class="font-medium mb-3">{{ $pc->pc_name }}</h4>
+                                        <input type="hidden" name="pcs[{{ $pc->id }}][pc_id]" value="{{ $pc->id }}">
 
-                                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                        <label class="btn btn-outline-success active mr-3">
-                                            <input type="radio" name="pcs[{{ $pc->id }}][status]" value="Good" autocomplete="off" checked> Good
-                                        </label>
-                                        <label class="btn btn-outline-danger">
-                                            <input type="radio" name="pcs[{{ $pc->id }}][status]" value="Bad" autocomplete="off"> Bad
-                                        </label>
+                                        <div class="btn-group btn-group-toggle mb-3" data-toggle="buttons">
+                                            <label class="btn btn-outline-success active mr-2">
+                                                <input type="radio" name="pcs[{{ $pc->id }}][status]" value="Good" autocomplete="off" checked> Good
+                                            </label>
+                                            <label class="btn btn-outline-danger">
+                                                <input type="radio" name="pcs[{{ $pc->id }}][status]" value="Bad" autocomplete="off"> Bad
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {{-- Per-PC Note --}}
+                                    <div>
+                                        <label for="pcs[{{ $pc->id }}][note]" class="form-label text-muted small">Note (optional)</label>
+                                        <textarea name="pcs[{{ $pc->id }}][note]" class="form-control" rows="2" placeholder="Note for this PC..."></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -48,7 +56,7 @@
 
                 <div class="mb-4 mt-4">
                     <div class="col-md-8 mx-auto">
-                        <label for="note" class="form-label fw-bold mb-2 text-dark">General Note</label>
+                        <label for="note" class="form-label fw-bold mb-2 text-dark">Summary Note</label>
                         <textarea name="note" id="note" class="form-control" rows="3" placeholder="Optional note..."></textarea>
                     </div>
                 </div>

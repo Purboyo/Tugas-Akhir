@@ -29,6 +29,9 @@
     <div class="card mb-4 shadow-lg">
         <div class="card-header bg-light">
             <h5 class="mb-0">Overall Statistics</h5>
+            <button class="btn btn-outline-primary mb-3" data-toggle="modal" data-target="#exportModal">
+    <i class="fa fa-file-pdf"></i> Export PDF
+</button>
         </div>
         <div class="card-body text-center">
             <div style="max-width: 400px; margin: auto;">
@@ -86,6 +89,7 @@
                             <th>#</th>
                             <th>PC</th>
                             <th>Status</th>
+                            <th>Note</th>
                             <th>Technician</th>
                             <th>Date</th>
                         </tr>
@@ -100,6 +104,7 @@
                                         {{ $row->status }}
                                     </span>
                                 </td>
+                                <td>{{ $row->note ?? '-' }}</td>
                                 <td>{{ $row->maintenance->reminder->laboratory->technician->name ?? '-' }}</td>
                                 <td>{{ $row->created_at->format('d M Y') }}</td>
                             </tr>
@@ -137,7 +142,7 @@
                 @if ($noteText)
                     <div class="card mt-4 bg-light">
                         <div class="card-body">
-                            <h6 class="text-muted mb-2">Maintenance notes:</h6>
+                            <h6 class="text-muted mb-2">Summary notes:</h6>
                             <p class="mb-0 text-dark">{{ $noteText }}</p>
                         </div>
                     </div>
@@ -149,6 +154,45 @@
         <div class="alert alert-warning text-dark">No data found.</div>
     @endforelse
 </div>
+
+{{-- Modal Export PDF --}}
+<div class="modal fade" id="exportModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title text-white">Export Maintenance PDF</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <form method="GET" action="{{ route($role . '.maintenance.export.pdf') }}" target="_blank">
+                <div class="modal-body text-dark">
+                    <div class="form-group">
+                        <label for="labs">Select Laboratory</label>
+                        <select name="labs[]" id="labs" class="form-control select2" multiple required>
+                            @foreach ($availableLabs as $lab)
+                                <option value="{{ $lab }}">{{ $lab }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dates">Select Dates</label>
+<select name="dates[]" id="dates" class="form-control select2" multiple required>
+    {{-- Akan diisi oleh JS --}}
+</select>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-outline-primary">Export PDF</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    const datesByLab = @json($availableDatesPerLab);
+</script>
+
 @endsection
 
 @push('scripts')
@@ -245,4 +289,48 @@
         this.form.submit();
     });
 </script>
+<script>
+    $(document).ready(function () {
+        $('.select2').select2({
+            width: '100%',
+            dropdownParent: $('#exportModal')
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        // Inisialisasi Select2
+        $('.select2').select2({
+            width: '100%',
+            dropdownParent: $('#exportModal')
+        });
+
+        // Saat lab berubah
+        $('#labs').on('change', function () {
+            const selectedLabs = $(this).val(); // array lab
+            const $datesSelect = $('#dates');
+
+            // Kosongkan opsi sebelumnya
+            $datesSelect.empty();
+
+            // Loop setiap lab yang dipilih
+            selectedLabs.forEach(lab => {
+                const dates = datesByLab[lab] || [];
+
+                dates.forEach(date => {
+                    const formatted = new Date(date).toLocaleDateString('id-ID', {
+                        day: '2-digit', month: 'short', year: 'numeric'
+                    });
+
+                    const option = new Option(formatted, date, false, false);
+                    $datesSelect.append(option);
+                });
+            });
+
+            $datesSelect.trigger('change');
+        });
+    });
+</script>
+
+
 @endpush

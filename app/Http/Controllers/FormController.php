@@ -150,7 +150,6 @@ public function edit($id)
         'customQuestions' => $customQuestions,
     ]);
 }
-
 public function update(Request $request, $id)
 {
     $request->validate([
@@ -165,24 +164,19 @@ public function update(Request $request, $id)
 
     try {
         $form = Form::findOrFail($id);
+
+        // Update judul form
         $form->update([
             'title' => $request->title,
         ]);
 
+        // Sinkronisasi lab
         $form->laboratories()->sync($request->lab_id);
 
-        // Ambil pertanyaan default dari form admin (tidak boleh dihapus)
-        $defaultForm = Form::where('is_default', true)->first();
-        $defaultQuestionsText = $defaultForm 
-            ? $defaultForm->questions->pluck('question_text')->toArray()
-            : [];
+        // Hapus hanya pertanyaan teknisi, bukan default admin
+        $form->questions()->where('is_default', false)->delete();
 
-        // Hapus semua pertanyaan yang bukan default
-        $form->questions()
-            ->whereNotIn('question_text', $defaultQuestionsText)
-            ->delete();
-
-        // Tambahkan pertanyaan baru dari teknisi
+        // Tambahkan pertanyaan dari request (teknisi)
         if ($request->has('questions')) {
             foreach ($request->questions as $question) {
                 Form_question::create([
@@ -192,6 +186,7 @@ public function update(Request $request, $id)
                     'options' => in_array($question['type'], ['radio', 'checkbox']) 
                         ? json_encode($question['options'] ?? []) 
                         : null,
+                    'is_default' => false, // teknisi = bukan default
                 ]);
             }
         }

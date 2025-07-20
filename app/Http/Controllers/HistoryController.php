@@ -8,6 +8,7 @@ use App\Models\HistoryReportPC;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 
@@ -117,6 +118,28 @@ public function historymaintenancepc(Request $request)
     ]);
 }
 
+public function exportPdf(Request $request)
+{
+    $labs = $request->input('labs', []);
+    $dates = $request->input('dates', []);
+
+    $data = HistoryMaintenance::with([
+        'pc',
+        'maintenance.reminder.laboratory.technician',
+        'maintenance.reminder.user'
+    ])
+    ->whereHas('maintenance.reminder.laboratory', function ($q) use ($labs) {
+        $q->whereIn('lab_name', $labs);
+    })
+    ->whereIn(DB::raw('DATE(created_at)'), $dates)
+    ->get()
+    ->groupBy(fn($item) => $item->maintenance->reminder->laboratory->lab_name ?? 'Unknown');
+
+    $pdf = Pdf::loadView('share.maintenance.export', compact('data', 'labs', 'dates'))
+        ->setPaper('a4', 'landscape');
+
+    return $pdf->stream('maintenance_history.pdf');
+}
 
 public function historyReportPC(Request $request)
 {
@@ -190,6 +213,32 @@ public function historyReportPC(Request $request)
         'availableDatesPerLab',
         'selectedLab'
     ));
+}
+
+
+public function exportpc(Request $request)
+{
+    $labs = $request->labs ?? [];
+    $dates = $request->dates ?? [];
+
+    $query = HistoryReportPC::with(['pc.lab', 'technician']);
+
+    if (!empty($labs)) {
+        $query->whereHas('pc.lab', fn($q) => $q->whereIn('lab_name', $labs));
+    }
+
+    if (!empty($dates)) {
+        $query->whereIn(DB::raw('DATE(created_at)'), $dates);
+    }
+
+    $histories = $query->get();
+
+    // Group per lab
+    $data = $histories->groupBy(fn($item) => $item->pc->lab->lab_name ?? 'Unknown');
+
+    $pdf = Pdf::loadView('share.reports.export', compact('data', 'labs', 'dates'))->setPaper('a4', 'landscape');
+
+    return $pdf->stream('report-history.pdf');
 }
 
 }

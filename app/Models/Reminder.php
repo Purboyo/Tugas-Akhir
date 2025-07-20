@@ -12,9 +12,9 @@ class Reminder extends Model
         'description',
         'reminder_date',
         'laboratory_id',
-        // 'user_id',
-        // 'status'
+        'status',
     ];
+
 
     protected $casts = [
         'reminder_date' => 'datetime',
@@ -47,19 +47,22 @@ class Reminder extends Model
         );
     }
 
-    public function getComputedStatusAttribute()
-    {
-        if ($this->historyMaintenance) {
-            return 'completed';
+public static function updateReminderStatuses()
+{
+    $reminders = self::with('historyMaintenance')->get();
+
+    foreach ($reminders as $reminder) {
+        if ($reminder->historyMaintenance) {
+            $reminder->status = 'completed';
+        } elseif (Carbon::parse($reminder->reminder_date)->startOfDay()->lt(now()->startOfDay())) {
+            $reminder->status = 'missed';
+        } else {
+            $reminder->status = 'pending';
         }
 
-        $reminderDate = Carbon::parse($this->reminder_date)->startOfDay();
-        $today = now()->startOfDay();
-
-        if ($reminderDate->lt($today)) {
-            return 'missed';
-        }
-
-        return 'pending';
+        $reminder->save();
     }
+}
+
+
 }

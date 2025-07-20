@@ -27,14 +27,10 @@
 
 <body>
 @php
-  $role = auth()->user()->role; // 'admin' atau 'teknisi'
+  $role = auth()->user()->role;
 @endphp
 <div id="app">
 
-
-    <!--*******************
-        Preloader start
-    ********************-->
     <div id="preloader">
         <div class="sk-three-bounce">
             <div class="sk-child sk-bounce1"></div>
@@ -42,19 +38,8 @@
             <div class="sk-child sk-bounce3"></div>
         </div>
     </div>
-    <!--*******************
-        Preloader end
-    ********************-->
 
-
-    <!--**********************************
-        Main wrapper start
-    ***********************************-->
     <div id="main-wrapper">
-
-        <!--**********************************
-            Nav header start
-        ***********************************-->
         <div class="nav-header">
             <a href="{{route ($role. '.kepala_lab.dashboard')}}" class="brand-logo text-white text-lg font-bold" style="text-decoration: none;">
                 LabSI
@@ -66,45 +51,30 @@
                 </div>
             </div>
         </div>
-        <!--**********************************
-            Nav header end
-        ***********************************-->
 
-        <!--**********************************
-            Header start
-        ***********************************-->
-        <div class="header bg-white border-bottom shadow-sm">
-            <div class="header-content px-4 py-2">
+       <div class="header">
+            <div class="header-content">
                 <nav class="navbar navbar-expand">
-                    <div class="collapse navbar-collapse justify-content-between align-items-center">
-
-                        <!-- Left Section Kosong -->
-                        <div class="header-left"></div>
-
-                        <!-- Right Section: User Dropdown -->
+                    <div class="collapse navbar-collapse justify-content-between">
+                        <div class="header-left">
+                        </div>
                         <ul class="navbar-nav header-right">
                             <li class="nav-item dropdown header-profile">
-                                <a class="nav-link dropdown-toggle d-flex align-items-center text-dark" href="#" role="button" data-toggle="dropdown">
-                                    <i class="mdi mdi-account-circle h4 mb-0 mr-1"></i>
-                                    <span class="d-none d-md-inline">{{ ucfirst(Auth::user()->name) }}</span>
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                    {{ ucfirst(Auth::user()->name) }} <i class="mdi mdi-account"></i>
                                 </a>
-
-                                <div class="dropdown-menu dropdown-menu-right shadow">
-                                    <h6 class="dropdown-header">Hi, {{ ucfirst(Auth::user()->name) }}</h6>
-                                    <div class="dropdown-divider"></div>
-
-                                    <!-- Profile Modal Trigger -->
-                                    <a href="#" class="dropdown-item d-flex align-items-center" data-toggle="modal" data-target="#profileModal">
-                                        <i class="mdi mdi-account-box-outline mr-2"></i>
-                                        <span>Profile</span>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="#" class="dropdown-item" data-toggle="modal" data-target="#profileModal">
+                                        <i class="mdi mdi-account-box-outline"></i>
+                                        <span class="ml-2">Profile</span>
                                     </a>
 
-                                    <!-- Logout -->
+                                    <!-- Logout Form -->
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
-                                        <button type="submit" class="dropdown-item d-flex align-items-center text-danger">
-                                            <i class="mdi mdi-logout mr-2"></i>
-                                            <span>Logout</span>
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="mdi mdi-logout"></i>
+                                            <span class="ml-2">Logout</span>
                                         </button>
                                     </form>
                                 </div>
@@ -114,9 +84,52 @@
                 </nav>
             </div>
         </div>
-    <!--**********************************
-        Main wrapper end
-    ***********************************-->
+
+        {{-- Side bar --}}
+        <div class="quixnav">
+            <div class="quixnav-scroll">
+                <ul class="metismenu" id="menu">
+                    <li class="nav-label first">Menu</li>
+                    <li><a class="" href="{{route ($role. '.kepala_lab.dashboard')}}" aria-expanded="false"><i
+                                class="mdi mdi-view-dashboard"></i><span class="nav-text">Dashboard</span></a>
+                    </li>
+                    </li>
+                    <li><a class="" href="{{route ($role. '.labReports')}}" aria-expanded="false"><i
+                                class="mdi mdi-file-document-outline"></i><span class="nav-text">laboratory Damage Report</span></a>
+                    </li>
+                    <li><a class="" href="{{route ($role. '.reminder.index')}}" aria-expanded="false"><i
+                                class="mdi mdi-calendar-clock"></i><span class="nav-text">Reminders</span></a>
+                    </li>                    
+                    <li><a href="{{ route($role .'.maintenance.history') }}"><i 
+                                class="mdi mdi-history"></i><span class="nav-text">History Maintenance</span></a>
+                    <li><a href="{{ route($role .'.report.history') }}"><i 
+                                class="mdi mdi-history"></i><span class="nav-text">History Report</span></a>
+                    </li>
+                </ul>
+            </div>
+
+
+        </div>
+
+        {{-- Content --}}
+        <div class="content-body">
+            <div class="container-fluid">
+
+
+            @yield('content')
+
+            </div>
+        </div>
+
+        {{-- Footer --}}
+        <div class="footer">
+            <div class="copyright">
+                <p>Copyright © Designed &amp; Developed by <a href="#" target="_blank">Purboyo Broto Umbaran</a> 2025</p>
+            </div>
+        </div>
+
+    </div>
+ 
     <!-- Modal Profile -->
         <div class="modal fade" id="profileModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">

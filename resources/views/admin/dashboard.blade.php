@@ -1,4 +1,4 @@
-@extends('admin.app')
+@extends(auth()->user()->role . '.app')
 
 @section('content')
 <div class="container-fluid mt-4 text-dark">

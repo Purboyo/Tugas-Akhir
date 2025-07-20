@@ -21,15 +21,13 @@ public function admin()
     $labs = Laboratory::count();
     $technicians = User::where('role', 'teknisi')->count();
 
-    $reminders = Reminder::with('historyMaintenance')->get();
+    // Perbarui status reminder sebelum mengambil data
+    Reminder::updateReminderStatuses();
 
-    $reminderCompleted = $reminders->filter(function ($reminder) {
-        return $reminder->computed_status === 'completed';
-    })->count();
+    $reminders = Reminder::all();
 
-    $reminderPending = $reminders->filter(function ($reminder) {
-        return $reminder->computed_status === 'pending';
-    })->count();
+    $reminderCompleted = $reminders->where('status', 'completed')->count();
+    $reminderPending = $reminders->where('status', 'pending')->count();
 
     return view('admin.dashboard', compact(
         'users', 'reminderCompleted', 'reminderPending', 'labs', 'technicians'
@@ -62,11 +60,14 @@ public function teknisi()
             return $lab;
         });
 
+    // Panggil fungsi update status reminder (biar akurat)
+    Reminder::updateReminderStatuses();
+
     // Ambil semua reminder dari lab yang dimiliki teknisi
     $reminders = $labs->flatMap(function ($lab) {
         return $lab->reminders;
     })->filter(function ($reminder) {
-        return $reminder->computed_status !== 'completed';
+        return $reminder->status !== 'completed';
     });
 
     // Data untuk chart
