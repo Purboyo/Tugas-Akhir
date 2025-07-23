@@ -21,6 +21,12 @@
                                 <div class="auth-form text-dark">
                                     <h4 class="text-center mb-4">Sign in to your account</h4>
 
+                                    <!-- Pesan sukses -->
+                                    @if (session('status'))
+                                    <div class="alert alert-success text-center">
+                                        {{ session('status') }}
+                                    </div>
+                                    @endif
                                     {{-- Pesan Error Umum --}}
                                     @if (session('error'))
                                         <div class="alert alert-danger text-center">
@@ -49,6 +55,9 @@
                                             <button type="submit" class="btn btn-primary btn-block">Sign me in</button>
                                         </div>
                                     </form>
+                                    <div class="text-center mt-3">
+                                        <a href="{{ url('forgot-password') }}" class="text-primary">Forgot Password?</a>
+                                    </div>                                       
                                     
                                 </div>
                             </div>

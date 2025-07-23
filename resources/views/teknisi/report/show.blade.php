@@ -34,9 +34,17 @@
             <h5 class="text-dark">Answers</h5>
             <ul class="list-group">
                 @foreach ($report->answers as $answer)
-                    <li class="list-group-item">
-                        <strong>{{ $answer->question->question_text }}:</strong> {{ $answer->answer_text }}
-                    </li>
+                @php
+                    $parsed = json_decode($answer->answer_text, true);
+                @endphp
+
+                <li class="list-group-item">
+                    <strong>{{ $answer->question->question_text }}:</strong><br>
+                    Nilai: <span>{{ $parsed['value'] ?? $answer->answer_text }}</span><br>
+                    @if (!empty($parsed['note']))
+                        Keterangan: <em>{{ $parsed['note'] }}</em>
+                    @endif
+                </li>
                 @endforeach
             </ul>
         </div>

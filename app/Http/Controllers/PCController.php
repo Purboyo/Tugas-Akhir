@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use App\Models\PC;
 use App\Models\Laboratory as Lab;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
+
 
 class PCController extends Controller
 {
@@ -66,22 +68,36 @@ public function create()
 
 
     // Menyimpan PC baru
-    public function store(Request $request)
-    {
-        $request->validate([
-            'pc_name' => [
-                'required',
-                Rule::unique('pcs')->where(function ($query) use ($request) {
-                    return $query->where('lab_id', $request->lab_id);
-                })
-            ],
-            'lab_id' => 'required|exists:laboratories,id',
-        ]);
+public function store(Request $request)
+{
+    $request->validate([
+        'pc_name' => [
+            'required',
+            Rule::unique('pcs')->where(function ($query) use ($request) {
+                return $query->where('lab_id', $request->lab_id);
+            })
+        ],
+        'lab_id' => 'required|exists:laboratories,id',
+    ]);
 
-        PC::create($request->only(['pc_name', 'lab_id']));
+    // Simpan data PC terlebih dahulu
+    $pc = PC::create($request->only(['pc_name', 'lab_id']));
 
-        return redirect()->route('teknisi.pc.index')->with('success', 'PC add successfully.');
-    }
+    // URL yang akan dimasukkan dalam QR
+    $url = route('welcome', ['id' => $pc->id]);
+
+    // Generate SVG menggunakan simple-qrcode (tidak butuh Imagick atau GD)
+    $svg = QrCode::format('svg')->size(300)->generate($url);
+
+    // Nama file dan simpan SVG ke storage
+    $fileName = 'qr_codes/pc_' . $pc->id . '_' . Str::random(5) . '.svg';
+    Storage::disk('public')->put($fileName, $svg);
+
+    // Update kolom qr_code
+    $pc->update(['qr_code' => $fileName]);
+
+    return redirect()->route('teknisi.pc.index')->with('success', 'PC berhasil ditambahkan dan QR Code disimpan.');
+}
 
     // Menampilkan form untuk mengedit PC
 public function edit($id)

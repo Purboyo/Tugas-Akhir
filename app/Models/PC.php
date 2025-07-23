@@ -11,6 +11,7 @@ class PC extends Model
     protected $fillable = [
         'pc_name',
         'lab_id',
+        'qr_code'
     ];
 
     public function lab()

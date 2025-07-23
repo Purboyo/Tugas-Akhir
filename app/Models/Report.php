@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class report extends Model
+class Report extends Model
 {
     protected $fillable = [
         'reporter_id',
@@ -12,7 +12,7 @@ class report extends Model
         'pc_id',
         'technician_id',
         'status',
-        'description',
+        'note',
         'report_to_head_at',
         'remark_to_head',
     ];

@@ -87,7 +87,7 @@ public function submit(Request $request, Form $form)
     ]);
 
     // Cek apakah ada jawaban buruk
-    $burukKeywords = ['Buruk','rusak', 'tidak berfungsi', 'tidak menyala', 'Tidak']; // sesuaikan jika perlu
+    $burukKeywords = ['Buruk','rusak', 'tidak berfungsi', 'tidak menyala', 'Tidak', '1', '2']; // sesuaikan jika perlu
     $isBad = false;
 
     foreach ($validated['answers'] as $answer) {
@@ -113,12 +113,23 @@ public function submit(Request $request, Form $form)
 
     // Simpan jawaban
     foreach ($validated['answers'] as $questionId => $answer) {
+        // Cek apakah jawaban dalam bentuk array (karena skala + keterangan)
+        if (is_array($answer)) {
+            $formattedAnswer = json_encode([
+                'value' => $answer['value'] ?? '',
+                'note' => $answer['note'] ?? '',
+            ]);
+        } else {
+            $formattedAnswer = $answer;
+        }
+
         Report_answer::create([
             'report_id' => $report->id,
             'question_id' => $questionId,
-            'answer_text' => is_array($answer) ? json_encode($answer) : $answer,
+            'answer_text' => $formattedAnswer,
         ]);
     }
+
 
     return redirect()->route('form.success', ['pc' => $validated['pc_id']]);
 }

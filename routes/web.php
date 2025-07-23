@@ -14,11 +14,14 @@ use App\Http\Controllers\LaboratoryReportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PublicFormController;
 use App\Http\Controllers\ReminderController;
-use App\Models\Maintenance;
-
+// Route untuk login dan logout
 Route::get('/', [AuthController::class, 'loginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('forgot-password', [AuthController::class, 'forgotPasswordForm'])->name('forgot-password.form');
+Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot-password.post');
+Route::get('reset-password', [AuthController::class, 'showResetForm'])->name('password.reset');
+Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
 // Route publik tanpa auth untuk form via QR dll
 Route::get('/welcome/{id}', [PublicFormController::class, 'welcome'])->name('welcome');
@@ -59,7 +62,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('report-bad/submit', [ReportController::class, 'submitBadReport'])->name('report.submitBadReport');
         Route::get('/history-report', [HistoryController::class, 'historyReportPC'])->name('report.history');
         Route::get('report/export', [HistoryController::class, 'exportpc'])->name('report.export');
+        Route::get('/lab-reports', [LaboratoryReportController::class, 'labReportsTeknisi'])->name('labReports');
         Route::patch('/report/{report}/status', [ReportController::class, 'updateStatus'])->name('report.updateStatus'); 
+        Route::put('/lab-report/{id}', [LaboratoryReportController::class, 'updateteknisi'])->name('labreport.updateteknisi');
         Route::get('/maintenance', [MaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance', [MaintenanceController::class, 'store'])->name('maintenance.store');
         Route::get('/maintenance/export/pdf', [HistoryController::class, 'exportPdf'])->name('maintenance.export.pdf');

@@ -56,11 +56,23 @@
                                 @foreach($lab->pcs_paginated as $pc)
                                     <tr>
                                         <td>{{ $pc->pc_name }}</td>
-                                        <td>
-                                            <a href="{{ route('welcome', $pc->id) }}" class="btn btn-sm btn-outline-primary" target="_blank">
-                                                Lihat Halaman QR
-                                            </a>
+                                        <td class="text-center">
+                                            @if ($pc->qr_code)
+                                                <div class="mb-2">
+                                                    <img src="{{ asset('storage/' . $pc->qr_code) }}" alt="QR for {{ $pc->pc_name }}" width="100">
+                                                </div>
+                                                <a href="{{ asset('storage/' . $pc->qr_code) }}" class="btn btn-sm btn-outline-success mb-1" download>
+                                                    <i class="fa fa-download"></i> Download QR
+                                                </a>
+                                                <br>
+                                                <a href="{{ route('welcome', $pc->id) }}" class="btn btn-sm btn-outline-primary mt-1" target="_blank">
+                                                    <i class="fa fa-eye"></i> Lihat Halaman
+                                                </a>
+                                            @else
+                                                <span class="text-muted">QR belum tersedia</span>
+                                            @endif
                                         </td>
+
                                         <td>
                                             <a href="{{ route($role . '.pc.edit', $pc) }}" class="btn btn-sm btn-outline-warning mr-2">
                                                 <i class="fa fa-pencil"></i> Edit

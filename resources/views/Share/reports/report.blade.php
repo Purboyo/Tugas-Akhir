@@ -61,15 +61,14 @@
                     <div class="form-group">
                         <label for="dates">Select Dates</label>
                         <select name="dates[]" id="dates" class="form-control select2 text-dark" multiple required>
-@foreach ($availableDatesPerLab as $labName => $dates)
-    @foreach ($dates as $date)
-<option value="{{ $date }}" data-lab="{{ $labName }}" style="display: none">
-    {{ \Carbon\Carbon::parse($date)->format('d M Y') }}
-</option>
+                        @foreach ($availableDatesPerLab as $labName => $dates)
+                            @foreach ($dates as $date)
+                        <option value="{{ $date }}" data-lab="{{ $labName }}" style="display: none">
+                            {{ \Carbon\Carbon::parse($date)->format('d M Y') }}
+                        </option>
 
-    @endforeach
-@endforeach
-
+                            @endforeach
+                        @endforeach
                         </select>
                     </div>
                 </div>
@@ -132,6 +131,7 @@
                             <th>#</th>
                             <th>PC</th>
                             <th>Status</th>
+                            <th>Note</th>
                             <th>Technician</th>
                             <th>Date</th>
                         </tr>
@@ -146,6 +146,7 @@
                                         {{ $row->status }}
                                     </span>
                                 </td>
+                                <td>{{ $row->description ?? '-' }}</td>
                                 <td>{{ $row->technician->name ?? '-' }}</td>
                                 <td>{{ $row->created_at->format('d M Y') }}</td>
                             </tr>

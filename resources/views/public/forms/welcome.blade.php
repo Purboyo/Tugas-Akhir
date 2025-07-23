@@ -43,7 +43,7 @@
 
             <div class="text-center mb-4">
                 <div class="d-inline-block p-3 border rounded">
-                    {!! QrCode::size(220)->generate($formUrl) !!}
+            <img src="{{ asset('storage/' . $pc->qr_code) }}" alt="QR Code" width="220">
                 </div>
             </div>
 

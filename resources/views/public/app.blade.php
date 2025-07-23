@@ -53,5 +53,7 @@
     <script src="{{ asset('vendor/focus-2/js/plugins-init/sweetalert.init.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+        @stack('scripts')
+
 </body>
 </html>

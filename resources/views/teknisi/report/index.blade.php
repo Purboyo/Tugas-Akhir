@@ -110,18 +110,25 @@
                                         <form method="POST" action="{{ route('teknisi.report.updateStatus', $report->id) }}">
                                             @csrf @method('PATCH')
                                             <div class="modal-header bg-info text-white">
-                                                <h5 class="modal-title">Ubah Status</h5>
+                                                <h5 class="modal-title">Change Status</h5>
                                                 <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                                             </div>
                                             <div class="modal-body">
-                                                <select name="status" class="form-control" required>
-                                                    <option value="Good" {{ $report->status == 'Good' ? 'selected' : '' }}>Good</option>
-                                                    <option value="Bad" {{ $report->status == 'Bad' ? 'selected' : '' }}>Bad</option>
-                                                </select>
+                                                <div class="form-group">
+                                                    <label>Status</label>
+                                                    <select name="status" class="form-control" required>
+                                                        <option value="Good" {{ $report->status == 'Good' ? 'selected' : '' }}>Good</option>
+                                                        <option value="Bad" {{ $report->status == 'Bad' ? 'selected' : '' }}>Bad</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Note (Optional)</label>
+                                                    <textarea name="note" class="form-control" rows="3" placeholder="Add note...">{{ $report->note }}</textarea>
+                                                </div>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Batal</button>
-                                                <button type="submit" class="btn btn-outline-info">Simpan</button>
+                                                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-outline-info">Save</button>
                                             </div>
                                         </form>
                                     </div>

@@ -98,8 +98,6 @@ class ReportController extends Controller
            ], 500);
        }
    }
-   
-
 
 public function checkAll(Request $request)
 {
@@ -117,7 +115,8 @@ public function checkAll(Request $request)
             'pc_id' => $report->pc_id,
             'technician_id' => optional($report->lab)->technician_id ?? auth::id(),
             'description' => $report->description,
-            'status' => $report->status, // sudah ikut disimpan ke tabel history
+            'status' => $report->status,
+            'description' => $report->note, // <--- tambahkan ini
         ]);
     }
 
@@ -131,29 +130,36 @@ public function checkAll(Request $request)
 
 
 
+
 public function updateStatus(Request $request, $id)
 {
     $request->validate([
-        'status' => 'required|in:Good,Bad,Repairing,Pending',
+        'status' => 'required|in:Good,Bad,Pending',
+        'note' => 'nullable|string',
     ]);
 
     $report = Report::findOrFail($id);
     $report->status = $request->status;
+    $report->note = $request->note; // simpan catatan
     $report->save();
 
-    return redirect()->back()->with('success', 'Status report updated successfully.');
+    return redirect()->back()->with('success', 'Status report berhasil diperbarui.');
 }
+
 public function reportBadForm()
 {
-    
-$pcs = Report::where('status', 'Bad')
-    ->where('checked', 1)
-    ->with('pc')
-    ->get()
-    ->groupBy('pc_id');
+    $burukKeywords = ['Buruk', 'rusak', 'tidak berfungsi', 'tidak menyala', 'Tidak', '1', '2'];
 
-    return view('teknisi.report.report_bad_form', compact('pcs'));
+    $pcs = Report::where('status', 'Bad')
+        ->where('checked', 1)
+        ->with(['pc', 'answers.question'])
+        ->get()
+        ->groupBy('pc_id');
+
+    return view('teknisi.report.report_bad_form', compact('pcs', 'burukKeywords'));
 }
+
+
 
 public function submitBadReport(Request $request)
 {

@@ -35,7 +35,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="font-semibold mb-1 text-gray-700">NPM</label>
+                    <label class="font-semibold mb-1 text-gray-700">NPM/NID/ID/Lainya</label>
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="mdi mdi-card-account-details text-sm"></i></span>
@@ -96,15 +96,31 @@
                                 @break
 
                             @case('radio')
-                                @php $options = json_decode($question->options) ?? []; @endphp
-                                <div class="form-check">
-                                    @foreach($options as $opt)
-                                        <div class="form-check">
-                                            <input type="radio" name="{{ $name }}" value="{{ $opt }}" {{ $old === $opt ? 'checked' : '' }} class="form-check-input">
-                                            <label class="form-check-label">{{ $opt }}</label>
-                                        </div>
-                                    @endforeach
-                                </div>
+        @php $options = json_decode($question->options, true); @endphp
+            <div class="d-flex flex-wrap gap-2">
+                @foreach ($options as $option)
+                    <div class="form-check">
+                        <input 
+                            type="radio" 
+                            name="answers[{{ $question->id }}][value]" 
+                            value="{{ $option }}" 
+                            class="form-check-input skala-radio" 
+                            data-max="{{ end($options) }}"
+                            id="q{{ $question->id }}_{{ $loop->index }}"
+                        >
+                        <label class="form-check-label" for="q{{ $question->id }}_{{ $loop->index }}">{{ $option }}</label>
+                    </div>
+                @endforeach
+            </div>
+            {{-- Input keterangan --}}
+            <div class="mt-2">
+                <textarea 
+                    name="answers[{{ $question->id }}][note]" 
+                    class="form-control mt-2 q-keterangan" 
+                    placeholder="Berikan keterangan jika nilai kurang dari maksimal (opsional)"
+                    style="display: none;"
+                ></textarea>
+            </div>
                                 @break
                         @endswitch
 
@@ -127,4 +143,29 @@
     </div>
 </section>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.skala-radio').forEach(radio => {
+        radio.addEventListener('change', function () {
+            const groupName = this.name;
+            const radios = document.querySelectorAll(`input[name="${groupName}"]`);
+            let selected = this.value;
+            let max = this.dataset.max;
+
+            // Temukan textarea keterangan
+            const wrapper = this.closest('.form-group');
+            const keteranganBox = wrapper.querySelector('.q-keterangan');
+
+            if (selected !== max) {
+                keteranganBox.style.display = 'block';
+            } else {
+                keteranganBox.style.display = 'none';
+                keteranganBox.value = '';
+            }
+        });
+    });
+});
+</script>
+
 @endsection
+

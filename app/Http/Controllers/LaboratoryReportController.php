@@ -46,4 +46,25 @@ class LaboratoryReportController extends Controller
         return view('jurusan.lab_reports.index', compact('labs', 'labReportsGrouped'));
     }
 
+        public function labReportsTeknisi()
+    {
+        $labs = Laboratory::with('pcs')->get();
+        $labReports = LabReport::with(['pc', 'technician', 'pc.lab'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Kelompokkan berdasarkan lab
+        $labReportsGrouped = $labReports->groupBy(fn($report) => $report->pc->lab->id ?? 'unknown');
+
+        return view('teknisi.lab_reports.index', compact('labs', 'labReportsGrouped'));
+    }
+        public function updateteknisi(Request $request, $id)
+    {
+        $report = LabReport::findOrFail($id);
+        $report->status = $request->status;
+        $report->description = $request->description;
+        $report->save();
+
+        return redirect()->back()->with('success', 'Report updated successfully.');
+    }
 }
