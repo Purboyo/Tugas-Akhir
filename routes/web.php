@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ErrorCodeController;
 use App\Http\Controllers\LaboratoryController;
 use App\Http\Controllers\PCController;
 use App\Http\Controllers\FormController;
@@ -45,7 +46,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/get-laboratories/{userId}', [ReminderController::class, 'getLaboratories']);
         Route::resource('user', UserController::class);
         Route::resource('lab', LaboratoryController::class);
-        Route::resource('form', FormController::class); //Default Form
+        Route::resource('error-codes', ErrorCodeController::class);
+        Route::resource('form', FormController::class);
     });
 
     // Routes khusus teknisi
@@ -78,6 +80,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'jurusan'])->name('jurusan.dashboard');
         Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
         Route::get('/lab-reports', [LaboratoryReportController::class, 'labReportsJurusan'])->name('labReports');
+        Route::put('/lab-report/{id}', [LaboratoryReportController::class, 'updatejurusan'])->name('labreport.updatejurusan');
         Route::get('/maintenance/history', [HistoryController::class, 'historymaintenancepc'])->name('maintenance.history');
         Route::get('/maintenance/export/pdf', [HistoryController::class, 'exportPdf'])->name('maintenance.export.pdf');
         Route::get('/maintenance/export/pdf', [HistoryController::class, 'exportPdf'])->name('maintenance.export.pdf');

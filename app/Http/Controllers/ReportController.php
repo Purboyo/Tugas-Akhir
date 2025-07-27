@@ -148,7 +148,7 @@ public function updateStatus(Request $request, $id)
 
 public function reportBadForm()
 {
-    $burukKeywords = ['Buruk', 'rusak', 'tidak berfungsi', 'tidak menyala', 'Tidak', '1', '2'];
+    $burukKeywords = ['buruk', 'rusak', 'tidak berfungsi', 'tidak menyala', 'tidak'];
 
     $pcs = Report::where('status', 'Bad')
         ->where('checked', 1)

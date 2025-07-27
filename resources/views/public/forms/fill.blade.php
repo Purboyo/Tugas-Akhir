@@ -147,16 +147,11 @@
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.skala-radio').forEach(radio => {
         radio.addEventListener('change', function () {
-            const groupName = this.name;
-            const radios = document.querySelectorAll(`input[name="${groupName}"]`);
-            let selected = this.value;
-            let max = this.dataset.max;
-
-            // Temukan textarea keterangan
+            const selected = parseInt(this.value);
             const wrapper = this.closest('.form-group');
             const keteranganBox = wrapper.querySelector('.q-keterangan');
 
-            if (selected !== max) {
+            if ([1, 2, 3].includes(selected)) {
                 keteranganBox.style.display = 'block';
             } else {
                 keteranganBox.style.display = 'none';
@@ -166,6 +161,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
 
 @endsection
 

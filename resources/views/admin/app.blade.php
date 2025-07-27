@@ -146,7 +146,9 @@
                     <li><a class="" href="{{route ($role. '.reminder.index')}}" aria-expanded="false"><i
                                 class="mdi mdi-calendar-clock"></i><span class="nav-text">Reminders</span></a>
                     </li>
-                </ul>
+                    <li><a href="{{route ($role. '.error-codes.index')}}" aria-expanded="false"><i
+                                class="mdi mdi-bug"></i><span class="nav-text">Error Codes</span></a>
+                    </li>
             </div>
 
 

@@ -12,14 +12,12 @@ class LaboratoryReportController extends Controller
     public function labReports()
     {
         $labs = Laboratory::with('pcs')->get();
+
         $labReports = LabReport::with(['pc', 'technician', 'pc.lab'])
-            ->orderBy('created_at', 'desc')
+            ->orderByRaw('GREATEST(COALESCE(updated_at, 0), COALESCE(created_at, 0)) DESC')
             ->get();
 
-        // Kelompokkan berdasarkan lab
-        $labReportsGrouped = $labReports->groupBy(fn($report) => $report->pc->lab->id ?? 'unknown');
-
-        return view('kepala_lab.lab_reports.index', compact('labs', 'labReportsGrouped'));
+        return view('kepala_lab.lab_reports.index', compact('labs', 'labReports'));
     }
 
     public function update(Request $request, $id)
@@ -35,29 +33,35 @@ class LaboratoryReportController extends Controller
     public function labReportsJurusan()
     {
         $labs = Laboratory::with('pcs')->get();
+
         $labReports = LabReport::with(['pc', 'technician', 'pc.lab'])
-            ->where('status', 'Send')
-            ->orderBy('created_at', 'desc')
+            ->orderByRaw('GREATEST(COALESCE(updated_at, 0), COALESCE(created_at, 0)) DESC')
             ->get();
 
-        // Kelompokkan berdasarkan lab
-        $labReportsGrouped = $labReports->groupBy(fn($report) => $report->pc->lab->id ?? 'unknown');
-
-        return view('jurusan.lab_reports.index', compact('labs', 'labReportsGrouped'));
+        return view('jurusan.lab_reports.index', compact('labs', 'labReports'));
     }
 
-        public function labReportsTeknisi()
+    public function updatejurusan(Request $request, $id)
+    {
+        $report = LabReport::findOrFail($id);
+        $report->status = $request->status;
+        $report->handling_notes = $request->handling_notes;
+        $report->save();
+
+        return redirect()->back()->with('success', 'Report updated successfully.');
+    }
+
+    public function labReportsTeknisi()
     {
         $labs = Laboratory::with('pcs')->get();
+
         $labReports = LabReport::with(['pc', 'technician', 'pc.lab'])
-            ->orderBy('created_at', 'desc')
+            ->orderByRaw('GREATEST(COALESCE(updated_at, 0), COALESCE(created_at, 0)) DESC')
             ->get();
 
-        // Kelompokkan berdasarkan lab
-        $labReportsGrouped = $labReports->groupBy(fn($report) => $report->pc->lab->id ?? 'unknown');
-
-        return view('teknisi.lab_reports.index', compact('labs', 'labReportsGrouped'));
+        return view('teknisi.lab_reports.index', compact('labs', 'labReports'));
     }
+
         public function updateteknisi(Request $request, $id)
     {
         $report = LabReport::findOrFail($id);

@@ -12,14 +12,27 @@
         @php
             $firstReport = $group->first();
             $pc = $firstReport->pc;
+
             $badAnswers = $firstReport->answers->filter(function($answer) use ($burukKeywords) {
+                // Coba decode jika answer dalam format JSON
+                $parsed = json_decode($answer->answer_text, true);
+                $value = is_array($parsed) && isset($parsed['value']) ? strtolower(trim($parsed['value'])) : strtolower(trim($answer->answer_text));
+
+                // Cek apakah cocok dengan kata kunci string
                 foreach ($burukKeywords as $keyword) {
-                    if (stripos($answer->answer_text, $keyword) !== false) {
+                    if (stripos($value, strtolower($keyword)) !== false) {
                         return true;
                     }
                 }
+
+                // Cek jika jawaban berupa angka 1 atau 2 (bukan bagian dari kalimat)
+                if (is_numeric($value) && in_array((int)$value, [1, 2], true)) {
+                    return true;
+                }
+
                 return false;
             });
+
         @endphp
 
         <div class="card mb-3 shadow-sm">
@@ -33,7 +46,7 @@
                             @php
                                 $parsed = json_decode($answer->answer_text, true);
                             @endphp
-                            <li class="list-group-item">
+                            <li class="list-group-item text-dark">
                                 <strong>{{ $answer->question->question_text }}:</strong><br>
                                 @if (is_array($parsed) && isset($parsed['value']))
                                     <span>Nilai: {{ $parsed['value'] }}</span><br>
